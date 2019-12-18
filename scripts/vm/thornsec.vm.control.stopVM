@@ -17,16 +17,25 @@ stopVm() {
             (( pullPlug-- ));
 	    sleep 1;
         done;
+	if sudo -u vboxuser_"${vm}" VBoxManage showvminfo "${vm}" --machinereadable | grep running
+    then
+        exit 0
+    else
+        echo "Attempting holding down the (virtual) powerbutton"
+        sudo -u vboxuser_"${vm}" VBoxManage controlvm "${vm}" poweroff
+        sleep 30
+    fi
+        if sudo -u vboxuser_"${vm}" VBoxManage showvminfo "${vm}" --machinereadable | grep poweroff
+    then
+        exit 0
+    else
+        echo "Bugger, okay pulling the (virtual) power cord"
+        sudo -u vboxuser_"${vm}" VBoxManage discardstate "${vm}"
+    fi
     else
         printf "...no need!\n\n";
         sudo -u vboxuser_"${vm}" VBoxManage controlvm "${vm}" acpipowerbutton;
     fi;
-
-    if vmRunning "${vm}" && [ ${pullPlug} -eq 0 ]; then
-        printf "15 seconds has elapsed.\nPulling the plug.\n\n";
-        sudo -u vboxuser_"${vm}" VBoxManage controlvm "${vm}" poweroff;
-        wait $!;
-    fi
 
     return $?;
 }
