@@ -50,6 +50,7 @@ import core.unit.fs.FileChecksumUnit.Checksum;
 import core.unit.fs.FileDownloadUnit;
 import core.unit.fs.FileUnit;
 import core.unit.pkg.InstalledUnit;
+import inet.ipaddr.IPAddress;
 import profile.HypervisorScripts;
 import profile.stack.Virtualisation;
 
@@ -68,7 +69,8 @@ public class HyperVisor extends AStructuredProfile {
 		if (!me.isRouter()) {
 			try {
 				if (networkModel.getData().getNetworkInterfaces(getLabel()).get(Direction.WAN) != null) {
-					for (final NetworkInterfaceData wanNic : networkModel.getData().getNetworkInterfaces(getLabel()).get(Direction.WAN)) {
+					for (final NetworkInterfaceData wanNic : networkModel.getData().getNetworkInterfaces(getLabel())
+							.get(Direction.WAN).values()) {
 						NetworkInterfaceModel link = null;
 	
 						switch (wanNic.getInet()) {
@@ -80,7 +82,7 @@ public class HyperVisor extends AStructuredProfile {
 							break;
 						default:
 						}
-						link.addAddress(wanNic.getAddress());
+						link.addAddress(wanNic.getAddresses().toArray(IPAddress[]::new));
 						link.setGateway(wanNic.getGateway());
 						link.setBroadcast(wanNic.getBroadcast());
 						link.setMac(wanNic.getMAC());
@@ -88,7 +90,8 @@ public class HyperVisor extends AStructuredProfile {
 						me.addNetworkInterface(link);
 					}
 				}
-				for (final NetworkInterfaceData lanNic : networkModel.getData().getNetworkInterfaces(getLabel()).get(Direction.LAN)) {
+				for (final NetworkInterfaceData lanNic : networkModel.getData().getNetworkInterfaces(getLabel())
+						.get(Direction.LAN).values()) {
 					NetworkInterfaceModel link = null;
 	
 					switch (lanNic.getInet()) {
@@ -100,7 +103,9 @@ public class HyperVisor extends AStructuredProfile {
 						break;
 					default:
 					}
-					link.addAddress(lanNic.getAddress());
+					if (lanNic.getAddresses() != null) {
+						link.addAddress(lanNic.getAddresses().toArray(IPAddress[]::new));
+					}
 					link.setGateway(lanNic.getGateway());
 					link.setBroadcast(lanNic.getBroadcast());
 					link.setMac(lanNic.getMAC());
@@ -145,7 +150,7 @@ public class HyperVisor extends AStructuredProfile {
 	}
 
 	@Override
-	protected Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
+	public Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		final FileUnit fuseConf = new FileUnit("fuse", "proceed", "/etc/fuse.conf");
@@ -239,7 +244,7 @@ public class HyperVisor extends AStructuredProfile {
 
 		Collection<NetworkInterfaceData> lanNics = null;
 		try {
-			lanNics = getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.LAN);
+			lanNics = getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.LAN).values();
 		} catch (JsonParsingException | ADataException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -22,8 +22,10 @@ import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
 
 import core.data.machine.AMachineData.MachineType;
 import core.exception.AThornSecException;
+import core.exception.data.ADataException;
 import core.exception.data.machine.InvalidMachineException;
 import core.exception.runtime.InvalidProfileException;
+import core.exception.runtime.InvalidServerModelException;
 import core.iface.IUnit;
 import core.model.network.NetworkModel;
 import core.profile.AProfile;
@@ -98,46 +100,53 @@ public class ServerModel extends AMachineModel {
 		this.firewall = new ShorewallFirewall(getLabel(), this.networkModel);
 
 		for (final MachineType type : getNetworkModel().getData().getTypes(getLabel())) {
-			switch (type) {
-			case ROUTER:
-//				if (this.firewall == null) {
-//				}
-				this.types.add(new Router(getLabel(), this.networkModel));
-				break;
-			case HYPERVISOR:
-//				if (this.firewall == null) {
-//					this.firewall = new CSFFirewall(getLabel(), this.networkModel);
-//				}
-				this.types.add(new HyperVisor(getLabel(), this.networkModel));
-				break;
-			case SERVICE:
-//				if (this.firewall == null) {
-//					this.firewall = new CSFFirewall(getLabel(), this.networkModel);
-//				}
-				String hv = this.networkModel.getData().getService(getLabel()).getHypervisor();
-				Service service = new Service(getLabel(), this.networkModel);
-				service.setHypervisor(hv);
-				this.types.add(service);
-				
-				break;
-			case DEDICATED:
-				this.types.add(new Dedicated(getLabel(), this.networkModel));
-				break;
-			default:
-				break;
-			}
-		}
-
-		this.profiles = new HashSet<>();
-		for (final String profile : getNetworkModel().getData().getProfiles(getLabel())) {
 			try {
-				addProfile(profile);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException
-					| ClassNotFoundException | IOException e) {
+				switch (type) {
+				case ROUTER:
+//				if (this.firewall == null) {
+//				}
+					this.types.add(new Router(getLabel(), this.networkModel));
+					break;
+				case HYPERVISOR:
+//				if (this.firewall == null) {
+//					this.firewall = new CSFFirewall(getLabel(), this.networkModel);
+//				}
+					this.types.add(new HyperVisor(getLabel(), this.networkModel));
+					break;
+				case SERVICE:
+//				if (this.firewall == null) {
+//					this.firewall = new CSFFirewall(getLabel(), this.networkModel);
+//				}
+//				String hv = this.networkModel.getData().getService(getLabel()).getHypervisor();
+//				Service service = new Service(getLabel(), this.networkModel);
+//				service.setHypervisor(hv);
+//				this.types.add(service);
+//
+//				break;
+				case DEDICATED:
+					this.types.add(new Dedicated(getLabel(), this.networkModel));
+					break;
+				default:
+					break;
+				}
+			} catch (InvalidServerModelException | JsonParsingException | ADataException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+
+		this.profiles = new HashSet<>();
+
+		getNetworkModel().getData().getProfiles(getLabel()).forEach(profile -> {
+			try {
+				addProfile(profile);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException
+					| IOException | InvalidProfileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private void addProfile(String... profiles) throws IOException, InvalidProfileException, InstantiationException, IllegalAccessException, IllegalArgumentException,

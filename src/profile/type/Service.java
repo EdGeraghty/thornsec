@@ -7,24 +7,13 @@
  */
 package profile.type;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.json.stream.JsonParsingException;
-
-import core.data.machine.configuration.NetworkInterfaceData;
-import core.data.machine.configuration.NetworkInterfaceData.Direction;
-import core.data.machine.configuration.NetworkInterfaceData.Inet;
-import core.exception.data.ADataException;
 import core.exception.runtime.InvalidMachineModelException;
 import core.exception.runtime.InvalidServerModelException;
 import core.iface.IUnit;
-import core.model.machine.configuration.networking.DHCPClientInterfaceModel;
-import core.model.machine.configuration.networking.NetworkInterfaceModel;
-import core.model.machine.configuration.networking.StaticInterfaceModel;
 import core.model.network.NetworkModel;
-import core.profile.AStructuredProfile;
 import core.unit.SimpleUnit;
 import core.unit.fs.DirMountedUnit;
 import core.unit.fs.DirUnit;
@@ -35,7 +24,7 @@ import core.unit.pkg.RunningUnit;
 /**
  * This is a Service, which represents a VM on a HyperVisor
  */
-public class Service extends AStructuredProfile {
+public class Service extends AMachineProfile {
 
 	private String hypervisor;
 	
@@ -43,63 +32,6 @@ public class Service extends AStructuredProfile {
 		super(label, networkModel);
 
 		setHypervisor(null);
-		
-		try {
-			if (getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.WAN) != null) {
-				for (final NetworkInterfaceData nicData : getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.WAN)) {
-					// TODO finish implementing
-//					ifaceModel.setIface(ifaceData.getIface());
-//					ifaceModel.setAddress(ifaceData.getAddress());
-//					ifaceModel.setMACVLANs(ifaceData.getMACVLANs());
-//					ifaceModel.setBroadcast(ifaceData.getBroadcast());
-//					ifaceModel.setComment(ifaceData.getComment());
-//					ifaceModel.setGateway(ifaceData.getGateway());
-//					ifaceModel.setInet(ifaceData.getInet());
-//					ifaceModel.setMac(ifaceData.getMAC());
-//					ifaceModel.setNetmask(ifaceData.getNetmask());
-//					ifaceModel.setSubnet(ifaceData.getSubnet());
-					NetworkInterfaceModel nic = null;
-					if (nicData.getInet() == Inet.STATIC) {
-						nic = new StaticInterfaceModel(nicData.getIface());
-						nic.addAddress(nicData.getAddress());
-						nic.setGateway(nicData.getGateway());
-						nic.setBroadcast(nicData.getBroadcast());
-					} else if (nicData.getInet() == Inet.DHCP) {
-						nic = new DHCPClientInterfaceModel(nicData.getIface());
-					}
-
-					nic.setIsIPMasquerading(true); // We're an external iface
-
-					if (nicData.getMAC() != null) {
-						nic.setMac(nicData.getMAC());
-					}
-
-					getNetworkModel().getServerModel(getLabel()).addNetworkInterface(nic);
-				}
-			}
-
-			for (final NetworkInterfaceData nicData : getNetworkModel().getData().getNetworkInterfaces(getLabel())
-					.get(Direction.LAN)) {
-				NetworkInterfaceModel nic = null;
-				if (nicData.getInet() == Inet.STATIC) {
-					nic = new StaticInterfaceModel(nicData.getIface());
-					nic.addAddress(nicData.getAddress());
-					nic.setGateway(nicData.getGateway());
-					nic.setBroadcast(nicData.getBroadcast());
-				} else if (nicData.getInet() == Inet.DHCP) {
-					nic = new DHCPClientInterfaceModel(nicData.getIface());
-				}
-
-				if (nicData.getMAC() != null) {
-					nic.setMac(nicData.getMAC());
-				}
-
-				getNetworkModel().getServerModel(getLabel()).addNetworkInterface(nic);
-			}
-		} catch (JsonParsingException | ADataException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -126,7 +58,7 @@ public class Service extends AStructuredProfile {
 				"It seems that " + getLabel() + " isn't actually a VM.  This will cause a bunch of misconfigurations, please fix your config file."));
 
 		units.add(new InstalledUnit("build_essential", "is_virtualbox_guest", "build-essential"));
-		units.add(new InstalledUnit("linux_headers", "build_essential_installed", "linux-headers-$(uname -r)"));
+		units.add(new InstalledUnit("linux_headers", "build_essential_installed", "linux-headers-\"$(uname -r)\""));
 
 		units.add(new SimpleUnit(
 				"guest_additions_installed", "linux_headers_installed", "sudo bash -c '" + "mount /dev/sr1 /mnt;" + "sh /mnt/VBoxLinuxAdditions.run --nox11;"
@@ -163,8 +95,10 @@ public class Service extends AStructuredProfile {
 	}
 
 	@Override
-	protected Collection<IUnit> getPersistentConfig() {
+	public Collection<IUnit> getPersistentConfig() {
 		final Collection<IUnit> units = new ArrayList<>();
+
+		super.buildNICs();
 
 		units.add(new SimpleUnit("data_drive_is_partitioned", "proceed", "(\n" + "	echo o\n" // Create a new empty DOS
 																								// partition table
