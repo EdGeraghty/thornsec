@@ -132,7 +132,7 @@ public class MISP extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		final FileUnit nginxConf = new FileUnit("misp_nginx_conf", "misp_installed",

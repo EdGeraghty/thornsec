@@ -50,7 +50,7 @@ public class media extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() {
+	protected Collection<IUnit> getPersistentConfig() {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.add(new SimpleUnit("candc_user", "proceed", "sudo useradd -m candc -c 'C&C Music Factory'",

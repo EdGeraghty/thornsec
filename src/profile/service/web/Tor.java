@@ -55,7 +55,7 @@ public class Tor extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidPropertyArrayException, InvalidMachineException,
+	protected Collection<IUnit> getPersistentConfig() throws InvalidPropertyArrayException, InvalidMachineException,
 			InvalidServerModelException, InvalidPropertyException {
 		final Collection<IUnit> units = new ArrayList<>();
 

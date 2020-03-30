@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -522,15 +521,15 @@ public class NetworkData extends AData {
 	 * @throws ADataException
 	 * @throws IOException
 	 */
-	final public Map<Direction, Map<String, NetworkInterfaceData>> getNetworkInterfaces(String machine) throws JsonParsingException, ADataException, IOException {
-		Map<Direction, Map<String, NetworkInterfaceData>> interfaces = getMachine(machine).getNetworkInterfaces();
+	final public Map<Direction, Collection<NetworkInterfaceData>> getNetworkInterfaces(String machine) throws JsonParsingException, ADataException, IOException {
+		Map<Direction, Collection<NetworkInterfaceData>> interfaces = getMachine(machine).getNetworkInterfaces();
 
 		if (interfaces == null) {
 			interfaces = this.defaultServiceData.getNetworkInterfaces();
 			if (interfaces == null) {
 				interfaces = new Hashtable<>();
 
-				final Map<String, NetworkInterfaceData> automagic = new HashMap<>();
+				final HashSet<NetworkInterfaceData> automagic = new HashSet<>();
 				final NetworkInterfaceData defaultIface = new NetworkInterfaceData(machine);
 
 				final JsonObjectBuilder defaultNetworkInterfaceData = Json.createObjectBuilder();
@@ -539,7 +538,7 @@ public class NetworkData extends AData {
 				defaultNetworkInterfaceData.add("comment", "This NIC was automagically built using default values.");
 
 				defaultIface.read(defaultNetworkInterfaceData.build());
-				automagic.put(defaultIface.getIface(), defaultIface);
+				automagic.add(defaultIface);
 
 				interfaces.put(Direction.LAN, automagic);
 			}

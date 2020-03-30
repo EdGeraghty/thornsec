@@ -83,7 +83,7 @@ public class Drupal7 extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		final FileUnit nginxConf = new FileUnit("nginxConf", "nginx_installed",

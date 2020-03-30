@@ -38,7 +38,7 @@ public class LetsEncrypt extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		String config = "";

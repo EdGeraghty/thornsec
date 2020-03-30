@@ -10,8 +10,6 @@ package profile.type;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.json.stream.JsonParsingException;
 
@@ -19,20 +17,19 @@ import core.data.machine.AMachineData.MachineType;
 import core.data.machine.configuration.NetworkInterfaceData;
 import core.data.machine.configuration.NetworkInterfaceData.Direction;
 import core.exception.AThornSecException;
-import core.exception.data.ADataException;
-import core.exception.data.InvalidIPAddressException;
-import core.exception.runtime.InvalidMachineModelException;
-import core.exception.runtime.InvalidServerModelException;
 import core.iface.IUnit;
 import core.model.machine.ServerModel;
 import core.model.machine.configuration.networking.BondInterfaceModel;
 import core.model.machine.configuration.networking.BondModel;
+import core.model.machine.configuration.networking.DHCPClientInterfaceModel;
 import core.model.machine.configuration.networking.DummyModel;
 import core.model.machine.configuration.networking.ISystemdNetworkd;
 import core.model.machine.configuration.networking.MACVLANModel;
 import core.model.machine.configuration.networking.MACVLANTrunkModel;
 import core.model.machine.configuration.networking.NetworkInterfaceModel;
+import core.model.machine.configuration.networking.StaticInterfaceModel;
 import core.model.network.NetworkModel;
+import core.profile.AStructuredProfile;
 import core.unit.SimpleUnit;
 import core.unit.fs.FilePermsUnit;
 import core.unit.fs.FileUnit;
@@ -51,87 +48,19 @@ import profile.dns.UnboundDNSServer;
  *
  * If you want to make changes in here, you'll have a lot of reading to do :)!
  */
-public class Router extends AMachineProfile {
+public class Router extends AStructuredProfile {
 	private final ADNSServerProfile dnsServer;
 	private final ADHCPServerProfile dhcpServer;
 
 	public Router(String label, NetworkModel networkModel) throws AThornSecException, JsonParsingException {
 		super(label, networkModel);
 
-		try {
-			addLANIfaces();
-			addWANIfaces();
-			buildVLANs();
-		} catch (JsonParsingException | ADataException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		this.dhcpServer = new ISCDHCPServer(label, networkModel);
-		this.dnsServer = new UnboundDNSServer(label, networkModel);
-	}
-
-	private final void buildVLANs() throws InvalidIPAddressException, InvalidServerModelException {
 		final ServerModel me = getNetworkModel().getServerModel(getLabel());
 
-		final MACVLANTrunkModel trunk = new MACVLANTrunkModel("Trunk");
-		trunk.setIface("LAN");
-
-		me.addNetworkInterface(trunk);
-
-		if (!getNetworkModel().getMachines(MachineType.SERVER).isEmpty()) {
-			me.addNetworkInterface(new MACVLANModel(MachineType.SERVER.toString(), trunk,
-					getNetworkModel().getData().getServerSubnet(), getNetworkModel().getData().getServerSubnet()));
-		}
-
-		if (!me.isHyperVisor()) {
-			if (!getNetworkModel().getMachines(MachineType.ADMIN).isEmpty()) {
-				me.addNetworkInterface(new MACVLANModel(MachineType.ADMIN.toString(), trunk,
-						getNetworkModel().getData().getAdminSubnet(), getNetworkModel().getData().getAdminSubnet()));
-			}
-
-			if ((!getNetworkModel().getMachines(MachineType.USER).isEmpty())) {
-				me.addNetworkInterface(new MACVLANModel(MachineType.USER.toString(), trunk,
-						getNetworkModel().getData().getUserSubnet(), getNetworkModel().getData().getUserSubnet()));
-			}
-
-			if (!getNetworkModel().getMachines(MachineType.EXTERNAL_ONLY).isEmpty()) {
-				me.addNetworkInterface(new MACVLANModel(MachineType.EXTERNAL_ONLY.toString(), trunk,
-						getNetworkModel().getData().getExternalSubnet(),
-						getNetworkModel().getData().getExternalSubnet()));
-			}
-
-			if (!getNetworkModel().getMachines(MachineType.INTERNAL_ONLY).isEmpty()) {
-				me.addNetworkInterface(new MACVLANModel(MachineType.INTERNAL_ONLY.toString(), trunk,
-						getNetworkModel().getData().getInternalSubnet(),
-						getNetworkModel().getData().getInternalSubnet()));
-			}
-
-			// if we want a guest network, build one of them, too
-			if (getNetworkModel().getData().buildAutoGuest()) {
-				me.addNetworkInterface(new MACVLANModel(MachineType.GUEST.toString(), trunk,
-						getNetworkModel().getData().getGuestSubnet(), getNetworkModel().getData().getGuestSubnet()));
-			}
-		}
-	}
-
-	private final void addWANIfaces() throws JsonParsingException, ADataException, IOException {
-		final Map<String, NetworkInterfaceData> wanIfaces = getNetworkModel().getData().getNetworkInterfaces(getLabel())
-				.get(Direction.WAN);
-
-		// Declare external network interfaces
-		wanIfaces.forEach((iface, nic) -> {
-			try {
-				super.buildIface(nic, true);
-			} catch (final InvalidMachineModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
-	}
-
-	private final void addLANIfaces() throws JsonParsingException, ADataException, InvalidServerModelException {
-		Map<String, NetworkInterfaceData> lanIfaces = new HashMap<>();
+		// From this point, differentiate between LAN and WAN again. Makes bondage
+		// easier.
+		Collection<NetworkInterfaceData> lanIfaces = new ArrayList<>();
+		Collection<NetworkInterfaceData> wanIfaces = new ArrayList<>();
 
 		// Start by building our trunk. This trunk will bond any LAN-facing
 		// NICs, or will be a dummy if there aren't any. We'll hang our VLANs off it.
@@ -139,6 +68,7 @@ public class Router extends AMachineProfile {
 
 		try {
 			lanIfaces = getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.LAN);
+			wanIfaces = getNetworkModel().getData().getNetworkInterfaces(getLabel()).get(Direction.WAN);
 		} catch (final IOException e) {
 			// @TODO: This
 			e.printStackTrace();
@@ -147,15 +77,83 @@ public class Router extends AMachineProfile {
 		// Bond each LAN interface
 		if (lanIfaces != null) {
 			lanTrunk = new BondModel("bond");
-			for (final NetworkInterfaceData ifaceData : lanIfaces.values()) {
-				final NetworkInterfaceModel link = new BondInterfaceModel(ifaceData.getIface(), lanTrunk);
-				getNetworkModel().getServerModel(getLabel()).addNetworkInterface(link);
-			}
 		} else {
 			lanTrunk = new DummyModel("dummy");
 		}
 
 		lanTrunk.setIface("LAN");
+
+		for (final NetworkInterfaceData ifaceData : lanIfaces) {
+			final NetworkInterfaceModel link = new BondInterfaceModel(ifaceData.getIface(), lanTrunk);
+			me.addNetworkInterface(link);
+		}
+
+		// Declare external network interfaces
+		wanIfaces.forEach(iface -> {
+			NetworkInterfaceModel link = null;
+
+			switch (iface.getInet()) {
+			case STATIC:
+				link = new StaticInterfaceModel(iface.getIface());
+				link.addAddress(iface.getAddress());
+				link.setGateway(iface.getGateway());
+				link.setBroadcast(iface.getBroadcast());
+				link.setIsIPMasquerading(true);
+				break;
+			case DHCP:
+				link = new DHCPClientInterfaceModel(iface.getIface());
+				link.setIsIPMasquerading(true);
+				break;
+			case PPP: // @TODO
+				break;
+			default:
+			}
+
+			me.addNetworkInterface(link);
+		});
+
+		// Now build the VLANs we'll be hanging all of our networking off
+		final MACVLANTrunkModel trunk = new MACVLANTrunkModel("Trunk");
+		trunk.setIface("LAN");
+
+		me.addNetworkInterface(trunk);
+
+		if (!getNetworkModel().getMachines(MachineType.ADMIN).isEmpty()) {
+			me.addNetworkInterface(new MACVLANModel(MachineType.ADMIN.toString(), trunk,
+					getNetworkModel().getData().getAdminSubnet(), getNetworkModel().getData().getAdminSubnet()));
+		}
+
+		if ((!getNetworkModel().getMachines(MachineType.USER).isEmpty()) && !me.isHyperVisor()) {
+			me.addNetworkInterface(new MACVLANModel(MachineType.USER.toString(), trunk,
+					getNetworkModel().getData().getUserSubnet(), getNetworkModel().getData().getUserSubnet()));
+		}
+
+		if (!getNetworkModel().getMachines(MachineType.EXTERNAL_ONLY).isEmpty()) {
+			me.addNetworkInterface(new MACVLANModel(MachineType.EXTERNAL_ONLY.toString(), trunk,
+					getNetworkModel().getData().getExternalSubnet(), getNetworkModel().getData().getExternalSubnet()));
+		}
+
+		if (!getNetworkModel().getMachines(MachineType.INTERNAL_ONLY).isEmpty()) {
+			me.addNetworkInterface(new MACVLANModel(MachineType.INTERNAL_ONLY.toString(), trunk,
+					getNetworkModel().getData().getInternalSubnet(), getNetworkModel().getData().getInternalSubnet()));
+		}
+
+		if (!getNetworkModel().getMachines(MachineType.SERVER).isEmpty()) {
+			me.addNetworkInterface(new MACVLANModel(MachineType.SERVER.toString(), trunk,
+					getNetworkModel().getData().getServerSubnet(), getNetworkModel().getData().getServerSubnet()));
+		}
+
+		// if we want a guest network, build one of them, too
+		if (getNetworkModel().getData().buildAutoGuest()) {
+			if ( !me.isHyperVisor() ) { // Unless you're a hypervisor router - this is a silly thing to have :/
+				me.addNetworkInterface(new MACVLANModel(MachineType.GUEST.toString(), trunk,
+					getNetworkModel().getData().getGuestSubnet(), getNetworkModel().getData().getGuestSubnet()));
+			}
+		}
+
+		// Now create our DHCP Server.
+		this.dhcpServer = new ISCDHCPServer(label, networkModel);
+		this.dnsServer = new UnboundDNSServer(label, networkModel);
 	}
 
 	public final ISystemdNetworkd buildBond(String bondName) {
@@ -205,17 +203,15 @@ public class Router extends AMachineProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws AThornSecException {
+	protected Collection<IUnit> getPersistentConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		final FileUnit resolvConf = new FileUnit("leave_my_resolv_conf_alone", "proceed",
-				"/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone");
+		final FileUnit resolvConf = new FileUnit("leave_my_resolv_conf_alone", "proceed", "/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone");
 		units.add(resolvConf);
 
 		resolvConf.appendLine("make_resolv_conf() { :; }");
 
-		units.add(new FilePermsUnit("leave_my_resolv_conf_alone", "leave_my_resolv_conf_alone",
-				"/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone", "755",
+		units.add(new FilePermsUnit("leave_my_resolv_conf_alone", "leave_my_resolv_conf_alone", "/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone", "755",
 				"I couldn't stop various systemd services deciding to override your DNS settings."
 						+ " This will cause you intermittent, difficult to diagnose problems as it randomly"
 						+ " sets your DNS to wherever it decides. Great for laptops/desktops, atrocious for servers..."));

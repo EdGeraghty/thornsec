@@ -63,7 +63,7 @@ public class Piwik extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		this.lempStack.getDB().setUsername("piwik");

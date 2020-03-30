@@ -60,7 +60,7 @@ public class Redmine extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(getNetworkModel().getServerModel(getLabel()).getBindFsModel().addDataBindPoint("redmine_logs",

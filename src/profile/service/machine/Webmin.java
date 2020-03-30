@@ -28,7 +28,7 @@ public class Webmin extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		getNetworkModel().getServerModel(getLabel()).getAptSourcesModel().addAptSource("webmin", "deb http://download.webmin.com/download/repository sarge contrib",

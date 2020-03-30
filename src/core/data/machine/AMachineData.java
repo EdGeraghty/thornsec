@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +73,7 @@ public abstract class AMachineData extends AData {
 
 	public static Boolean DEFAULT_IS_THROTTLED = true;
 
-	private Map<Direction, Map<String, NetworkInterfaceData>> networkInterfaces;
+	private Map<Direction, Collection<NetworkInterfaceData>> networkInterfaces;
 	private Collection<IPAddress> externalIPAddresses;
 	private Collection<String> cnames;
 	// Alerting
@@ -211,20 +210,8 @@ public abstract class AMachineData extends AData {
 		return this.listens;
 	}
 
-	public final Map<Direction, Map<String, NetworkInterfaceData>> getNetworkInterfaces() {
+	public final Map<Direction, Collection<NetworkInterfaceData>> getNetworkInterfaces() {
 		return this.networkInterfaces;
-	}
-
-	public final NetworkInterfaceData getNetworkInterface(Direction dir, String iface) {
-		if (getNetworkInterfaces() != null) {
-			final Map<String, NetworkInterfaceData> nics = getNetworkInterfaces().get(dir);
-
-			if (nics != null) {
-				return nics.getOrDefault(iface, null);
-			}
-		}
-
-		return null;
 	}
 
 	public final Boolean isThrottled() {
@@ -272,15 +259,15 @@ public abstract class AMachineData extends AData {
 			this.networkInterfaces = new Hashtable<>();
 		}
 
-		Map<String, NetworkInterfaceData> currentIfaces = this.networkInterfaces.get(dir);
+		Collection<NetworkInterfaceData> currentIfaces = this.networkInterfaces.get(dir);
 
 		if (currentIfaces == null) {
-			currentIfaces = new LinkedHashMap<>();
+			currentIfaces = new HashSet<>();
 		}
 
 		for (final NetworkInterfaceData iface : ifaces) {
-			if (!currentIfaces.containsKey(iface.getIface())) {
-				currentIfaces.put(iface.getIface(), iface);
+			if (!currentIfaces.contains(iface)) {
+				currentIfaces.add(iface);
 			}
 		}
 

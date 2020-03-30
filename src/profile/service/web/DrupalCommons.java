@@ -41,7 +41,7 @@ public class DrupalCommons extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerException, InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(this.drupal7.getPersistentConfig());

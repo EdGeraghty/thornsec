@@ -80,7 +80,7 @@ public class Webproxy extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig()
+	protected Collection<IUnit> getPersistentConfig()
 			throws InvalidPropertyException, InvalidServerException, InvalidServerModelException {
 		final Collection<IUnit> units = new ArrayList<>();
 

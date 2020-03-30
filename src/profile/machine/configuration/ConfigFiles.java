@@ -33,7 +33,7 @@ public class ConfigFiles extends AProfile {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		for (final File file : this.configFiles) {
-			grepString += " | grep -Ev \"" + file.getPath() + "\"";
+			grepString += " | egrep -v \"" + file.getPath() + "\"";
 		}
 
 		units.add(new SimpleUnit("no_config_file_tampering", "proceed", "", grepString, "", "pass",

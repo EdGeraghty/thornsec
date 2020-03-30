@@ -64,7 +64,7 @@ public class UserAccounts extends AProfile {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		for (final String username : this.usernames) {
-			grepString += " | grep -Ev \"^" + username + "\\$\"";
+			grepString += " | egrep -v \"^" + username + "\\$\"";
 		}
 
 		// We want to be able to see what users are there if the audit fails!

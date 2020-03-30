@@ -24,7 +24,7 @@ public class StrongSwan extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() {
+	protected Collection<IUnit> getPersistentConfig() {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		return units;

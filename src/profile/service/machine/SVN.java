@@ -60,7 +60,7 @@ public class SVN extends AStructuredProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
+	protected Collection<IUnit> getPersistentConfig() throws InvalidServerModelException, InvalidServerException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(this.php.getPersistentConfig());
