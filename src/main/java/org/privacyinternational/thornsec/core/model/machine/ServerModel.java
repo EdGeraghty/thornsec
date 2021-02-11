@@ -96,7 +96,7 @@ public class ServerModel extends AMachineModel {
 			classes = new ClassesInPackageScanner()
 					.setResourceNameFilter((packageName, fileName) ->
 							fileName.equals(profile + ".class"))
-					.scan("profile");
+					.scan("org.privacyinternational.thornsec.profile");
 
 			return (AProfile) Class.forName(classes.iterator().next().getName())
 					.getDeclaredConstructor(ServerModel.class)
