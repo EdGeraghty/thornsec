@@ -5,15 +5,12 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master ]
-    branches: [ unstable ]
+    branches: [ master, unstable ]
   pull_request:
-    branches: [ master ]
-    branches: [ unstable ]
+    branches: [ master, unstable ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
