@@ -49,8 +49,6 @@ public abstract class AModel {
 	 * @return the model's label, corresponding with its Data
 	 */
 	public final String getLabel() {
-//		//assertNotNull(this.label);
-
 		return this.label;
 	}
 
@@ -60,8 +58,6 @@ public abstract class AModel {
 	 * @return this AModel's Network
 	 */
 	public final NetworkModel getNetworkModel() {
-		////assertNotNull(this.networkModel);
-
 		return this.networkModel;
 	}
 
@@ -72,8 +68,6 @@ public abstract class AModel {
 	 * @return the Model's AData, representing its persistent configuration
 	 */
 	public AData getData() {
-		////assertNotNull(this.myData);
-
 		return this.myData;
 	}
 

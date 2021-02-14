@@ -85,20 +85,14 @@ public abstract class AMachineModel extends AModel {
 
 	private void setFirewallFromData(AMachineData myData) {
 		this.firewallRules = myData.getTrafficRules();
-
-		//assertNotNull(this.firewallRules);
 	}
 
 	public void addFirewallRule(TrafficRule rule) {
-		//assertNotNull(rule);
-
 		this.firewallRules.add(rule);
 	}
 
 	private void setExternalIPsFromData(AMachineData myData) {
 		this.externalIPs = myData.getExternalIPs();	
-
-		//assertNotNull(this.externalIPs);
 	}
 
 	private void setCNAMEsFromData(AMachineData myData) {
