@@ -32,12 +32,4 @@ public class UserDeviceModel extends ADeviceModel {
 	public void init() throws AThornSecException {
 		// TODO Auto-generated method stub
 	}
-
-	@Override
-	protected Collection<IUnit> getPersistentFirewall() throws InvalidPortException {
-		this.addEgress(Encapsulation.UDP, new HostName("*"));
-		this.addEgress(Encapsulation.TCP, new HostName("*"));
-
-		return new LinkedHashSet<>();
-	}
 }

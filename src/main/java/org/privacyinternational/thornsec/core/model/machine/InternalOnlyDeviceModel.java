@@ -27,12 +27,6 @@ public class InternalOnlyDeviceModel extends ADeviceModel {
 	}
 
 	@Override
-	protected Collection<IUnit> getPersistentFirewall() throws InvalidPortException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void init() throws AThornSecException {
 		// TODO Auto-generated method stub
 		

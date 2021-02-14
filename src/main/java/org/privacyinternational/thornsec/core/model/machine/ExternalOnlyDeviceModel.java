@@ -7,15 +7,9 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
-import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
-import inet.ipaddr.HostName;
 
 /**
  * This model represents an "External-Only" device on our network.
@@ -28,19 +22,6 @@ public class ExternalOnlyDeviceModel extends ADeviceModel {
 		super(myData, networkModel);
 	}
 
-	/**
-	 * Set up our device to access the Internet 
-	 */
 	@Override
-	public Collection<IUnit> getPersistentFirewall() throws InvalidPortException {
-		this.addEgress(Encapsulation.UDP, new HostName("*"));
-		this.addEgress(Encapsulation.TCP, new HostName("*"));
-
-		return new LinkedHashSet<>();
-	}
-
-	@Override
-	public void init() throws AThornSecException {
-		// TODO Auto-generated method stub
-	}
+	public void init() {}
 }

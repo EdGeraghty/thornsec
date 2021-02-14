@@ -71,7 +71,4 @@ abstract public class ADeviceModel extends AMachineModel {
 				.filter((nic) -> nic.getMac().isPresent())
 				.count() > 0;
 	}
-
-	protected abstract Collection<IUnit> getPersistentFirewall() throws InvalidPortException;
-
 }
