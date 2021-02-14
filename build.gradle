@@ -8,10 +8,8 @@
 
 plugins {
     id 'java'
+    id 'application'
 }
-
-apply plugin: 'application'
-mainClassName = 'org.privacyinternational.thornsec.core.Main'
 
 repositories {
     // Use jcenter for resolving dependencies.
@@ -36,9 +34,13 @@ dependencies {
     implementation 'com.metapossum:metapossum-scanner:1.0.1'
     implementation 'org.glassfish:json:2.0.0'
     implementation 'org.glassfish.jsonp:providers:2.0.0-RC3'
-    
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+}
+
+application {
+    mainClassName = 'org.privacyinternational.thornsec.core.Main'
 }
 
 jar {
