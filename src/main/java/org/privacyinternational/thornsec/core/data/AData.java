@@ -103,7 +103,7 @@ public abstract class AData {
 	/**
 	 * Sets the object's data.
 	 *
-	 * @param object the new data
+	 * @param data the new data
 	 */
 	protected final void setData(JsonObject data) {
 		////assertNotNull(data);

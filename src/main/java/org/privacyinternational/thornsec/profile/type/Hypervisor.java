@@ -54,8 +54,6 @@ public class Hypervisor extends AStructuredProfile {
 	 * Create a new HyperVisor box, with initialised NICs, and initialise the
 	 * virtualisation layer itself, including the building of Service machines
 	 * 
-	 * @param myData
-	 * @param networkModel
 	 * @throws JsonParsingException
 	 * @throws ADataException
 	 * @throws InvalidMachineModelException 

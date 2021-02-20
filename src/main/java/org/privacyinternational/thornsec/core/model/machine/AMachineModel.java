@@ -373,7 +373,7 @@ public abstract class AMachineModel extends AModel {
 	 * 
 	 * Don't use this method if you don't want these ports to be potentially
 	 * publicly accessible.
-	 * @param ports port(s) to listen on
+	 * @param port port to listen on
 	 * @throws InvalidPortException if trying to set an invalid port
 	 */
 	public void addListen(Integer port) throws InvalidPortException {

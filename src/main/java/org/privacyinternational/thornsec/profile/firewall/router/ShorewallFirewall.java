@@ -434,7 +434,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 	/**
 	 * Zones must be a maximum of 10 alpha-numeric chars long
 	 *
-	 * @param zone
+	 * @param zone The zone name to be cleaned
 	 * @return valid zone name
 	 */
 	private String cleanZone(Object zone) {
@@ -496,7 +496,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 	 * This maclist file reflects the whole network
 	 * 
 	 * @return the contents of the maclist file
-	 * @throws InvalidServerException if you don't have exactly 1 router on your network
+	 * @throws InvalidProfileException if you don't have exactly 1 router on your network
 	 */
 	private Collection<String> getMaclistFile() throws InvalidProfileException {
 		final Collection<String> maclist = new ArrayList<>();

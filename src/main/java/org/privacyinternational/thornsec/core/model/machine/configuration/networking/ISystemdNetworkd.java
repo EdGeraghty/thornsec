@@ -16,8 +16,8 @@ import inet.ipaddr.mac.MACAddress;
 /**
  * Represents a Systemd-networkd network interface.
  *
- * See
- * {@link https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html}
+ * See <a href="https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html">
+ *     FreeDesktop.org's documentation</a> for more information
  *
  */
 public interface ISystemdNetworkd {
@@ -26,8 +26,8 @@ public interface ISystemdNetworkd {
 	 * Build a Systemd-networkd .network file for this NIC.
 	 *
 	 * See
-	 * {@link https://www.freedesktop.org/software/systemd/man/systemd.network.html}
-	 *
+	 *<a href="https://www.freedesktop.org/software/systemd/man/systemd-network.html">
+	 *     FreeDesktop.org's documentation</a> for more information
 	 * @return FileUnit in /etc/systemd/network/
 	 */
 	Optional<FileUnit> getNetworkFile();
@@ -35,9 +35,8 @@ public interface ISystemdNetworkd {
 	/**
 	 * Build a Systemd-networkd .netwdev file for this NIC
 	 *
-	 * See
-	 * {@link https://www.freedesktop.org/software/systemd/man/systemd.netdev.html}
-	 *
+	 * See <a href="https://www.freedesktop.org/software/systemd/man/systemdnetdev.html">
+	 *     FreeDesktop.org's documentation</a> for more information
 	 * @return FileUnit in /etc/systemd/network/
 	 */
 	Optional<FileUnit> getNetDevFile();

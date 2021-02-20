@@ -131,8 +131,7 @@ public class FileUnit extends SimpleUnit {
 	/**
 	 * Append line(s) of text to this FileUnit, each ending with a carriage return
 	 *
-	 * @param line
-	 */
+     */
 	public final void appendLine(String... lines) {
 		for (final String line : lines) {
 			this.appendText(line, true);
@@ -142,8 +141,7 @@ public class FileUnit extends SimpleUnit {
 	/**
 	 * Append line(s) of text to this FileUnit, each ending with a carriage return
 	 *
-	 * @param line
-	 */
+     */
 	public final void appendLine(Collection<String> lines) {
 		appendLine(lines.toArray(String[]::new));
 	}

@@ -371,7 +371,6 @@ public abstract class AMachineData extends AData {
 
 	/**
 	 * 
-	 * @param dir
 	 * @param ifaces
 	 * @throws InvalidNetworkInterfaceException
 	 */

@@ -34,8 +34,7 @@ public abstract class ADHCPServerProfile extends AStructuredProfile {
 	/**
 	 * In your constructor, you will need
 	 *
-	 * @param myData
-	 * @param networkModel
+	 * @param me
 	 */
 	public ADHCPServerProfile(ServerModel me) {
 		super(me);
@@ -71,7 +70,6 @@ public abstract class ADHCPServerProfile extends AStructuredProfile {
 	/**
 	 *
 	 * @param subnetName
-	 * @param machine
 	 * @return false if machine already added, true otherwise
 	 */
 	public final void addToSubnet(MachineType subnetName, Collection<AMachineModel> machines) {
@@ -98,16 +96,6 @@ public abstract class ADHCPServerProfile extends AStructuredProfile {
 
 	@Override
 	public abstract Collection<IUnit> getLiveFirewall() throws AThornSecException;
-
-	/**
-	 * The entire point of a DHCP server is to distribute IP Addresses.
-	 *
-	 * You must implement this method, and it must distribute IP addresses across
-	 * your various {@code AMachineModel}s.
-	 *
-	 * @throws AThornSecException
-	 */
-	// protected abstract void distributeIPs() throws AThornSecException;
 
 	/**
 	 * DHCP shouldn't *really* give out MAC addresses, given that it uses them to

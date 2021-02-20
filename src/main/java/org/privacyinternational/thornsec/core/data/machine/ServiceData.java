@@ -194,7 +194,6 @@ public class ServiceData extends ServerData {
 	 * a default value
 	 * 
 	 * @param diskLabel the disk's label
-	 * @param defaultSize the default size to return if the size is not set
 	 * @return Either the disk's size as set in the JSON or the defaultSize
 	 */
 	public Optional<Integer> getDiskSize(String diskLabel) {

@@ -311,8 +311,6 @@ public class Debian extends AOS {
 
 	/**
 	 * @param user
-	 * @param sshDir
-	 * @param pubKey
 	 * @throws InvalidUserException 
 	 */
 	private void buildPreseedLateCommand(UserModel user) throws InvalidUserException {
@@ -324,11 +322,8 @@ public class Debian extends AOS {
 	}
 
 	/**
-	 * @param preseed
 	 * @param user
-	 * @param sshDir
-	 * @param pubKey
-	 * @return 
+	 * @return
 	 * @throws InvalidUserException 
 	 */
 	private void getLateCommandUserSSHKeySettings(UserModel user) throws InvalidUserException {

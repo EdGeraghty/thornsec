@@ -315,7 +315,7 @@ public class NetworkData extends AData {
 
 	/**
 	 * Read in whether we should autogenerate secure passwords, or set the
-	 * default from {@link NETWORK_AUTOGENPASSWDS}
+	 * default from `NETWORK_AUTOGENPASSWDS`
 	 */
 	private void readAutoGenPasswords() {
 		if (!getData().containsKey("autogen_passwds")) {
@@ -440,7 +440,6 @@ public class NetworkData extends AData {
 
 	/**
 	 * Creates UserData objects from a given JSON network
-	 * @param networkJSONData the whole network
 	 * @throws InvalidUserException If there are duplicate users declared
 	 * in this network's data
 	 * @throws NoValidUsersException If there aren't any Users to 
