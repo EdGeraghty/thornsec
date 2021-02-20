@@ -27,8 +27,8 @@ public class Alpine extends AOS {
 
 	@Override
 	public Collection<IUnit> buildIso() throws InvalidServerException, InvalidMachineModelException {
-		String url = getServerModel().getIsoUrl().orElseGet(() -> getIsoURLFromLatest());
-		String checksum = getServerModel().getIsoSHA512().orElseGet(() -> getIsoSHA512FromLatest());
+		String url = getServerModel().getIsoUrl().orElseGet(this::getIsoURLFromLatest);
+		String checksum = getServerModel().getIsoSHA512().orElseGet(this::getIsoSHA512FromLatest);
 
 		return super.getISODownloadUnits(url, checksum);
 	}

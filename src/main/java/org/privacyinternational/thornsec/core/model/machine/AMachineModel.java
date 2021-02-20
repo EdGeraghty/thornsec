@@ -257,7 +257,7 @@ public abstract class AMachineModel extends AModel {
 		final Collection<IPAddress> ips = new ArrayList<>();
 
 		getNetworkInterfaces().forEach(nic -> {
-			nic.getAddresses().ifPresent(addresses -> ips.addAll(addresses));
+			nic.getAddresses().ifPresent(ips::addAll);
 		});
 
 		if (includeExternalIPs) {

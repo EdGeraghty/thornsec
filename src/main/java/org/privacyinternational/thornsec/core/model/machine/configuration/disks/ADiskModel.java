@@ -140,26 +140,11 @@ public class ADiskModel extends AModel {
 
 	@Override
 	public void init() throws AThornSecException {
-		getData().getComment().ifPresent((comment) -> {
-			this.setComment(comment);
-		});
-		
-		getData().getDiffparent().ifPresent((diffParent) -> {
-			this.setDiffParent(diffParent);
-		});
-		
-		getData().getFilename().ifPresent((filename) -> {
-			this.setFilename(filename);
-		});
-		
-		getData().getFormat().ifPresent((format) -> {
-			this.setFormat(format);
-		});
-		
-		getData().getMedium().ifPresent((medium) -> {
-			this.setMedium(medium);
-		});
-		
+		getData().getComment().ifPresent(this::setComment);
+		getData().getDiffparent().ifPresent(this::setDiffParent);
+		getData().getFilename().ifPresent(this::setFilename);
+		getData().getFormat().ifPresent(this::setFormat);
+		getData().getMedium().ifPresent(this::setMedium);
 		getData().getSize().ifPresent((size) -> {
 			try {
 				this.setSize(size);

@@ -68,7 +68,6 @@ abstract public class ADeviceModel extends AMachineModel {
 	final public Boolean hasRealNICs() {
 		return getNetworkInterfaces()
 				.stream()
-				.filter((nic) -> nic.getMac().isPresent())
-				.count() > 0;
+				.anyMatch((nic) -> nic.getMac().isPresent());
 	}
 }

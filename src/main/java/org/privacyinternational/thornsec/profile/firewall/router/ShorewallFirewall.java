@@ -212,11 +212,10 @@ public class ShorewallFirewall extends AFirewallProfile {
 		 * @param rule Forward TrafficRule
 		 */
 		private void buildForward(TrafficRule rule) throws InvalidFirewallRuleException {
-			Boolean destIsExternallyAccessible = rule.getDestinations()
+			boolean destIsExternallyAccessible = rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
-					.filter(label -> !this.getMachineModel(label).getExternalIPs().isEmpty())
-					.count() > 0;
+					.map(HostName::getHost)
+					.anyMatch(label -> !this.getMachineModel(label).getExternalIPs().isEmpty());
 
 			this.setAction(Action.ACCEPT);
 			if (destIsExternallyAccessible) {
@@ -227,7 +226,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 					getNetworkModel().getSubnets().keySet()
 					 .stream()
 					 .filter(type -> !getNetworkModel().getMachines(type).isEmpty())
-					 .map(type -> cleanZone(type))
+					 .map(ShorewallFirewall.this::cleanZone)
 					 .collect(Collectors.joining(","))
 				);
 			}
@@ -242,10 +241,10 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
-					.filter(ip -> ip.isLocal())
+					.filter(IPAddress::isLocal)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
 					.collect(Collectors.joining(","))
 			);
@@ -264,7 +263,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.collect(Collectors.joining(","))
 			);
 		}
@@ -290,7 +289,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setSourceSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
@@ -307,7 +306,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
@@ -861,7 +860,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 				.forEach(nic -> {
 					String mac = nic.getMac().get().toNormalizedString();
 					String addresses = nic.getAddresses().get().stream()
-											.map(ip -> ip.withoutPrefixLength())
+											.map(IPAddress::withoutPrefixLength)
 											.map(Object::toString)
 											.collect(Collectors.joining(","));
 

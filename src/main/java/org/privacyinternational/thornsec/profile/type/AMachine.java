@@ -22,8 +22,8 @@ public abstract class AMachine extends AStructuredProfile {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		for (NetworkInterfaceModel nic : getMachineModel().getNetworkInterfaces()) {
-			nic.getNetworkFile().ifPresent(n -> units.add(n));
-			nic.getNetDevFile().ifPresent(n -> units.add(n));
+			nic.getNetworkFile().ifPresent(units::add);
+			nic.getNetDevFile().ifPresent(units::add);
 		}
 
 		return units;
