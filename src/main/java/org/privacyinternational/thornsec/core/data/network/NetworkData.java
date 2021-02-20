@@ -403,6 +403,7 @@ public class NetworkData extends AData {
 	 * @throws InvalidJSONException 
 	 */
 	private void readInclude(String includePath) throws InvalidPropertyException, InvalidJSONException {
+		assert (null != getConfigFilePath().getParent());
 		String configBase = getConfigFilePath().getParent().toString();
 		Path includeFile = Path.of(configBase, includePath);
 
