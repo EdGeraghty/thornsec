@@ -199,11 +199,8 @@ public class ServiceData extends ServerData {
 	public Optional<Integer> getDiskSize(String diskLabel) {
 		Optional<DiskData> disk = getDiskData(diskLabel);
 
-		if (disk.isPresent()) {
-			return disk.get().getSize();
-		}
+		return disk.flatMap(DiskData::getSize);
 
-		return null;
 	}
 		/**
 	 * @return The CPU execution cap as an absolute percentage {1-100}
