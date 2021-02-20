@@ -172,6 +172,6 @@ public class ADiskModel extends AModel {
 	
 	@Override
 	public DiskData getData() {
-		return (DiskData) getData();
+		return (DiskData) super.getData();
 	}
 }

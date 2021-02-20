@@ -67,7 +67,7 @@ public class Service extends Server {
 
 	@Override
 	public ServiceModel getServerModel() {
-		return (ServiceModel) getServerModel();
+		return (ServiceModel) super.getServerModel();
 	}
 
 	@Override
