@@ -417,8 +417,8 @@ public class NetworkData extends AData {
 			JsonObject includeData = jsonReader.readObject();
 
 			JsonObjectBuilder newData = Json.createObjectBuilder();
-			currentData.forEach((k,v) -> newData.add(k, v));
-			includeData.forEach((k,v) -> newData.add(k, v));
+			currentData.forEach(newData::add);
+			includeData.forEach(newData::add);
 
 			setData(newData.build());
 

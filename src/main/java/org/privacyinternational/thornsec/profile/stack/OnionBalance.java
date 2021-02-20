@@ -156,9 +156,7 @@ public class OnionBalance extends AStructuredProfile {
 			this.backends = new LinkedHashSet<>();
 		}
 
-		for (final String backend : backends) {
-			this.backends.add(backend);
-		}
+		this.backends.addAll(Arrays.asList(backends));
 	}
 
 	private Set<String> getBackends() {

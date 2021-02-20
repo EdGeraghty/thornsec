@@ -37,6 +37,6 @@ public abstract class ADNSServerProfile extends AStructuredProfile {
 	 * @param machines The machines to build DNS records for
 	 */
 	public final void addRecord(Collection<AMachineModel> machines) {
-		machines.forEach(machine -> addRecord(machine));
+		machines.forEach(this::addRecord);
 	}
 }

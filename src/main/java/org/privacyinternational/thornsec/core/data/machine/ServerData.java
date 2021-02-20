@@ -419,9 +419,7 @@ public class ServerData extends AMachineData {
 			this.profiles = new LinkedHashSet<>();
 		}
 
-		for (final String profile : profiles) {
-			this.profiles.add(profile);
-		}
+		this.profiles.addAll(Arrays.asList(profiles));
 	}
 
 	private void putSSHSource(HostName... sources) {
@@ -429,9 +427,7 @@ public class ServerData extends AMachineData {
 			this.sshSources = new LinkedHashSet<>();
 		}
 
-		for (final HostName source : sources) {
-			this.sshSources.add(source);
-		}
+		this.sshSources.addAll(Arrays.asList(sources));
 	}
 
 	private void putAdmin(String... admins) throws InvalidPropertyException {

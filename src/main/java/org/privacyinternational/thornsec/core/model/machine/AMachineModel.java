@@ -146,9 +146,7 @@ public abstract class AMachineModel extends AModel {
 	private void setTypesFromData(AMachineData myData) {
 		this.types = new LinkedHashMap<>();
 
-		myData.getTypes().forEach(type -> {
-			addType(type);
-		});
+		myData.getTypes().forEach(this::addType);
 	}
 
 	public final void addType(MachineType type) {
@@ -212,9 +210,7 @@ public abstract class AMachineModel extends AModel {
 			this.cnames = new LinkedHashSet<>();
 		}
 
-		for (final String cname : cnames) {
-			this.cnames.add(cname);
-		}
+		this.cnames.addAll(Arrays.asList(cnames));
 	}
 
 	public HostName getDomain() {

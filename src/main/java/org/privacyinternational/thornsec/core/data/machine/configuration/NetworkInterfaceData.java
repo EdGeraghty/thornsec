@@ -270,8 +270,8 @@ public class NetworkInterfaceData extends AData {
 	}
 
 	public final void addAddress(IPAddress... addresses) {
-		for (int i = 0; i < addresses.length; i++) {
-			addAddress(addresses[i]);
+		for (IPAddress address : addresses) {
+			addAddress(address);
 		}
 	}
 

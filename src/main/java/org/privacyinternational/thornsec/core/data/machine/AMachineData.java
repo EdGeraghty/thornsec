@@ -420,9 +420,7 @@ public abstract class AMachineData extends AData {
 	}
 
 	protected void putType(MachineType... types) {
-		for (MachineType type : types) {
-			this.types.add(type);
-		}
+		this.types.addAll(Arrays.asList(types));
 	}
 
 	public final Collection<MachineType> getTypes() {
