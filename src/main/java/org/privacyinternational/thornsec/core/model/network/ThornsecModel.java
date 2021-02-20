@@ -36,7 +36,7 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidJSONExceptio
 public class ThornsecModel {
 
 	private final Map<String, NetworkModel> networks;
-	private Path configPath;
+	private final Path configPath;
 
 	public ThornsecModel() {
 		this.networks = new LinkedHashMap<>();

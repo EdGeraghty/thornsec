@@ -27,8 +27,8 @@ import org.privacyinternational.thornsec.profile.service.machine.SSH;
 
 class PreseedFile extends FileUnit {
 	
-	private Set<String> lateCommand;
-	private Set<String> debianInstaller;
+	private final Set<String> lateCommand;
+	private final Set<String> debianInstaller;
 	
 	public PreseedFile() {
 		super("preseed", "proceed", null);
@@ -70,7 +70,7 @@ class PreseedFile extends FileUnit {
 public class Debian extends AOS {
 
 	private final AptSources aptSources;
-	private PreseedFile preseed;
+	private final PreseedFile preseed;
 	
 	public Debian(ServerModel me) throws AThornSecException {
 		super(me);

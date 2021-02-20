@@ -45,7 +45,7 @@ public class NetworkInterfaceData extends AData {
 		DUMMY("dummy"),
 		WIREGUARD("wireguard");
 
-		private String inet;
+		private final String inet;
 
 		Inet(String inet) {
 			this.inet = inet;

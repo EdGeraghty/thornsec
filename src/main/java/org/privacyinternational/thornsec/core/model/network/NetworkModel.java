@@ -70,7 +70,7 @@ import inet.ipaddr.IncompatibleAddressException;
 public class NetworkModel {
 	private final String label;
 	private NetworkData data;
-	private Map<String, UserModel> users;
+	private final Map<String, UserModel> users;
 	private Map<String, AMachineModel> machines;
 	private Map<String, Collection<IUnit>> networkUnits;
 

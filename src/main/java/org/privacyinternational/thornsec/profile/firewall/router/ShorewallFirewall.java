@@ -72,8 +72,8 @@ public class ShorewallFirewall extends AFirewallProfile {
 		public static Set<ParentZone> routerZone = EnumSet.of(ROUTER);
 		public static Set<ParentZone> lanZone = EnumSet.range(USERS, VPN);
 
-		private Arm direction;
-		private MachineType parentZone;
+		private final Arm direction;
+		private final MachineType parentZone;
 
 		ParentZone(Arm direction, MachineType type) {
 			this.direction = direction;
@@ -94,7 +94,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		}
 	}
 
-	private static String CONFIG_BASEDIR = "/etc/shorewall";
+	private static final String CONFIG_BASEDIR = "/etc/shorewall";
 
 	private class ShorewallRule {
 		private String macro;
@@ -104,7 +104,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 
 		private String sourceZone;
 		private String sourceSubZone;
-		private Collection<Integer> sPorts;
+		private final Collection<Integer> sPorts;
 
 		private String destinationZone;
 		private String destinationSubZone;

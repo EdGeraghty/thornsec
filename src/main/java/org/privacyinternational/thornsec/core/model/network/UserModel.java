@@ -18,7 +18,7 @@ import org.privacyinternational.thornsec.core.exception.AThornSecException;
  */
 public class UserModel {
 
-	private UserData myData;
+	private final UserData myData;
 
 	public UserModel(UserData myData) throws AThornSecException {
 		this.myData = myData;

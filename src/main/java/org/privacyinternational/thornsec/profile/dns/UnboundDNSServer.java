@@ -36,13 +36,13 @@ import inet.ipaddr.IPAddress;
  * Please see https://nlnetlabs.nl/projects/unbound/about/ for more details.
  */
 public class UnboundDNSServer extends ADNSServerProfile {
-	private static Integer DEFAULT_UPSTREAM_DNS_PORT = 853;
+	private static final Integer DEFAULT_UPSTREAM_DNS_PORT = 853;
 
-	private static String UNBOUND_CONFIG_DIR = "/etc/unbound/";
-	private static String UNBOUND_CONFIG_DROPIN_DIR = UNBOUND_CONFIG_DIR + "unbound.conf.d/";
-	private static String UNBOUND_CONFIG_FILE = UNBOUND_CONFIG_DIR + "unbound.conf";
+	private static final String UNBOUND_CONFIG_DIR = "/etc/unbound/";
+	private static final String UNBOUND_CONFIG_DROPIN_DIR = UNBOUND_CONFIG_DIR + "unbound.conf.d/";
+	private static final String UNBOUND_CONFIG_FILE = UNBOUND_CONFIG_DIR + "unbound.conf";
 
-	private static String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
+	private static final String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
 
 	private final Map<HostName, Set<AMachineModel>> zones;
 

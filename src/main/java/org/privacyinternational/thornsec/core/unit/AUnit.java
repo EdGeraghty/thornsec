@@ -15,14 +15,13 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
  * This is a basic unit test.
  */
 public abstract class AUnit implements IUnit {
+	private final String label;
+	private final String precondition;
+	private String config;
+	private final String audit;
+	private final String message;
 
 	protected NetworkModel networkModel;
-
-	protected String label;
-	protected String precondition;
-	protected String config;
-	protected String audit;
-	protected String message;
 
 	public AUnit(String label, String precondition, String config, String audit, String message) {
 		//Do some normalisation of the unit test labels. You'll thank me later, I assure you. 

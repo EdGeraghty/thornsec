@@ -19,8 +19,8 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 public abstract class AModel {
 
 	private String label;
-	private NetworkModel networkModel;
-	private AData myData;
+	private final NetworkModel networkModel;
+	private final AData myData;
 
 	/**
 	 * Create a new AModel. This AModel represents a logical <i>thing</i>, such

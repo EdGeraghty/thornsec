@@ -20,8 +20,8 @@ public class TrafficRule {
 	private Encapsulation encapsulation;
 	private Table table;
 	private String source;
-	private Set<HostName> destinations;
-	private Set<Integer> ports;
+	private final Set<HostName> destinations;
+	private final Set<Integer> ports;
 
 	public TrafficRule(Encapsulation encapsulation, Table table, String source, Set<HostName> destinations, Set<Integer> ports) throws InvalidPortException {
 		this.ports = new LinkedHashSet<>();

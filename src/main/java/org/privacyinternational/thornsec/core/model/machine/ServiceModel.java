@@ -42,8 +42,8 @@ public class ServiceModel extends ServerModel {
 	private Map<String, ADiskModel> disks;
 	private HypervisorModel hypervisor;
 
-	private static Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
-	private static Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
+	private static final Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
+	private static final Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
 
 	public ServiceModel(ServerData myData, NetworkModel networkModel)
 			throws AThornSecException {

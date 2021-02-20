@@ -2,7 +2,7 @@ package org.privacyinternational.thornsec.core.exec;
 
 public class OutputExec {
 
-	private String cmd;
+	private final String cmd;
 
 	public OutputExec(String cmd) {
 		this.cmd = cmd;

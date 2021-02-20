@@ -50,7 +50,7 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		MACVLAN("MACVLAN"),
 		BOND("Bond");
 
-		private String section;
+		private final String section;
 
 		Section(String section) {
 			this.section = section;

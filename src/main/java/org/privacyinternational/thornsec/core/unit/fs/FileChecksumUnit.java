@@ -13,7 +13,7 @@ public class FileChecksumUnit extends SimpleUnit {
 	public enum Checksum {
 		SHA512("sha512sum"), SHA256("sha256sum");
 
-		private String checksum;
+		private final String checksum;
 
 		Checksum(String checksum) {
 			this.checksum = checksum;

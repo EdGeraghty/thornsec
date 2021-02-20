@@ -47,12 +47,12 @@ import org.privacyinternational.thornsec.profile.type.Service;
  */
 public class ServerModel extends AMachineModel {
 	// Server-specific
-	private Processes runningProcesses;
-	private AFirewallProfile firewall;
+	private final Processes runningProcesses;
+	private final AFirewallProfile firewall;
 	// private final ConfigFiles configFiles;
-	private UserAccounts users;
+	private final UserAccounts users;
 	
-	private Map<String, AProfile> profiles;
+	private final Map<String, AProfile> profiles;
 
 	private AOS os;
 	private String iso;

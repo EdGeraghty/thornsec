@@ -75,8 +75,8 @@ public class NetworkData extends AData {
 
 	private final Map<MachineType, IPAddress> subnets;
 
-	private Map<String, AMachineData> machines;
-	private Map<String, UserData> users;
+	private final Map<String, AMachineData> machines;
+	private final Map<String, UserData> users;
 
 	/**
 	 * Create a new Network, populated with null values.

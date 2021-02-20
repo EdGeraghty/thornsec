@@ -17,7 +17,7 @@ import org.privacyinternational.thornsec.profile.machine.configuration.AptSource
 
 public class Alpine extends AOS {
 	private final AptSources aptSources;
-	private static String RELEASES_FILE = "https://uk.alpinelinux.org/alpine/latest-stable/releases/x86_64/latest-releases.yaml";
+	private static final String RELEASES_FILE = "https://uk.alpinelinux.org/alpine/latest-stable/releases/x86_64/latest-releases.yaml";
 
 	public Alpine(ServerModel me) throws AThornSecException {
 		super(me);

@@ -7,8 +7,8 @@ import java.io.OutputStream;
 
 class InputExec implements Runnable {
 
-	private InputStreamReader reader;
-	private OutputStream writer;
+	private final InputStreamReader reader;
+	private final OutputStream writer;
 
 	InputExec(InputStream stream, OutputStream writer) {
 		this.writer = writer;

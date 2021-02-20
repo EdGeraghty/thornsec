@@ -28,7 +28,7 @@ public class DiskData extends AData {
 
 		DISK("disk"), DVD("dvd");
 
-		private String medium;
+		private final String medium;
 
 		Medium(String medium) {
 			this.medium = medium;
@@ -45,7 +45,7 @@ public class DiskData extends AData {
 	public enum Format {
 		VDI("vdi"), VMDK("vmdk"), VHD("vhd");
 
-		private String format;
+		private final String format;
 
 		Format(String format) {
 			this.format = format;
