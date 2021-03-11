@@ -548,14 +548,6 @@ public class Virtualbox extends AHypervisorProfile {
 		// Use high precision event timers instead of legacy
 		units.add(modifyVm(service, "hpet", "on"));
 
-		// Shared folders setup
-		units.add(new SimpleUnit(service.getLabel() + "_backup_sf_attached", service.getLabel() + "_exists",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage sharedfolder add " + service.getLabel() + " --name backup --hostpath "
-						+ backupDir,
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel()
-						+ " --machinereadable | grep SharedFolderPathMachineMapping2",
-				"SharedFolderPathMachineMapping2=\\\"" + backupDir + "\\\"", "pass"));
-
 		// Clock setup to try and stop drift between host and guest
 		// https://www.virtualbox.org/manual/ch09.html#changetimesync
 		units.add(guestPropertySet(service, "timesync-interval", "10000", "Couldn't sync the clock between "
