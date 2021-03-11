@@ -513,7 +513,7 @@ public class Virtualbox extends AHypervisorProfile {
 	}
 
 	@Override
-	public Collection<IUnit> buildVM(ServiceModel service) {
+	public Collection<IUnit> buildServiceVM(ServiceModel service, String networkBridge) {
 		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
 
 		final Collection<IUnit> units = new ArrayList<>();
