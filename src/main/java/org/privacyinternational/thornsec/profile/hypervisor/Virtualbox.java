@@ -401,26 +401,27 @@ public class Virtualbox extends AHypervisorProfile {
 		units.addAll(createSockets(service));
 
 		// Architecture setup
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "paravirtprovider", "kvm")); // Default, make it explicit
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "chipset", "ich9"));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "ioapic", "on", "IO APIC couldn't be enabled for " + service.getLabel()
+		units.add(modifyVm(service, "paravirtprovider", "kvm")); // Default, make it explicit
+		units.add(modifyVm(service, "chipset", "ich9"));
+		units.add(modifyVm(service, "ioapic", "on",
+				"IO APIC couldn't be enabled for " + service.getLabel()
 				+ ".  This is required for 64-bit installations, and for more than 1 virtual CPU in a service."));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "hwvirtex", "on"));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "pae", "on"));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "cpus", service.getCPUs()));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "cpuexecutioncap", service.getCPUExecutionCap()));
+		units.add(modifyVm(service, "hwvirtex", "on"));
+		units.add(modifyVm(service, "pae", "on"));
+		units.add(modifyVm(service, "cpus", service.getCPUs()));
+		units.add(modifyVm(service, "cpuexecutioncap", service.getCPUExecutionCap()));
 
 		// RAM setup
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "memory", service.getRAM()));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "vram", "16"));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "nestedpaging", "on"));
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "largepages", "on"));
+		units.add(modifyVm(service, "memory", service.getRAM()));
+		units.add(modifyVm(service, "vram", "16"));
+		units.add(modifyVm(service, "nestedpaging", "on"));
+		units.add(modifyVm(service, "largepages", "on"));
 
 		// Audio setup (switch it off)
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "audio", "none"));
+		units.add(modifyVm(service, "audio", "none"));
 
 		// Use high precision event timers instead of legacy
-		units.add(modifyVm(service.getLabel(), USER_PREFIX + service.getLabel(), "hpet", "on"));
+		units.add(modifyVm(service, "hpet", "on"));
 
 		// Shared folders setup
 		units.add(new SimpleUnit(service.getLabel() + "_backup_sf_attached", service.getLabel() + "_exists",
@@ -502,24 +503,9 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
-	protected Collection<IUnit> buildDisks(String user, String group, String service, Map<String, ADiskModel> disks) {
-	
-	protected Collection<IUnit> buildLogs(String service, String backupDir, String user, String group) {
-		Collection<IUnit> units = new ArrayList<>();
-		
-		units.add(new DirUnit("backup_dir_" + service, "proceed", backupDir, user, group, 0750, ""));
+	protected SimpleUnit modifyVm(ServiceModel service, String setting, String value, String errorMsg, String prerequisite) {
 
-		// Mark the backup destination directory as a valid destination
-		units.add(new FileUnit(service + "_mark_backup_dir", "backup_dir_" + service + "_chmoded",
-				backupDir + "/backup.marker", "In memoriam Luke and Guy.  Miss you two!"));
-		
-		return units;
-	}
-
-	protected SimpleUnit modifyVm(String service, String user, String setting, String value, String errorMsg,
-			String prerequisite) {
-
-		String check = "";
+		String check;
 
 		// Integers aren't quoted...
 		if (value.matches("-?(0|[1-9]\\d*)")) {
@@ -528,22 +514,34 @@ public class Virtualbox extends AHypervisorProfile {
 			check = setting + "=\\\"" + value + "\\\"";
 		}
 
-		return new SimpleUnit(service + "_" + setting + "_" + value, prerequisite,
-				"sudo -u " + user + " VBoxManage modifyvm " + service + " --" + setting + " " + value,
-				"sudo -u " + user + " VBoxManage showvminfo " + service + " --machinereadable | grep ^" + setting + "=",
-				check, "pass", errorMsg);
+		return new SimpleUnit(
+			service.getLabel() + "_" + setting + "_" + value,
+			prerequisite,
+			"sudo -u " + USER_PREFIX + service.getLabel()
+				+ " VBoxManage"
+					+ " modifyvm " + service.getLabel()
+						+ " --" + setting + " " + value,
+			"sudo -u " + USER_PREFIX + service.getLabel()
+				+ " VBoxManage"
+					+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+			+ " | grep ^" + setting + "=",
+			check,
+			"pass",
+			errorMsg
+		);
 	}
 
-	protected SimpleUnit modifyVm(String service, String user, String setting, String value, String errorMsg) {
-		return modifyVm(service, user, setting, value, errorMsg, service + "_exists");
+	protected SimpleUnit modifyVm(ServiceModel service, String setting, String value, String errorMsg) {
+		return modifyVm(service, setting, value, errorMsg, service.getLabel() + "_exists");
 	}
 
-	protected SimpleUnit modifyVm(String service, String user, String setting, String value) {
-		return modifyVm(service, user, setting, value, "Couldn't change " + setting + " to " + value);
+	protected SimpleUnit modifyVm(ServiceModel service, String setting, String value) {
+		return modifyVm(service, setting, value, "Couldn't change " + setting + " to " + value);
 	}
 
-	protected SimpleUnit modifyVm(String service, String user, String setting, Integer value) {
-		return modifyVm(service, user, setting, value + "", "Couldn't change " + setting + " to " + value);
+	protected SimpleUnit modifyVm(ServiceModel service, String setting, Integer value) {
+		return modifyVm(service, setting, value + "", "Couldn't change " + setting + " to " + value);
 	}
 
 	protected SimpleUnit guestPropertySet(String service, String user, String property, String value, String errorMsg,
