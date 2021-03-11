@@ -264,8 +264,62 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
+	/**
+	 * Build and attach backup directory to a given service
+	 *
+	 * @param service the service to attach to
+	 * @return units to build & attach backup directories
+	 */
 	@Override
-	protected void buildBackups() {
+	protected Collection<IUnit> buildBackups(ServiceModel service) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
+		final String backupDir = baseDir + "/backups/" + service.getLabel();
+
+		units.add(
+			new DirUnit(
+				"backup_dir_" + service.getLabel(),
+				"proceed",
+				backupDir,
+				USER_PREFIX + service.getLabel(),
+				GROUP,
+				0750,
+				""
+			)
+		);
+
+		// Mark the backup destination directory as a valid destination
+		units.add(
+			new FileUnit(
+				service.getLabel() + "_mark_backup_dir",
+				"backup_dir_" + service.getLabel() + "_chmoded",
+				backupDir + "/backup.marker",
+				"In memoriam Luke and Guy.  Miss you two!"
+			)
+		);
+
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_backup_sf_attached",
+				service.getLabel() + "_exists",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " sharedfolder add " + service.getLabel()
+						+ " --name backup"
+						+ " --hostpath "
+						+ backupDir,
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+				+ " | grep " + backupDir,
+				"",
+				"fail"
+			)
+		);
+
+		return units;
 	}
 
 	@Override
@@ -338,7 +392,6 @@ public class Virtualbox extends AHypervisorProfile {
 	public Collection<IUnit> buildVM(ServiceModel service) {
 		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
 
-		final String backupDir = baseDir + "/backups/" + service.getLabel();
 		final String ttySocketDir = baseDir + "/sockets/" + service.getLabel();
 
 		final Collection<IUnit> units = new ArrayList<>();
@@ -450,23 +503,6 @@ public class Virtualbox extends AHypervisorProfile {
 	}
 
 	protected Collection<IUnit> buildDisks(String user, String group, String service, Map<String, ADiskModel> disks) {
-	
-	protected Collection<IUnit> buildBackups(String service, String logDir, String user, String group) {
-		Collection<IUnit> units = new ArrayList<>();
-		
-		units.add(new DirUnit("log_dir_" + service, "proceed", logDir, user, group, 0750, ""));
-
-		units.add(new SimpleUnit(service + "_log_sf_attached", service + "_exists",
-				"sudo -u " + user + " VBoxManage sharedfolder add " + service + " --name log --hostpath " + logDir + ";"
-						+ "sudo -u " + user + " VBoxManage setextradata " + service
-						+ " VBoxInternal1/SharedFoldersEnableSymlinksCreate/log 1",
-				"sudo -u " + user + " VBoxManage showvminfo " + service
-						+ " --machinereadable | grep SharedFolderPathMachineMapping1",
-				"SharedFolderPathMachineMapping1=\\\"" + logDir + "\\\"", "pass",
-				"Couldn't attach the logs folder to " + service + ".  This means logs will only exist in the VM."));
-		
-		return units;
-	}
 	
 	protected Collection<IUnit> buildLogs(String service, String backupDir, String user, String group) {
 		Collection<IUnit> units = new ArrayList<>();
