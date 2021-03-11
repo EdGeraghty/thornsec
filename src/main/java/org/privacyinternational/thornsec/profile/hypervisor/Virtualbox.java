@@ -7,11 +7,8 @@
  */
 package org.privacyinternational.thornsec.profile.hypervisor;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import inet.ipaddr.HostName;
+import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
@@ -27,7 +24,13 @@ import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
-import inet.ipaddr.HostName;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Virtualbox extends AHypervisorProfile {
 	final static String USER_PREFIX = "vboxuser_";
