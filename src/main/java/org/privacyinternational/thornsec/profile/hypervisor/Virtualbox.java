@@ -409,33 +409,94 @@ public class Virtualbox extends AHypervisorProfile {
 						+ " on its HyperVisor.  This is fatal, " + service.getLabel() + " will not exist on your network.");
 	}
 
-	private final Collection<IUnit> createSockets(ServiceModel service) {
+	private Collection<IUnit> createSockets(ServiceModel service) {
 		final Collection<IUnit> units = new ArrayList<>();
 		final String ttySocketDir = getServerModel().getVMBase().getPath() + "/sockets/" + service.getLabel();
 
-		units.add(new DirUnit("socket_dir_" + service.getLabel(), "proceed", ttySocketDir, USER_PREFIX + service.getLabel(), GROUP, 0750, ""));
+		units.add(
+			new DirUnit(
+				"socket_dir_" + service.getLabel(),
+				"proceed",
+				ttySocketDir,
+				USER_PREFIX + service.getLabel(),
+				GROUP,
+				0750,
+				""
+			)
+		);
+
 		// tty0 socket
-		units.add(new SimpleUnit(service.getLabel() + "_tty0_com_port", service.getLabel() + "_exists",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage modifyvm " + service.getLabel() + " --uart1 0x3F8 4",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep ^uart1=",
-				"uart1=\\\"0x03f8,4\\\"", "pass"));
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_tty0_com_port",
+				service.getLabel() + "_exists",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+					+ " modifyvm " + service.getLabel()
+						+ " --uart1 0x3F8 4",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+				+ " | grep ^uart1=",
+				"uart1=\\\"0x03f8,4\\\"",
+				"pass"
+			)
+		);
 
-		units.add(new SimpleUnit(service.getLabel() + "_tty0_socket", service.getLabel() + "_tty0_com_port",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage modifyvm " + service.getLabel() + " --uartmode1 server " + ttySocketDir
-						+ "/vboxttyS0",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep ^uartmode1=",
-				"uartmode1=\\\"server," + ttySocketDir + "/vboxttyS0\\\"", "pass"));
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_tty0_socket",
+				service.getLabel() + "_tty0_com_port",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " modifyvm " + service.getLabel()
+							+ " --uartmode1 server " + ttySocketDir + "/vboxttyS0",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+				+ " | grep ^uartmode1=",
+				"uartmode1=\\\"server," + ttySocketDir + "/vboxttyS0\\\"",
+				"pass"
+			)
+		);
 
-		units.add(new SimpleUnit(service.getLabel() + "_tty1_com_port", service.getLabel() + "_exists",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage modifyvm " + service.getLabel() + " --uart2 0x2F8 3",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep ^uart2=",
-				"uart2=\\\"0x02f8,3\\\"", "pass"));
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_tty1_com_port",
+				service.getLabel() + "_exists",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " modifyvm " + service.getLabel()
+							+ " --uart2 0x2F8 3",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+							+ " --machinereadable"
+				+ " | grep ^uart2=",
+				"uart2=\\\"0x02f8,3\\\"",
+				"pass"
+			)
+		);
 
-		units.add(new SimpleUnit(service.getLabel() + "_tty1_socket", service.getLabel() + "_tty1_com_port",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage modifyvm " + service.getLabel() + " --uartmode2 server " + ttySocketDir
-						+ "/vboxttyS1",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep ^uartmode2=",
-				"uartmode2=\\\"server," + ttySocketDir + "/vboxttyS1\\\"", "pass"));
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_tty1_socket",
+				service.getLabel() + "_tty1_com_port",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " modifyvm " + service.getLabel()
+							+ " --uartmode2 server " + ttySocketDir	+ "/vboxttyS1",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+							+ " --machinereadable"
+				+ " | grep ^uartmode2=",
+				"uartmode2=\\\"server," + ttySocketDir + "/vboxttyS1\\\"",
+				"pass"
+			)
+		);
 
 		return units;
 	}
@@ -443,8 +504,6 @@ public class Virtualbox extends AHypervisorProfile {
 	@Override
 	public Collection<IUnit> buildVM(ServiceModel service) {
 		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
-
-		final String ttySocketDir = baseDir + "/sockets/" + service.getLabel();
 
 		final Collection<IUnit> units = new ArrayList<>();
 
