@@ -21,8 +21,6 @@ public abstract class AUnit implements IUnit {
 	private final String audit;
 	private final String message;
 
-	protected NetworkModel networkModel;
-
 	public AUnit(String label, String precondition, String config, String audit, String message) {
 		//Do some normalisation of the unit test labels. You'll thank me later, I assure you. 
 		this.label        = label.toLowerCase().replaceAll("[^a-z0-9]", "_");
