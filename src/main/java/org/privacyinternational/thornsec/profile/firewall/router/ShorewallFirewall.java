@@ -137,20 +137,11 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this();
 
 			switch (rule.getTable()) {
-				case DNAT:
-					buildDNAT(rule);
-					break;
-				case EGRESS:
-					buildEgress(rule);
-					break;
-				case FORWARD:
-					buildForward(rule);
-					break;
-				case INGRESS:
-					buildIngress(rule);
-					break;
-				default:
-					throw new InvalidFirewallRuleException(rule.getTable() + " is not recognised");
+				case DNAT -> buildDNAT(rule);
+				case EGRESS -> buildEgress(rule);
+				case FORWARD -> buildForward(rule);
+				case INGRESS -> buildIngress(rule);
+				default -> throw new InvalidFirewallRuleException(rule.getTable() + " is not recognised");
 			}
 		}
 
