@@ -50,11 +50,11 @@ import org.privacyinternational.thornsec.profile.type.Router;
 //@TODO:This class is mucky, and needs some major refactoring to make readable
 public class ShorewallFirewall extends AFirewallProfile {
 	public enum Action {
-		ACCEPT, DNAT, DROP, REJECT, REDIRECT;
+		ACCEPT, DNAT, DROP, REJECT, REDIRECT
 	}
 
 	public enum Arm {
-		LAN, FIREWALL, INTERNET;
+		LAN, FIREWALL, INTERNET
 	}
 
 	public enum ParentZone {
