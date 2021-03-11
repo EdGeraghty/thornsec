@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -316,7 +317,7 @@ public class NetworkModel {
 			try {
 				final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 				final String filename = server + "_" + dateFormat.format(new Date()) + ".sh";
-				final Writer wr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF8"));
+				final Writer wr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
 				wr.write(audit);
 				wr.flush();
 				wr.close();
