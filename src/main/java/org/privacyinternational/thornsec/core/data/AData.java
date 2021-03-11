@@ -95,8 +95,6 @@ public abstract class AData {
 	 * @return the data
 	 */
 	public final JsonObject getData() {
-		////assertNotNull(this.data);
-
 		return this.data;
 	}
 
@@ -106,8 +104,6 @@ public abstract class AData {
 	 * @param data the new data
 	 */
 	protected final void setData(JsonObject data) {
-		////assertNotNull(data);
-
 		this.data = data;
 	}
 }
