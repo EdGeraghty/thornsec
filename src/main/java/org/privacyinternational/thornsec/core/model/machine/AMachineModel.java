@@ -279,7 +279,7 @@ public abstract class AMachineModel extends AModel {
 		}
 		md.update(name.getBytes());
 
-		final byte byteData[] = md.digest();
+		final byte[] byteData = md.digest();
 		final StringBuffer hashCodeBuffer = new StringBuffer();
 		for (final byte element : byteData) {
 			hashCodeBuffer.append(Integer.toString((element & 0xff) + 0x100, 16).substring(1));
