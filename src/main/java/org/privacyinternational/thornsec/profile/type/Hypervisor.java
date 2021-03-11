@@ -111,10 +111,10 @@ public class Hypervisor extends AStructuredProfile {
 
 		getServerModel().getServices().forEach(service -> {
 			units.addAll(service.getUserPasswordUnits());
-			units.addAll(virtualbox.buildVM(service));
+			units.addAll(virtualbox.buildServiceVM(service, getNetworkBridge()));
 		});
 		
-		//units.addAll(this.hypervisor.getLiveConfig());
+		units.addAll(this.virtualbox.getLiveConfig());
 		units.addAll(this.scripts.getLiveConfig());
 
 		return units;
