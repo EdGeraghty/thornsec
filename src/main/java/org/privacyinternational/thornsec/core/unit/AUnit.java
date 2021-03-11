@@ -46,6 +46,9 @@ public abstract class AUnit implements IUnit {
 		return this.precondition;
 	}
 
+	//@TODO...
+	protected String getDryRun() { return ""; }
+
 	protected final void setConfig(String config) {
 		this.config = config;
 	}
