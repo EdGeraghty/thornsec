@@ -142,23 +142,12 @@ public class ServerModel extends AMachineModel {
 	private void addTypes() throws AThornSecException {
 		for (final MachineType type : getData().getTypes()) {
 			switch (type) {
-				case DEDICATED:
-					addType(type, new Dedicated((DedicatedModel)this));
-					break;
-				case HYPERVISOR:
-					addType(type, new Hypervisor((HypervisorModel)this));
-					break;
-				case ROUTER:
-					addType(type, new Router((ServerModel)this));
-					break;
-				case SERVICE:
-					addType(type, new Service((ServerModel)this));
-					break;
-				case SERVER:
-					addType(MachineType.SERVER, new Server((ServerModel)this));
-					break;
-				default:
-					throw new InvalidTypeException(type + " is not a valid type");
+				case DEDICATED -> addType(type, new Dedicated((DedicatedModel) this));
+				case HYPERVISOR -> addType(type, new Hypervisor((HypervisorModel) this));
+				case ROUTER -> addType(type, new Router(this));
+				case SERVICE -> addType(type, new Service(this));
+				case SERVER -> addType(MachineType.SERVER, new Server(this));
+				default -> throw new InvalidTypeException(type + " is not a valid type");
 			}
 		}		
 	}
