@@ -111,7 +111,7 @@ public class Hypervisor extends AStructuredProfile {
 		return units;
 	}
 
-	private String getNetworkBridge() throws InvalidServerException, InvalidMachineModelException {
+	private String getNetworkBridge() {
 		if (getMachineModel().isType(MachineType.ROUTER)) {
 			return MachineType.SERVER.toString();
 		}
