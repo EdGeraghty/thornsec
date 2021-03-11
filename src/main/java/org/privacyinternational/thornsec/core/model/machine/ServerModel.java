@@ -182,7 +182,7 @@ public class ServerModel extends AMachineModel {
 		return units;
 	}
 
-	private Collection<IUnit> serverConfig() throws InvalidMachineException {
+	private Collection<IUnit> serverConfig() {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		// Shouldn't /really/ be doing this out here, but these should be the only RAW
