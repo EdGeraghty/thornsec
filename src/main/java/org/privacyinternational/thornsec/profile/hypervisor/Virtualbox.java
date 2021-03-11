@@ -480,13 +480,13 @@ public class Virtualbox extends AHypervisorProfile {
 
 		// Clock setup to try and stop drift between host and guest
 		// https://www.virtualbox.org/manual/ch09.html#changetimesync
-		units.add(guestPropertySet(service.getLabel(), USER_PREFIX + service.getLabel(), "timesync-interval", "10000", "Couldn't sync the clock between "
+		units.add(guestPropertySet(service, "timesync-interval", "10000", "Couldn't sync the clock between "
 				+ service.getLabel() + " and its metal.  You'll probably see some clock drift in " + service.getLabel() + " as a result."));
-		units.add(guestPropertySet(service.getLabel(), USER_PREFIX + service.getLabel(), "timesync-min-adjust", "100", "Couldn't sync the clock between "
+		units.add(guestPropertySet(service, "timesync-min-adjust", "100", "Couldn't sync the clock between "
 				+ service.getLabel() + " and its metal.  You'll probably see some clock drift in " + service.getLabel() + " as a result."));
-		units.add(guestPropertySet(service.getLabel(), USER_PREFIX + service.getLabel(), "timesync-set-on-restore", "1", "Couldn't sync the clock between "
+		units.add(guestPropertySet(service, "timesync-set-on-restore", "1", "Couldn't sync the clock between "
 				+ service.getLabel() + " and its metal.  You'll probably see some clock drift in " + service.getLabel() + " as a result."));
-		units.add(guestPropertySet(service.getLabel(), USER_PREFIX + service.getLabel(), "timesync-set-threshold", "1000", "Couldn't sync the clock between "
+		units.add(guestPropertySet(service, "timesync-set-threshold", "1000", "Couldn't sync the clock between "
 				+ service.getLabel() + " and its metal.  You'll probably see some clock drift in " + service.getLabel() + " as a result."));
 
 
@@ -591,18 +591,18 @@ public class Virtualbox extends AHypervisorProfile {
 		return modifyVm(service, setting, value + "", "Couldn't change " + setting + " to " + value);
 	}
 
-	protected SimpleUnit guestPropertySet(String service, String user, String property, String value, String errorMsg,
-			String prerequisite) {
-		return new SimpleUnit(service + "_" + property.replaceAll("-", "_") + "_" + value, prerequisite,
-				"sudo -u " + user + " VBoxManage guestproperty set " + service
+	protected SimpleUnit guestPropertySet(ServiceModel service, String property, String value, String errorMsg,
+										  String prerequisite) {
+		return new SimpleUnit(service.getLabel() + "_" + property.replaceAll("-", "_") + "_" + value, prerequisite,
+				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage guestproperty set " + service
 						+ " \"/VirtualBox/GuestAdd/VBoxService/--" + property + "\" " + value,
-				"sudo -u " + user + " VBoxManage guestproperty enumerate " + service
+				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage guestproperty enumerate " + service
 						+ " | grep \"Name: /VirtualBox/GuestAdd/VBoxService/--" + property + ", value: " + value + "\"",
 				"", "fail", errorMsg);
 	}
 
-	protected SimpleUnit guestPropertySet(String service, String user, String property, String value, String errorMsg) {
-		return guestPropertySet(service, user, property, value, errorMsg, service + "_exists");
+	protected SimpleUnit guestPropertySet(ServiceModel service, String property, String value, String errorMsg) {
+		return guestPropertySet(service, property, value, errorMsg, service.getLabel() + "_exists");
 	}
 
 	public Collection<? extends IUnit> buildIso(String service) throws InvalidServerException, InvalidServerModelException, NoValidUsersException, MalformedURLException, URISyntaxException, InvalidMachineModelException {
