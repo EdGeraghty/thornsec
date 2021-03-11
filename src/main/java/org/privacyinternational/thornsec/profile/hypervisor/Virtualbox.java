@@ -21,8 +21,8 @@ import org.privacyinternational.thornsec.core.exception.runtime.InvalidServerMod
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.HypervisorModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
-import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
+import org.privacyinternational.thornsec.core.model.machine.configuration.disks.DVDModel;
+import org.privacyinternational.thornsec.core.model.machine.configuration.disks.HardDiskModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
@@ -37,9 +37,231 @@ public class Virtualbox extends AHypervisorProfile {
 		super(me);
 	}
 
+	/**
+	 * Build and attach all disks relating to a given service
+	 *
+	 * @param service the service to build the disks for
+	 * @return units to build & attach disks to our service
+	 */
 	@Override
-	protected void buildDisks() {
-		// TODO Auto-generated method stub
+	protected Collection<IUnit> buildDisks(ServiceModel service) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		Set<HardDiskModel> hdds = service.getDisks()
+										 .values()
+										 .stream()
+										 .filter(disk -> disk.getMedium() == Medium.DISK)
+										 .map(HardDiskModel.class::cast)
+										 .collect(Collectors.toSet());
+
+		Set<DVDModel> dvds = service.getDisks()
+									.values()
+									.stream()
+									.filter(disk -> disk.getMedium() == Medium.DVD)
+									.map(DVDModel.class::cast)
+									.collect(Collectors.toSet());
+
+		units.addAll(buildHDDController(service, hdds));
+		units.addAll(buildDVDController(service, dvds));
+		units.addAll(buildHDDs(service, hdds));
+		units.addAll(buildDVDs(service, dvds));
+		units.addAll(bootOrder(service));
+
+		return units;
+	}
+
+	/**
+	 * Builds the HDD Controller, ready for attaching disks
+	 * @param service Service to build our disks for
+	 * @param hdds disks to build
+	 * @return IUnits to create the HDD Controller on our Service
+	 */
+	private Collection<IUnit> buildHDDController(ServiceModel service, Set<HardDiskModel> hdds) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		units.add(new SimpleUnit(service.getLabel() + "_hdds_sas_controller",
+					service.getLabel() + "_exists",
+					"sudo -u " + USER_PREFIX + service.getLabel()
+						+ " VBoxManage"
+							+ " storagectl " + service.getLabel()
+							+ " --name \"HDDs\""
+							+ " --add sas"
+							+ " --controller LSILogicSAS"
+							+ " --portcount " + hdds.size()
+							+ " --hostiocache off",
+					"sudo -u " + USER_PREFIX + service.getLabel()
+						+ " VBoxManage"
+							+ " showvminfo " + service.getLabel()
+							+ " --machinereadable"
+						+ " | grep ^storagecontrollername0=",
+				"storagecontrollername0=\\\"HDDs\\\"",
+				"pass",
+				"The hard drive SAS controller for " + service.getLabel()
+					+ " (where its disks are attached) couldn't be created/attached"
+					+ " to " + service.getLabel() + ". "
+					+ "This is fatal, " + service.getLabel() + " will not be installed.")
+		);
+
+		return units;
+	}
+
+	/**
+	 * Builds the DVD Controller, ready for attaching disks
+	 * @param service
+	 * @param dvds
+	 * @return
+	 */
+	private Collection<IUnit> buildDVDController(ServiceModel service, Set<DVDModel> dvds) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		units.add(new SimpleUnit(service.getLabel() + "_dvds_ide_controller",
+				service.getLabel() + "_exists",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " storagectl " + service.getLabel()
+						+ " --name \"DVDs\""
+						+ " --add ide"
+						+ " --controller PIIX4"
+						+ " --hostiocache off",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+				+ " | grep ^storagecontrollername1=",
+				"storagecontrollername1=\\\"DVDs\\\"",
+				"pass",
+				"The DVD IDE controller for " + service.getLabel()
+						+ " (where its disks are attached) couldn't be created/attached"
+						+ " to " + service.getLabel() + ". "
+						+"This is fatal, " + service.getLabel() + " will not be installed.")
+		);
+
+		return units;
+	}
+
+	private Collection<IUnit> buildHDDs(ServiceModel service, Set<HardDiskModel> hdds) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		int deviceCounter = 0;
+		for (final HardDiskModel disk : hdds) {
+			units.add(
+				new DirUnit(
+					disk.getLabel() + "_disk_dir_" + service.getLabel(),
+					"proceed",
+					disk.getFilePath(),
+					USER_PREFIX + service.getLabel(),
+					GROUP,
+					0750,
+					""
+				)
+			);
+
+			units.add(
+				new DirUnit(
+					disk.getLabel() + "_disk_loopback_dir_" + service.getLabel(),
+					"proceed",
+					disk.getFilePath() + "/live/",
+					"root",
+					"root",
+					700,
+					""
+				)
+			);
+
+			String diskCreation = "";
+			diskCreation += "sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage createmedium --filename " + disk.getFilename();
+			diskCreation += " --size " + disk.getSize();
+			diskCreation += " --format " + disk.getFormat();
+			diskCreation += (disk.getDiffParent().isPresent()) ? " --diffparent " + disk.getDiffParent() : "";
+
+			units.add(new SimpleUnit(service.getLabel() + "_" + disk.getLabel() + "_disk",
+					disk.getLabel() + "_disk_dir_" + service.getLabel() + "_chmoded", diskCreation,
+					"sudo [ -f " + disk.getFilename() + " ] && echo pass;", "pass", "pass",
+					"Couldn't create the disk " + disk.getLabel() + " for " + service.getLabel() + "."));
+//			units.add(new FileOwnUnit(service.getLabel() + "_" + disk.getLabel() + "_disk",
+//					service.getLabel() + "_" + disk.getLabel() + "_disk", disk.getFilename(), user, group));
+
+			String diskAttach = "";
+			diskAttach += "sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage storageattach " + service;
+			diskAttach += " --storagectl \"HDDs\"";
+			diskAttach += " --port " + deviceCounter;
+			diskAttach += " --device 0";
+			diskAttach += " --type hdd";
+			diskAttach += " --medium " + disk.getFilename();
+			// diskAttach += (disk.getLabel().contentEquals("boot")) ? " --bootable on" : "
+			// --bootable -off";
+			// diskAttach += " --comment \\\"" + disk.getComment() + "\\\";";
+
+			units.add(new SimpleUnit(service.getLabel() + "_" + disk.getLabel() + "_disk_attached",
+					service.getLabel() + "_hdds_sas_controller", diskAttach,
+					"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep \"HDDs-"
+							+ deviceCounter + "-0\"",
+					"\\\"HDDs-" + deviceCounter + "-0\\\"=\\\"" + disk.getFilename() + "\\\"", "pass",
+					"Couldn't attach disk " + disk.getLabel() + "for " + service.getLabel() + "."));
+
+			deviceCounter++;
+		}
+
+		return units;
+	}
+
+	private Collection<IUnit> buildDVDs(ServiceModel service, Set<DVDModel> dvds) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		int deviceCounter = 0;
+		for (DVDModel dvd : dvds) {
+			String diskAttach = "";
+			diskAttach += "sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage storageattach " + service;
+			diskAttach += " --storagectl \"DVDs\"";
+			diskAttach += " --port " + deviceCounter;
+			diskAttach += " --device 0";
+			diskAttach += " --type dvddrive";
+			diskAttach += " --medium " + dvd.getFilename();
+			// diskAttach += (disk.getLabel().contentEquals("boot")) ? " --bootable on" : "
+			// --bootable -off";
+			// diskAttach += " --comment \\\"" + disk.getComment() + "\\\";";
+
+			units.add(new SimpleUnit(service.getLabel() + "_" + dvd.getLabel() + "_disk_attached",
+					service.getLabel() + "_dvds_ide_controller", diskAttach,
+					"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage showvminfo " + service.getLabel() + " --machinereadable | grep \"DVDs-0-"
+							+ deviceCounter + "\"",
+					"\\\"DVDs-" + deviceCounter + "-0\\\"=\\\"" + dvd.getFilename() + "\\\"", "pass",
+					"Couldn't attach disk " + dvd.getLabel() + " for " + service.getLabel() + "."));
+
+			deviceCounter++;
+		}
+
+		return units;
+	}
+
+	private Collection<IUnit> bootOrder(ServiceModel service) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		// Boot setup - DVD is second to stop machines being wiped every time they're
+		// brought up
+		units.add(
+			modifyVm(
+				service,
+				"boot1",
+				"disk",
+				"Couldn't set the boot order for " + service.getLabel() + ". "
+					+ " This may mean the service will not be installed.",
+				service.getLabel() + "_hdds_sas_controller"
+			)
+		);
+
+		units.add(
+			modifyVm(
+				service,
+				"boot2",
+				"dvd",
+				"Couldn't set the boot order for " + service.getLabel() + ". "
+					+ " This may mean the service will not be installed.",
+				service.getLabel() + "_dvds_ide_controller"
+			)
+		);
+
+		return units;
 	}
 
 	@Override
@@ -228,110 +450,6 @@ public class Virtualbox extends AHypervisorProfile {
 	}
 
 	protected Collection<IUnit> buildDisks(String user, String group, String service, Map<String, ADiskModel> disks) {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		// Disk controller setup
-		units.add(new SimpleUnit(service + "_hdds_sas_controller", service + "_exists",
-				"sudo -u " + user + " VBoxManage storagectl " + service + " --name \"HDDs\"" + " --add sas"
-						+ " --controller LSILogicSAS" + " --portcount "
-						+ disks.values().stream().filter(disk -> disk.getMedium() == Medium.DISK).count()
-						+ " --hostiocache off",
-				"sudo -u " + user + " VBoxManage showvminfo " + service
-						+ " --machinereadable | grep ^storagecontrollername0=",
-				"storagecontrollername0=\\\"HDDs\\\"", "pass",
-				"The hard drive SAS controller for " + service
-						+ " (where its disks are attached) Couldn't be created/attached to " + service
-						+ ".  This is fatal, " + service + " will not be installed."));
-
-		units.add(new SimpleUnit(service + "_dvds_ide_controller", service + "_exists", "sudo -u " + user
-				+ " VBoxManage storagectl " + service + " --name \"DVDs\"" + " --add ide" + " --controller PIIX4"
-				// + " --portcount " + disks.values().stream().filter(disk -> disk.getMedium()
-				// == Medium.DVD).count()
-				+ " --hostiocache off",
-				"sudo -u " + user + " VBoxManage showvminfo " + service
-						+ " --machinereadable | grep ^storagecontrollername1=",
-				"storagecontrollername1=\\\"DVDs\\\"", "pass",
-				"The DVD SAS controller for " + service
-						+ " (where its disks are attached) Couldn't be created/attached to " + service
-						+ ".  This is fatal, " + service + " will not be installed."));
-
-		int deviceCounter = 0;
-		for (final ADiskModel disk : disks.values().stream().filter(disk -> disk.getMedium() == Medium.DISK)
-				.toArray(ADiskModel[]::new)) {
-			units.add(new DirUnit(disk.getLabel() + "_disk_dir_" + service, "proceed", disk.getFilePath(), user, group, 0750, ""));
-
-			units.add(new DirUnit(disk.getLabel() + "_disk_loopback_dir_" + service, "proceed",
-					disk.getFilePath() + "/live/", "root", "root", 0700, ""));
-
-			String diskCreation = "";
-			diskCreation += "sudo -u " + user + " VBoxManage createmedium --filename " + disk.getFilename();
-			diskCreation += " --size " + disk.getSize();
-			diskCreation += " --format " + disk.getFormat();
-			diskCreation += (disk.getDiffParent().isPresent()) ? " --diffparent " + disk.getDiffParent() : "";
-
-			units.add(new SimpleUnit(service + "_" + disk.getLabel() + "_disk",
-					disk.getLabel() + "_disk_dir_" + service + "_chmoded", diskCreation,
-					"sudo [ -f " + disk.getFilename() + " ] && echo pass;", "pass", "pass",
-					"Couldn't create the disk " + disk.getLabel() + " for " + service + "."));
-//			units.add(new FileOwnUnit(service + "_" + disk.getLabel() + "_disk",
-//					service + "_" + disk.getLabel() + "_disk", disk.getFilename(), user, group));
-
-			String diskAttach = "";
-			diskAttach += "sudo -u " + user + " VBoxManage storageattach " + service;
-			diskAttach += " --storagectl \"HDDs\"";
-			diskAttach += " --port " + deviceCounter;
-			diskAttach += " --device 0";
-			diskAttach += " --type hdd";
-			diskAttach += " --medium " + disk.getFilename();
-			// diskAttach += (disk.getLabel().contentEquals("boot")) ? " --bootable on" : "
-			// --bootable -off";
-			// diskAttach += " --comment \\\"" + disk.getComment() + "\\\";";
-
-			units.add(new SimpleUnit(service + "_" + disk.getLabel() + "_disk_attached",
-					service + "_hdds_sas_controller", diskAttach,
-					"sudo -u " + user + " VBoxManage showvminfo " + service + " --machinereadable | grep \"HDDs-"
-							+ deviceCounter + "-0\"",
-					"\\\"HDDs-" + deviceCounter + "-0\\\"=\\\"" + disk.getFilename() + "\\\"", "pass",
-					"Couldn't attach disk " + disk.getLabel() + "for " + service + "."));
-
-			deviceCounter++;
-		}
-
-		deviceCounter = 0;
-		for (final ADiskModel disk : disks.values().stream().filter(disk -> disk.getMedium() == Medium.DVD)
-				.toArray(ADiskModel[]::new)) {
-			String diskAttach = "";
-			diskAttach += "sudo -u " + user + " VBoxManage storageattach " + service;
-			diskAttach += " --storagectl \"DVDs\"";
-			diskAttach += " --port " + deviceCounter;
-			diskAttach += " --device 0";
-			diskAttach += " --type dvddrive";
-			diskAttach += " --medium " + disk.getFilename();
-			// diskAttach += (disk.getLabel().contentEquals("boot")) ? " --bootable on" : "
-			// --bootable -off";
-			// diskAttach += " --comment \\\"" + disk.getComment() + "\\\";";
-
-			units.add(new SimpleUnit(service + "_" + disk.getLabel() + "_disk_attached",
-					service + "_dvds_ide_controller", diskAttach,
-					"sudo -u " + user + " VBoxManage showvminfo " + service + " --machinereadable | grep \"DVDs-0-"
-							+ deviceCounter + "\"",
-					"\\\"DVDs-" + deviceCounter + "-0\\\"=\\\"" + disk.getFilename() + "\\\"", "pass",
-					"Couldn't attach disk " + disk.getLabel() + " for " + service + "."));
-
-			deviceCounter++;
-		}
-
-		// Boot setup - DVD is second to stop machines being wiped every time they're
-		// brought up
-		units.add(modifyVm(service, user, "boot1", "disk",
-				"Couldn't set the boot order for " + service + ".  This may mean the service will not be installed.",
-				service + "_hdds_sas_controller"));
-		units.add(modifyVm(service, user, "boot2", "dvd",
-				"Couldn't set the boot order for " + service + ".  This may mean the service will not be installed.",
-				service + "_dvds_ide_controller"));
-		
-		return units;
-	}
 	
 	protected Collection<IUnit> buildBackups(String service, String logDir, String user, String group) {
 		Collection<IUnit> units = new ArrayList<>();
