@@ -394,19 +394,30 @@ public class Virtualbox extends AHypervisorProfile {
 				+ service.getLabel() + " will not be installed.");
 	}
 
-	private final IUnit createVM(ServiceModel service) {
-		return new SimpleUnit(service.getLabel() + "_exists", service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage createvm"
-						+ "--name " + service.getLabel()
-						+ " --ostype \"" + GROUP + "\""
-						+ " --register;"
-						+ "sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage modifyvm " + service.getLabel()
-						+ " --description \"" + service.getLabel() + "." + service.getDomain() + "\n"
+	private IUnit createVM(ServiceModel service) {
+		return new SimpleUnit(
+			service.getLabel() + "_exists", service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user",
+			"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage createvm"
+				+ "--name " + service.getLabel()
+				+ " --ostype \"" + GROUP + "\""
+				+ " --register"
+			+ ";"
+			+ "sudo -u " + USER_PREFIX + service.getLabel()
+				+ " VBoxManage"
+					+ " modifyvm " + service.getLabel()
+					+ " --description \""
+						+ service.getLabel() + "." + service.getDomain() + "\n"
 						+ "ThornSec guest machine\n"
 						+ "Built with profile(s): "	+ String.join(", ", service.getProfiles().keySet()) + "\n"
 						+ "Built at $(date)" + "\"",
-				"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage list vms | grep " + service.getLabel(), "", "fail", "Couldn't create " + service.getLabel()
-						+ " on its HyperVisor.  This is fatal, " + service.getLabel() + " will not exist on your network.");
+			"sudo -u " + USER_PREFIX + service.getLabel()
+				+ " VBoxManage list vms"
+			+ "| grep " + service.getLabel(),
+			"",
+			"fail",
+			"Couldn't create " + service.getLabel() + " on its HyperVisor."
+			+ "This is fatal, " + service.getLabel() + " will not exist on your network."
+		);
 	}
 
 	private Collection<IUnit> createSockets(ServiceModel service) {
