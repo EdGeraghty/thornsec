@@ -48,8 +48,6 @@ public class Hypervisor extends AStructuredProfile {
 	private final AHypervisorProfile virtualbox;
 	private final HypervisorScripts scripts;
 
-	private Set<ServiceModel> services;
-
 	/**
 	 * Create a new HyperVisor box, with initialised NICs, and initialise the
 	 * virtualisation layer itself, including the building of Service machines
@@ -63,16 +61,6 @@ public class Hypervisor extends AStructuredProfile {
 
 		this.virtualbox = new Virtualbox(me);
 		this.scripts = new HypervisorScripts(me);
-
-		addServices();
-	}
-
-	private void addServices() throws InvalidMachineModelException {
-		this.services = getServerModel().getServices();
-	}
-
-	public Set<ServiceModel> getServices() {
-		return this.services;
 	}
 
 	@Override
@@ -128,7 +116,7 @@ public class Hypervisor extends AStructuredProfile {
 	public Collection<IUnit> getLiveConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		getServices().forEach(service -> {
+		getServerModel().getServices().forEach(service -> {
 			units.addAll(service.getUserPasswordUnits());
 			units.addAll(virtualbox.buildVM(service));
 		});
