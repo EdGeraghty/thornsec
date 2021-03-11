@@ -7,9 +7,9 @@
  */
 package org.privacyinternational.thornsec.core.unit;
 
-import java.util.regex.Pattern;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+
+import java.util.regex.Pattern;
 
 /**
  * This is a basic unit test.
