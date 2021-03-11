@@ -7,35 +7,28 @@
  */
 package org.privacyinternational.thornsec.profile.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.json.stream.JsonParsingException;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
-import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
-import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
+import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.machine.InvalidServerException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.HypervisorModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
-import org.privacyinternational.thornsec.core.unit.fs.FileChecksumUnit;
-import org.privacyinternational.thornsec.core.unit.fs.FileChecksumUnit.Checksum;
-import org.privacyinternational.thornsec.core.unit.fs.FileDownloadUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import org.privacyinternational.thornsec.profile.HypervisorScripts;
 import org.privacyinternational.thornsec.profile.hypervisor.AHypervisorProfile;
 import org.privacyinternational.thornsec.profile.hypervisor.Virtualbox;
+
+import javax.json.stream.JsonParsingException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * This is the representation of your HyperVisor itself.
@@ -48,14 +41,10 @@ public class Hypervisor extends AStructuredProfile {
 	private final AHypervisorProfile virtualbox;
 	private final HypervisorScripts scripts;
 
-	private Set<ServiceModel> services;
-
 	/**
 	 * Create a new HyperVisor box, with initialised NICs, and initialise the
 	 * virtualisation layer itself, including the building of Service machines
 	 * 
-	 * @param myData
-	 * @param networkModel
 	 * @throws JsonParsingException
 	 * @throws ADataException
 	 * @throws InvalidMachineModelException 
@@ -65,16 +54,6 @@ public class Hypervisor extends AStructuredProfile {
 
 		this.virtualbox = new Virtualbox(me);
 		this.scripts = new HypervisorScripts(me);
-
-		addServices();
-	}
-
-	private void addServices() throws InvalidMachineModelException {
-		this.services = getServerModel().getServices();
-	}
-
-	public Set<ServiceModel> getServices() {
-		return this.services;
 	}
 
 	@Override
@@ -113,7 +92,7 @@ public class Hypervisor extends AStructuredProfile {
 		return units;
 	}
 
-	private String getNetworkBridge() throws InvalidServerException, InvalidMachineModelException {
+	private String getNetworkBridge() {
 		if (getMachineModel().isType(MachineType.ROUTER)) {
 			return MachineType.SERVER.toString();
 		}
@@ -130,7 +109,7 @@ public class Hypervisor extends AStructuredProfile {
 	public Collection<IUnit> getLiveConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		getServices().forEach(service -> {
+		getServerModel().getServices().forEach(service -> {
 			units.addAll(service.getUserPasswordUnits());
 			units.addAll(virtualbox.buildVM(service));
 		});

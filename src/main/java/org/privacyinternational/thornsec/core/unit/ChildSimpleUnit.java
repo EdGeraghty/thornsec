@@ -15,7 +15,7 @@ public class ChildSimpleUnit extends SimpleUnit {
 	}
 
 	protected String getConfig() {
-		return config + getParent() + "_unchanged=0;\n";
+		return super.getConfig() + getParent() + "_unchanged=0;\n";
 	}
 
 	public String getParent() {

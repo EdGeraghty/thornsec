@@ -50,7 +50,7 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		MACVLAN("MACVLAN"),
 		BOND("Bond");
 
-		private String section;
+		private final String section;
 
 		Section(String section) {
 			this.section = section;
@@ -403,8 +403,9 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	}
 
 	/**
-	 * Get our Network File, as described in 
-	 * {@link https://www.freedesktop.org/software/systemd/man/systemd.network.html}
+	 * Get our Network File,
+	 * <a href="https://www.freedesktop.org/software/systemd/man/systemd.network.html">
+	 *     as described in the documentation</a>
 	 */
 	public Optional<FileUnit> getNetworkFile() {
 		final FileUnit networkFile = new FileUnit(getIface() + "_network", "proceed",

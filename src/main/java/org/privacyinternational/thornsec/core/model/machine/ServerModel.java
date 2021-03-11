@@ -47,12 +47,12 @@ import org.privacyinternational.thornsec.profile.type.Service;
  */
 public class ServerModel extends AMachineModel {
 	// Server-specific
-	private Processes runningProcesses;
-	private AFirewallProfile firewall;
+	private final Processes runningProcesses;
+	private final AFirewallProfile firewall;
 	// private final ConfigFiles configFiles;
-	private UserAccounts users;
+	private final UserAccounts users;
 	
-	private Map<String, AProfile> profiles;
+	private final Map<String, AProfile> profiles;
 
 	private AOS os;
 	private String iso;
@@ -142,23 +142,12 @@ public class ServerModel extends AMachineModel {
 	private void addTypes() throws AThornSecException {
 		for (final MachineType type : getData().getTypes()) {
 			switch (type) {
-				case DEDICATED:
-					addType(type, new Dedicated((DedicatedModel)this));
-					break;
-				case HYPERVISOR:
-					addType(type, new Hypervisor((HypervisorModel)this));
-					break;
-				case ROUTER:
-					addType(type, new Router((ServerModel)this));
-					break;
-				case SERVICE:
-					addType(type, new Service((ServerModel)this));
-					break;
-				case SERVER:
-					addType(MachineType.SERVER, new Server((ServerModel)this));
-					break;
-				default:
-					throw new InvalidTypeException(type + " is not a valid type");
+				case DEDICATED -> addType(type, new Dedicated((DedicatedModel) this));
+				case HYPERVISOR -> addType(type, new Hypervisor((HypervisorModel) this));
+				case ROUTER -> addType(type, new Router(this));
+				case SERVICE -> addType(type, new Service(this));
+				case SERVER -> addType(MachineType.SERVER, new Server(this));
+				default -> throw new InvalidTypeException(type + " is not a valid type");
 			}
 		}		
 	}
@@ -193,7 +182,7 @@ public class ServerModel extends AMachineModel {
 		return units;
 	}
 
-	private Collection<IUnit> serverConfig() throws InvalidMachineException {
+	private Collection<IUnit> serverConfig() {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		// Shouldn't /really/ be doing this out here, but these should be the only RAW

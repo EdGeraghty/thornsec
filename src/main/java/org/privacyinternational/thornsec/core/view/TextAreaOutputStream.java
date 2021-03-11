@@ -7,7 +7,7 @@ import javax.swing.JTextArea;
 
 public class TextAreaOutputStream extends OutputStream {
 
-	private JTextArea area;
+	private final JTextArea area;
 
 	public TextAreaOutputStream(JTextArea area) {
 		this.area = area;

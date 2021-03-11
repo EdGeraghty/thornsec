@@ -1,6 +1,6 @@
 package org.privacyinternational.thornsec.core.unit;
 
-public class ChildComplexUnit extends ComplexUnit {
+public class ChildComplexUnit extends AUnit {
 
 	protected String parent;
 
@@ -14,7 +14,7 @@ public class ChildComplexUnit extends ComplexUnit {
 	}
 
 	protected String getConfig() {
-		return config + getParent() + "_unchanged=0;\n";
+		return getConfig() + getParent() + "_unchanged=0;\n";
 	}
 
 	public String getParent() {

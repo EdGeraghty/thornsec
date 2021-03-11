@@ -60,7 +60,7 @@ public abstract class AMachineData extends AData {
 		VPN("VPN"),
 		INTERNET("Internet");
 
-		private String machineType;
+		private final String machineType;
 
 		MachineType(String machineType) {
 			this.machineType = machineType;
@@ -85,14 +85,14 @@ public abstract class AMachineData extends AData {
 
 	private Map<String, NetworkInterfaceData> networkInterfaces;
 	private Set<IPAddress> externalIPAddresses;
-	private Set<String> cnames;
+	private final Set<String> cnames;
 
 	// Alerting
 	private InternetAddress emailAddress;
 
 	private Boolean throttled;
 
-	private Set<TrafficRule> trafficRules;
+	private final Set<TrafficRule> trafficRules;
 
 	private HostName domain;
 
@@ -371,7 +371,6 @@ public abstract class AMachineData extends AData {
 
 	/**
 	 * 
-	 * @param dir
 	 * @param ifaces
 	 * @throws InvalidNetworkInterfaceException
 	 */
@@ -420,9 +419,7 @@ public abstract class AMachineData extends AData {
 	}
 
 	protected void putType(MachineType... types) {
-		for (MachineType type : types) {
-			this.types.add(type);
-		}
+		this.types.addAll(Arrays.asList(types));
 	}
 
 	public final Collection<MachineType> getTypes() {

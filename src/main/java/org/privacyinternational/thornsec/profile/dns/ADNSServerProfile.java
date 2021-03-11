@@ -21,7 +21,7 @@ import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
  */
 public abstract class ADNSServerProfile extends AStructuredProfile {
 
-	protected static Integer DEFAULT_LISTEN_PORT = 53;
+	protected static final Integer DEFAULT_LISTEN_PORT = 53;
 
 	public ADNSServerProfile(ServerModel me) {
 		super(me);
@@ -37,6 +37,6 @@ public abstract class ADNSServerProfile extends AStructuredProfile {
 	 * @param machines The machines to build DNS records for
 	 */
 	public final void addRecord(Collection<AMachineModel> machines) {
-		machines.forEach(machine -> addRecord(machine));
+		machines.forEach(this::addRecord);
 	}
 }

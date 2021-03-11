@@ -90,10 +90,9 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	 */
 	private Boolean isAssigned(IPAddress ip) {
 		return getNetworkModel().getMachines()
-						 .values()
-						 .stream()
-						 .filter(machine -> machine.getIPs().contains(ip))
-						 .count() > 0;
+				.values()
+				.stream()
+				.anyMatch(machine -> machine.getIPs().contains(ip));
 	}
 	
 	/**

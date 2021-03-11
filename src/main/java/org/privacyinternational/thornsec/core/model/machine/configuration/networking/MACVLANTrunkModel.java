@@ -22,7 +22,7 @@ import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
  * which to stack the VLANs.
  */
 public class MACVLANTrunkModel extends NetworkInterfaceModel {
-	private Set<MACVLANModel> vlans;
+	private final Set<MACVLANModel> vlans;
 
 	public MACVLANTrunkModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException {
 		super(myData, networkModel);

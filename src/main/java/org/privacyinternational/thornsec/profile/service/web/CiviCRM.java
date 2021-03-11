@@ -23,18 +23,17 @@ import org.privacyinternational.thornsec.profile.stack.MariaDB;
 
 /**
  * This profile installs and configures CiviCRM (https://civicrm.org/) on a
- * Drupal (7) base.
+ * Drupal (8) base.
  */
-@SuppressWarnings("deprecation") // Civi requires Drupal 7, which is deprecated.
 public class CiviCRM extends AStructuredProfile {
 
-	private final Drupal7 drupal;
+	private final Drupal8 drupal;
 	private final MariaDB db;
 
 	public CiviCRM(ServerModel me) {
 		super(me);
 
-		this.drupal = new Drupal7(me);
+		this.drupal = new Drupal8(me);
 		this.db = new MariaDB(me);
 
 		this.db.setUsername("civicrm");

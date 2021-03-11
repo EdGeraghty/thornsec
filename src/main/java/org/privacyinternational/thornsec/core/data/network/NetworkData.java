@@ -75,8 +75,8 @@ public class NetworkData extends AData {
 
 	private final Map<MachineType, IPAddress> subnets;
 
-	private Map<String, AMachineData> machines;
-	private Map<String, UserData> users;
+	private final Map<String, AMachineData> machines;
+	private final Map<String, UserData> users;
 
 	/**
 	 * Create a new Network, populated with null values.
@@ -315,7 +315,7 @@ public class NetworkData extends AData {
 
 	/**
 	 * Read in whether we should autogenerate secure passwords, or set the
-	 * default from {@link NETWORK_AUTOGENPASSWDS}
+	 * default from `NETWORK_AUTOGENPASSWDS`
 	 */
 	private void readAutoGenPasswords() {
 		if (!getData().containsKey("autogen_passwds")) {
@@ -403,12 +403,12 @@ public class NetworkData extends AData {
 	 * @throws InvalidJSONException 
 	 */
 	private void readInclude(String includePath) throws InvalidPropertyException, InvalidJSONException {
+		assert (null != getConfigFilePath().getParent());
 		String configBase = getConfigFilePath().getParent().toString();
 		Path includeFile = Path.of(configBase, includePath);
 
 		try {
-			String rawUTF8Data = new String(Files.readAllBytes(includeFile),
-											StandardCharsets.UTF_8);
+			String rawUTF8Data = Files.readString(includeFile);
 			rawUTF8Data = rawUTF8Data.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)", "");
 
 			JsonReader jsonReader = Json.createReader(new StringReader(rawUTF8Data));
@@ -417,8 +417,8 @@ public class NetworkData extends AData {
 			JsonObject includeData = jsonReader.readObject();
 
 			JsonObjectBuilder newData = Json.createObjectBuilder();
-			currentData.forEach((k,v) -> newData.add(k, v));
-			includeData.forEach((k,v) -> newData.add(k, v));
+			currentData.forEach(newData::add);
+			includeData.forEach(newData::add);
 
 			setData(newData.build());
 
@@ -440,7 +440,6 @@ public class NetworkData extends AData {
 
 	/**
 	 * Creates UserData objects from a given JSON network
-	 * @param networkJSONData the whole network
 	 * @throws InvalidUserException If there are duplicate users declared
 	 * in this network's data
 	 * @throws NoValidUsersException If there aren't any Users to 

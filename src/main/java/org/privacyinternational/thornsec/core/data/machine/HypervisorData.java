@@ -24,7 +24,7 @@ import org.privacyinternational.thornsec.core.exception.data.ADataException;
 public class HypervisorData extends ServerData {
 	private File vmBase;
 	private Integer backupFrequency;
-	private Set<ServerData> services;
+	private final Set<ServerData> services;
 
 	public HypervisorData(String label) {
 		super(label);

@@ -36,13 +36,13 @@ import inet.ipaddr.IPAddress;
  * Please see https://nlnetlabs.nl/projects/unbound/about/ for more details.
  */
 public class UnboundDNSServer extends ADNSServerProfile {
-	private static Integer DEFAULT_UPSTREAM_DNS_PORT = 853;
+	private static final Integer DEFAULT_UPSTREAM_DNS_PORT = 853;
 
-	private static String UNBOUND_CONFIG_DIR = "/etc/unbound/";
-	private static String UNBOUND_CONFIG_DROPIN_DIR = UNBOUND_CONFIG_DIR + "unbound.conf.d/";
-	private static String UNBOUND_CONFIG_FILE = UNBOUND_CONFIG_DIR + "unbound.conf";
+	private static final String UNBOUND_CONFIG_DIR = "/etc/unbound/";
+	private static final String UNBOUND_CONFIG_DROPIN_DIR = UNBOUND_CONFIG_DIR + "unbound.conf.d/";
+	private static final String UNBOUND_CONFIG_FILE = UNBOUND_CONFIG_DIR + "unbound.conf";
 
-	private static String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
+	private static final String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
 
 	private final Map<HostName, Set<AMachineModel>> zones;
 
@@ -267,7 +267,6 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Include the root hints file
-	 * @param string
 	 */
 	private void rootHints(String path) {
 		unboundConf.appendLine("\troot-hints: \\\"" + path + "\\\"");
@@ -308,7 +307,6 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Number of megabytes size of the RRset cache
-	 * @param megasize size in megabytes
 	 * @throws InvalidProfileException if size is invalid
 	 */
 	private void rrsetCacheSize(int megabytes) throws InvalidProfileException {
@@ -432,7 +430,6 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * 
 	 * Setting to 0 makes sure the data in the cache is as the domain owner
 	 * intended. 
-	 * @param min 0 to use domain's TTL, or fixed minimum cache in seconds
 	 * @throws InvalidProfileException if given an invalid TTL
 	 */
 	private void cacheMiniumumTTL(int seconds) throws InvalidProfileException {
@@ -633,7 +630,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * Allow DNS queries, but only from LAN, not the wider Internet.
 	 */
 	private void doIfacesAccessControl() {
-		/**
+		/*
 		 * The allow action does allow nonrecursive queries to access the
 		 * local-data that is configured. The reason is that this does not
 		 * involve the unbound server recursive lookup algorithm, and static

@@ -146,9 +146,7 @@ public abstract class AMachineModel extends AModel {
 	private void setTypesFromData(AMachineData myData) {
 		this.types = new LinkedHashMap<>();
 
-		myData.getTypes().forEach(type -> {
-			addType(type);
-		});
+		myData.getTypes().forEach(this::addType);
 	}
 
 	public final void addType(MachineType type) {
@@ -212,9 +210,7 @@ public abstract class AMachineModel extends AModel {
 			this.cnames = new LinkedHashSet<>();
 		}
 
-		for (final String cname : cnames) {
-			this.cnames.add(cname);
-		}
+		this.cnames.addAll(Arrays.asList(cnames));
 	}
 
 	public HostName getDomain() {
@@ -261,7 +257,7 @@ public abstract class AMachineModel extends AModel {
 		final Collection<IPAddress> ips = new ArrayList<>();
 
 		getNetworkInterfaces().forEach(nic -> {
-			nic.getAddresses().ifPresent(addresses -> ips.addAll(addresses));
+			nic.getAddresses().ifPresent(ips::addAll);
 		});
 
 		if (includeExternalIPs) {
@@ -283,8 +279,8 @@ public abstract class AMachineModel extends AModel {
 		}
 		md.update(name.getBytes());
 
-		final byte byteData[] = md.digest();
-		final StringBuffer hashCodeBuffer = new StringBuffer();
+		final byte[] byteData = md.digest();
+		final StringBuilder hashCodeBuffer = new StringBuilder();
 		for (final byte element : byteData) {
 			hashCodeBuffer.append(Integer.toString((element & 0xff) + 0x100, 16).substring(1));
 
@@ -377,7 +373,7 @@ public abstract class AMachineModel extends AModel {
 	 * 
 	 * Don't use this method if you don't want these ports to be potentially
 	 * publicly accessible.
-	 * @param ports port(s) to listen on
+	 * @param port port to listen on
 	 * @throws InvalidPortException if trying to set an invalid port
 	 */
 	public void addListen(Integer port) throws InvalidPortException {

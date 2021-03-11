@@ -9,10 +9,10 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 
 public class ServerListener implements ActionListener {
 
-	private NetworkModel network;
-	private String server;
-	private OutputStream out;
-	private InputStream in;
+	private final NetworkModel network;
+	private final String server;
+	private final OutputStream out;
+	private final InputStream in;
 
 	public ServerListener(String server, NetworkModel network, OutputStream out, InputStream in) {
 		this.server = server;

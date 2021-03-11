@@ -46,10 +46,10 @@ public class ServerData extends AMachineData {
 		ALPINE_64("alpine_amd64"),
 		ALPINE_32("alpine_x86");
 	
-		public static Set<GuestOS> alpine = EnumSet.of(ALPINE_32, ALPINE_64);
-		public static Set<GuestOS> debian = EnumSet.of(DEBIAN_32, DEBIAN_64);
+		public static final Set<GuestOS> alpine = EnumSet.of(ALPINE_32, ALPINE_64);
+		public static final Set<GuestOS> debian = EnumSet.of(DEBIAN_32, DEBIAN_64);
 	
-		private String guestOS;
+		private final String guestOS;
 	
 		GuestOS(String guestOS) {
 			this.guestOS = guestOS;
@@ -64,7 +64,7 @@ public class ServerData extends AMachineData {
 	private Set<HostName> sshSources;
 	private Set<String> profiles;
 	private Set<String> adminUsernames;
-	private Set<IPAddress> remoteAdminIPAddresses;
+	private final Set<IPAddress> remoteAdminIPAddresses;
 
 	private Integer adminSSHConnectPort;
 	private Integer sshListenPort;
@@ -419,9 +419,7 @@ public class ServerData extends AMachineData {
 			this.profiles = new LinkedHashSet<>();
 		}
 
-		for (final String profile : profiles) {
-			this.profiles.add(profile);
-		}
+		this.profiles.addAll(Arrays.asList(profiles));
 	}
 
 	private void putSSHSource(HostName... sources) {
@@ -429,9 +427,7 @@ public class ServerData extends AMachineData {
 			this.sshSources = new LinkedHashSet<>();
 		}
 
-		for (final HostName source : sources) {
-			this.sshSources.add(source);
-		}
+		this.sshSources.addAll(Arrays.asList(sources));
 	}
 
 	private void putAdmin(String... admins) throws InvalidPropertyException {

@@ -25,7 +25,7 @@ public class Processes extends AProfile {
 	public Processes(ServerModel server) {
 		super(server);
 
-		this.processStrings = new HashSet<String>();
+		this.processStrings = new HashSet<>();
 		// These are processes related to TS
 		this.processStrings.add("\\./script.sh; rm -rf script\\.sh; exit;");
 		this.processStrings.add("/bin/bash \\./script.sh$");

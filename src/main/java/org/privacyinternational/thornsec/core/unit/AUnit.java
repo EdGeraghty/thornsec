@@ -7,22 +7,19 @@
  */
 package org.privacyinternational.thornsec.core.unit;
 
-import java.util.regex.Pattern;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+
+import java.util.regex.Pattern;
 
 /**
  * This is a basic unit test.
  */
 public abstract class AUnit implements IUnit {
-
-	protected NetworkModel networkModel;
-
-	protected String label;
-	protected String precondition;
-	protected String config;
-	protected String audit;
-	protected String message;
+	private final String label;
+	private final String precondition;
+	private String config;
+	private final String audit;
+	private final String message;
 
 	public AUnit(String label, String precondition, String config, String audit, String message) {
 		//Do some normalisation of the unit test labels. You'll thank me later, I assure you. 
@@ -41,13 +38,21 @@ public abstract class AUnit implements IUnit {
 		return this.label;
 	}
 
-	protected abstract String getAudit();
+	protected String getAudit() {
+		return this.audit;
+	}
 
-	protected abstract String getPrecondition();
+	protected String getPrecondition() {
+		return this.precondition;
+	}
 
-	protected abstract String getConfig();
+	protected final void setConfig(String config) {
+		this.config = config;
+	}
 
-	protected abstract String getDryRun();
+	protected String getConfig() {
+		return this.config;
+	}
 
 	protected String getMessage() {
 		String message = this.message;

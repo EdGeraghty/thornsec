@@ -50,11 +50,11 @@ import org.privacyinternational.thornsec.profile.type.Router;
 //@TODO:This class is mucky, and needs some major refactoring to make readable
 public class ShorewallFirewall extends AFirewallProfile {
 	public enum Action {
-		ACCEPT, DNAT, DROP, REJECT, REDIRECT;
+		ACCEPT, DNAT, DROP, REJECT, REDIRECT
 	}
 
 	public enum Arm {
-		LAN, FIREWALL, INTERNET;
+		LAN, FIREWALL, INTERNET
 	}
 
 	public enum ParentZone {
@@ -72,8 +72,8 @@ public class ShorewallFirewall extends AFirewallProfile {
 		public static Set<ParentZone> routerZone = EnumSet.of(ROUTER);
 		public static Set<ParentZone> lanZone = EnumSet.range(USERS, VPN);
 
-		private Arm direction;
-		private MachineType parentZone;
+		private final Arm direction;
+		private final MachineType parentZone;
 
 		ParentZone(Arm direction, MachineType type) {
 			this.direction = direction;
@@ -94,7 +94,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		}
 	}
 
-	private static String CONFIG_BASEDIR = "/etc/shorewall";
+	private static final String CONFIG_BASEDIR = "/etc/shorewall";
 
 	private class ShorewallRule {
 		private String macro;
@@ -104,7 +104,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 
 		private String sourceZone;
 		private String sourceSubZone;
-		private Collection<Integer> sPorts;
+		private final Collection<Integer> sPorts;
 
 		private String destinationZone;
 		private String destinationSubZone;
@@ -137,20 +137,11 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this();
 
 			switch (rule.getTable()) {
-				case DNAT:
-					buildDNAT(rule);
-					break;
-				case EGRESS:
-					buildEgress(rule);
-					break;
-				case FORWARD:
-					buildForward(rule);
-					break;
-				case INGRESS:
-					buildIngress(rule);
-					break;
-				default:
-					throw new InvalidFirewallRuleException(rule.getTable() + " is not recognised");
+				case DNAT -> buildDNAT(rule);
+				case EGRESS -> buildEgress(rule);
+				case FORWARD -> buildForward(rule);
+				case INGRESS -> buildIngress(rule);
+				default -> throw new InvalidFirewallRuleException(rule.getTable() + " is not recognised");
 			}
 		}
 
@@ -212,11 +203,10 @@ public class ShorewallFirewall extends AFirewallProfile {
 		 * @param rule Forward TrafficRule
 		 */
 		private void buildForward(TrafficRule rule) throws InvalidFirewallRuleException {
-			Boolean destIsExternallyAccessible = rule.getDestinations()
+			boolean destIsExternallyAccessible = rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
-					.filter(label -> !this.getMachineModel(label).getExternalIPs().isEmpty())
-					.count() > 0;
+					.map(HostName::getHost)
+					.anyMatch(label -> !this.getMachineModel(label).getExternalIPs().isEmpty());
 
 			this.setAction(Action.ACCEPT);
 			if (destIsExternallyAccessible) {
@@ -227,7 +217,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 					getNetworkModel().getSubnets().keySet()
 					 .stream()
 					 .filter(type -> !getNetworkModel().getMachines(type).isEmpty())
-					 .map(type -> cleanZone(type))
+					 .map(ShorewallFirewall.this::cleanZone)
 					 .collect(Collectors.joining(","))
 				);
 			}
@@ -242,10 +232,10 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
-					.filter(ip -> ip.isLocal())
+					.filter(IPAddress::isLocal)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
 					.collect(Collectors.joining(","))
 			);
@@ -264,7 +254,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.collect(Collectors.joining(","))
 			);
 		}
@@ -290,7 +280,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setSourceSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
@@ -307,7 +297,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.map(destination -> destination.getHost())
+					.map(HostName::getHost)
 					.map(label -> this.getMachineModel(label).getIPs())
 					.flatMap(Collection::stream)
 					.map(ip -> ip.withoutPrefixLength().toCompressedString())
@@ -434,7 +424,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 	/**
 	 * Zones must be a maximum of 10 alpha-numeric chars long
 	 *
-	 * @param zone
+	 * @param zone The zone name to be cleaned
 	 * @return valid zone name
 	 */
 	private String cleanZone(Object zone) {
@@ -496,7 +486,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 	 * This maclist file reflects the whole network
 	 * 
 	 * @return the contents of the maclist file
-	 * @throws InvalidServerException if you don't have exactly 1 router on your network
+	 * @throws InvalidProfileException if you don't have exactly 1 router on your network
 	 */
 	private Collection<String> getMaclistFile() throws InvalidProfileException {
 		final Collection<String> maclist = new ArrayList<>();
@@ -861,7 +851,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 				.forEach(nic -> {
 					String mac = nic.getMac().get().toNormalizedString();
 					String addresses = nic.getAddresses().get().stream()
-											.map(ip -> ip.withoutPrefixLength())
+											.map(IPAddress::withoutPrefixLength)
 											.map(Object::toString)
 											.collect(Collectors.joining(","));
 

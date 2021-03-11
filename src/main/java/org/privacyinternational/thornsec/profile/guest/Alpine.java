@@ -17,7 +17,7 @@ import org.privacyinternational.thornsec.profile.machine.configuration.AptSource
 
 public class Alpine extends AOS {
 	private final AptSources aptSources;
-	private static String RELEASES_FILE = "https://uk.alpinelinux.org/alpine/latest-stable/releases/x86_64/latest-releases.yaml";
+	private static final String RELEASES_FILE = "https://uk.alpinelinux.org/alpine/latest-stable/releases/x86_64/latest-releases.yaml";
 
 	public Alpine(ServerModel me) throws AThornSecException {
 		super(me);
@@ -27,8 +27,8 @@ public class Alpine extends AOS {
 
 	@Override
 	public Collection<IUnit> buildIso() throws InvalidServerException, InvalidMachineModelException {
-		String url = getServerModel().getIsoUrl().orElseGet(() -> getIsoURLFromLatest());
-		String checksum = getServerModel().getIsoSHA512().orElseGet(() -> getIsoSHA512FromLatest());
+		String url = getServerModel().getIsoUrl().orElseGet(this::getIsoURLFromLatest);
+		String checksum = getServerModel().getIsoSHA512().orElseGet(this::getIsoSHA512FromLatest);
 
 		return super.getISODownloadUnits(url, checksum);
 	}

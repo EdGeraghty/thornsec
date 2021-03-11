@@ -32,7 +32,7 @@ import inet.ipaddr.mac.MACAddress;
  */
 public class NetworkInterfaceData extends AData {
 	public enum Direction {
-		LAN, WAN;
+		LAN, WAN
 	}
 
 	public enum Inet {
@@ -45,7 +45,7 @@ public class NetworkInterfaceData extends AData {
 		DUMMY("dummy"),
 		WIREGUARD("wireguard");
 
-		private String inet;
+		private final String inet;
 
 		Inet(String inet) {
 			this.inet = inet;
@@ -270,8 +270,8 @@ public class NetworkInterfaceData extends AData {
 	}
 
 	public final void addAddress(IPAddress... addresses) {
-		for (int i = 0; i < addresses.length; i++) {
-			addAddress(addresses[i]);
+		for (IPAddress address : addresses) {
+			addAddress(address);
 		}
 	}
 
