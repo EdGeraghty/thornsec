@@ -408,8 +408,7 @@ public class NetworkData extends AData {
 		Path includeFile = Path.of(configBase, includePath);
 
 		try {
-			String rawUTF8Data = new String(Files.readAllBytes(includeFile),
-											StandardCharsets.UTF_8);
+			String rawUTF8Data = Files.readString(includeFile);
 			rawUTF8Data = rawUTF8Data.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)", "");
 
 			JsonReader jsonReader = Json.createReader(new StringReader(rawUTF8Data));
