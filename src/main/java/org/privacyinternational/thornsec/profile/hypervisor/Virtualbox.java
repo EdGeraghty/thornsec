@@ -376,17 +376,22 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
-	private final IUnit createVMUser(ServiceModel service) {
-		return new SimpleUnit(service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user", "virtualbox_installed",
-				"sudo adduser " + USER_PREFIX + service.getLabel()
-					+ " --system" //create with no aging information in /etc/shadow
-					+ " --shell=/bin/false" //force no login shell
-					+ " --disabled-login" //deactivate ability to log in as account
-					+ " --ingroup " + GROUP,
-				"id -u " + USER_PREFIX + service.getLabel() + " 2>&1 | grep 'no such user'", "", "pass",
-				"Couldn't create the user for " + service.getLabel()
-						+ " on its HyperVisor.  This is fatal, "
-						+ service.getLabel() + " will not be installed.");
+	private IUnit createVMUser(ServiceModel service) {
+		return new SimpleUnit(
+			service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user",
+			"virtualbox_installed",
+			"sudo adduser " + USER_PREFIX + service.getLabel()
+				+ " --system" //create with no aging information in /etc/shadow
+				+ " --shell=/bin/false" //force no login shell
+				+ " --disabled-login" //deactivate ability to log in as account
+				+ " --ingroup " + GROUP,
+			"id -u " + USER_PREFIX + service.getLabel() + " 2>&1"
+			+ " | grep 'no such user'",
+			"",
+			"pass",
+			"Couldn't create the user for " + service.getLabel()
+				+ " on its HyperVisor.  This is fatal, "
+				+ service.getLabel() + " will not be installed.");
 	}
 
 	private final IUnit createVM(ServiceModel service) {
