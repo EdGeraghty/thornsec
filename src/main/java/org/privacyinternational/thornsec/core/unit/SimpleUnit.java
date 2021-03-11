@@ -7,7 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.unit;
 
-public class SimpleUnit extends ComplexUnit {
+public class SimpleUnit extends AUnit {
 
 	protected String test;
 	protected String result;

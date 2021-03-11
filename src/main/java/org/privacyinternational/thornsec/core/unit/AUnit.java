@@ -38,13 +38,21 @@ public abstract class AUnit implements IUnit {
 		return this.label;
 	}
 
-	protected abstract String getAudit();
+	protected String getAudit() {
+		return this.audit;
+	}
 
-	protected abstract String getPrecondition();
+	protected String getPrecondition() {
+		return this.precondition;
+	}
 
-	protected abstract String getConfig();
+	protected final void setConfig(String config) {
+		this.config = config;
+	}
 
-	protected abstract String getDryRun();
+	protected String getConfig() {
+		return this.config;
+	}
 
 	protected String getMessage() {
 		String message = this.message;

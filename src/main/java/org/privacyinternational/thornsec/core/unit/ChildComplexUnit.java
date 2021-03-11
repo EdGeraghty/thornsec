@@ -1,6 +1,6 @@
 package org.privacyinternational.thornsec.core.unit;
 
-public class ChildComplexUnit extends ComplexUnit {
+public class ChildComplexUnit extends AUnit {
 
 	protected String parent;
 
