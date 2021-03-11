@@ -10,6 +10,7 @@ package org.privacyinternational.thornsec.core.model.machine;
 //import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

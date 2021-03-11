@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidServerException;
@@ -13,6 +15,7 @@ import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineMo
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import inet.ipaddr.HostName;
+import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.profile.machine.configuration.AptSources;
 
 public class Alpine extends AOS {

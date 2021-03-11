@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
