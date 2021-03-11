@@ -40,7 +40,7 @@ public class TrafficRule {
 	 * @throws InvalidPortException
 	 */
 	public TrafficRule(String source, HostName destination, Table table) throws InvalidPortException {
-		this(Encapsulation.TCP, table, source, new HashSet<>(Arrays.asList(destination)), new HashSet<>(Arrays.asList(443)));
+		this(Encapsulation.TCP, table, source, new HashSet<>(Collections.singletonList(destination)), new HashSet<>(Collections.singletonList(443)));
 	}
 
 	public TrafficRule() throws InvalidPortException {
