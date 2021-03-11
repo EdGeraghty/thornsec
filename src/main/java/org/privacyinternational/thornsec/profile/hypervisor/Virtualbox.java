@@ -322,11 +322,58 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
+	/**
+	 * Build and attach logs directory to a given service
+	 *
+	 * @param service the service to attach to
+	 * @return units to build & attach logs directory
+	 */
 	@Override
-	protected void buildVMs() throws InvalidMachineModelException {
-		for (ServiceModel service : getServerModel().getServices()) {
-			buildVM(service);
-		}
+	protected Collection<IUnit> buildLogs(ServiceModel service) {
+		final Collection<IUnit> units = new ArrayList<>();
+
+		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
+		final String logDir = baseDir + "/logs/" + service.getLabel();
+
+		units.add(
+			new DirUnit(
+				"log_dir_" + service.getLabel(),
+				"proceed",
+				logDir,
+				USER_PREFIX + service.getLabel(),
+				GROUP,
+				0750,
+				""
+			)
+		);
+
+		units.add(
+			new SimpleUnit(
+				service.getLabel() + "_log_sf_attached",
+				service.getLabel() + "_exists",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " sharedfolder add " + service.getLabel()
+						+ " --name logs"
+						+ " --hostpath " + logDir
+				+ ";"
+				+ "sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " setextradata " + service.getLabel()
+						+ " VBoxInternal1/SharedFoldersEnableSymlinksCreate/logs 1",
+				"sudo -u " + USER_PREFIX + service.getLabel()
+					+ " VBoxManage"
+						+ " showvminfo " + service.getLabel()
+						+ " --machinereadable"
+				+ " | grep " + logDir,
+				"",
+				"fail",
+				"Couldn't attach the logs folder to " + service.getLabel() + "."
+				+ "This means logs will only exist in the VM."
+			)
+		);
+
+		return units;
 	}
 
 	private final IUnit createVMUser(ServiceModel service) {
