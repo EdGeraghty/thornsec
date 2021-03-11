@@ -14,7 +14,7 @@ public class ChildComplexUnit extends ComplexUnit {
 	}
 
 	protected String getConfig() {
-		return config + getParent() + "_unchanged=0;\n";
+		return getConfig() + getParent() + "_unchanged=0;\n";
 	}
 
 	public String getParent() {

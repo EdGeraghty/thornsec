@@ -89,7 +89,7 @@ public class FileUnit extends SimpleUnit {
 			body = body.substring(0, body.length() - 1);
 		}
 
-		super.config = "sudo [ -f " + this.path + " ] || sudo touch " + this.path + ";" + "echo \"${" + this.label + "_expected}\" | sudo tee " + this.path + " > /dev/null";
+		setConfig("sudo [ -f " + this.path + " ] || sudo touch " + getPath() + ";" + "echo \"${" + getLabel() + "_expected}\" | sudo tee " + getPath() + " > /dev/null");
 
 		super.test = body;
 	}
