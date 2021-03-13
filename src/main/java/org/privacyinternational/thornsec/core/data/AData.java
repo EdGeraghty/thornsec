@@ -22,7 +22,7 @@ import org.privacyinternational.thornsec.core.exception.data.ADataException;
  * This is something which has been read() from a JSON, and for our purposes
  * acts as a DAO.
  */
-public abstract class AData {
+public class AData {
 
 	private final String label;
 	private JsonObject data;
@@ -33,10 +33,9 @@ public abstract class AData {
 	 *
 	 * @param label the label for this object
 	 */
-	protected AData(String label) {
-		////assertNotNull(label);
-		
+	public AData(String label) {
 		this.label = label;
+		this.data = null;
 		this.configFilePath = null;
 	}
 
@@ -103,7 +102,7 @@ public abstract class AData {
 	 *
 	 * @param data the new data
 	 */
-	protected final void setData(JsonObject data) {
+	public final void setData(JsonObject data) {
 		this.data = data;
 	}
 }
