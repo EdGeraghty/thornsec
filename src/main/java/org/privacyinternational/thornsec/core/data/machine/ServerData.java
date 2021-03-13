@@ -91,8 +91,6 @@ public class ServerData extends AMachineData {
 		this.sshSources = null;
 		this.profiles = null;
 
-		this.putType(MachineType.SERVER);
-
 		this.adminUsernames = null;
 		this.remoteAdminIPAddresses = null;
 
@@ -119,7 +117,6 @@ public class ServerData extends AMachineData {
 		readNICs(data);
 		readAdmins(data);
 		readSSHSources(data);
-		readTypes(data);
 		readProfiles(data);
 		readSSHSettings(data);
 		readUpdate(data);
@@ -323,19 +320,6 @@ public class ServerData extends AMachineData {
 
 		data.getJsonArray("profiles").forEach(profile ->
 			putProfile(((JsonString)profile).getString())
-		);
-	}
-
-	/**
-	 * @param data
-	 */
-	private void readTypes(JsonObject data) {
-		if (!data.containsKey("types")) {
-			return;
-		}
-
-		data.getJsonArray("types").forEach(type ->
-			putType(((JsonString)type).getString())
 		);
 	}
 

@@ -26,7 +26,6 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidDeviceModelException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
@@ -231,7 +230,7 @@ public class FullFrame {
 		final JPanel serverPanel = getNewPanel();
 		final DefaultMutableTreeNode serverRoot = new DefaultMutableTreeNode(model.getLabel());
 
-		for (final AMachineModel server : model.getMachines(MachineType.SERVER)) {
+		for (final AMachineModel server : model.getMachines(ServerModel.class)) {
 			serverRoot.add(new DefaultMutableTreeNode(server.getLabel()));
 //		for (ServerModel router : model.getRouterServers()) {
 //			if (!router.isMetal()) {

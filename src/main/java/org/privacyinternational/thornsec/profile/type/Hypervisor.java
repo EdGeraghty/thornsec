@@ -7,7 +7,6 @@
  */
 package org.privacyinternational.thornsec.profile.type;
 
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
@@ -93,10 +92,6 @@ public class Hypervisor extends AStructuredProfile {
 	}
 
 	private String getNetworkBridge() {
-		if (getMachineModel().isType(MachineType.ROUTER)) {
-			return MachineType.SERVER.toString();
-		}
-
 		return getMachineModel().getNetworkInterfaces()
 					.stream()
 					.filter(nic -> Direction.LAN.equals(nic.getDirection()))

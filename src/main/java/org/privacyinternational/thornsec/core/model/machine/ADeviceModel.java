@@ -10,15 +10,10 @@ package org.privacyinternational.thornsec.core.model.machine;
 import java.util.Collection;
 
 import org.privacyinternational.thornsec.core.data.machine.ADeviceData;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
-import org.privacyinternational.thornsec.profile.type.Device;
-import org.privacyinternational.thornsec.profile.type.ExternalOnly;
-import org.privacyinternational.thornsec.profile.type.InternalOnly;
-import org.privacyinternational.thornsec.profile.type.User;
 
 /**
  * This model represents a device on our network.
@@ -34,27 +29,6 @@ abstract public class ADeviceModel extends AMachineModel {
 		super(myData, networkModel);
 
 		this.managed = myData.isManaged().orElse(false);
-
-		this.addTypes();
-	}
-	
-	private void addTypes() throws AThornSecException {
-		this.addType(MachineType.DEVICE, new Device(this));
-		
-		for (final MachineType type : ((ADeviceData)getData()).getTypes()) {
-			switch (type) {
-				case INTERNAL_ONLY:
-					addType(type, new InternalOnly((InternalOnlyDeviceModel) this));
-					break;
-				case EXTERNAL_ONLY:
-					addType(type, new ExternalOnly((ExternalOnlyDeviceModel) this));
-					break;
-				case USER:
-					addType(type, new User((UserDeviceModel) this));
-					break;
-				default:
-			}
-		}		
 	}
 
 	final public Boolean isManaged() {

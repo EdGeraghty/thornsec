@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Format;
@@ -48,8 +47,6 @@ public class ServiceModel extends ServerModel {
 	public ServiceModel(ServerData myData, NetworkModel networkModel)
 			throws AThornSecException {
 		super(myData, networkModel);
-
-		this.addType(MachineType.SERVICE);
 
 		if (null == this.getNetworkInterfaces()) {
 			final DHCPClientInterfaceModel nic = new DHCPClientInterfaceModel(new NetworkInterfaceData("eth0"), networkModel);

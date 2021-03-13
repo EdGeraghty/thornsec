@@ -33,8 +33,6 @@ public class ServiceData extends ServerData {
 	public ServiceData(String label) {
 		super(label);
 
-		putType(MachineType.SERVICE);
-
 		this.hypervisor = null;
 
 		this.iso = null;

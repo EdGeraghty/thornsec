@@ -7,7 +7,6 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.networking;
 
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
@@ -19,7 +18,6 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
  * it to work, of course.
  */
 public class MACVLANModel extends NetworkInterfaceModel {
-	private MachineType type;
 
 	public MACVLANModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException {
 		super(myData, networkModel);
@@ -35,13 +33,5 @@ public class MACVLANModel extends NetworkInterfaceModel {
 
 	public MACVLANModel() throws InvalidNetworkInterfaceException {
 		this(new NetworkInterfaceData("MACVLAN"), null);
-	}
-
-	public void setType(MachineType type) {
-		this.type = type;
-	}
-
-	public MachineType getType() {
-		return this.type;
 	}
 }

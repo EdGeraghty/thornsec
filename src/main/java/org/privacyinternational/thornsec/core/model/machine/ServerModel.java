@@ -13,15 +13,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.data.machine.InvalidMachineException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidGuestOSException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidProfileException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidTypeException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.model.network.UserModel;
@@ -35,11 +32,6 @@ import org.privacyinternational.thornsec.profile.guest.Alpine;
 import org.privacyinternational.thornsec.profile.guest.Debian;
 import org.privacyinternational.thornsec.profile.machine.configuration.Processes;
 import org.privacyinternational.thornsec.profile.machine.configuration.UserAccounts;
-import org.privacyinternational.thornsec.profile.type.Dedicated;
-import org.privacyinternational.thornsec.profile.type.Hypervisor;
-import org.privacyinternational.thornsec.profile.type.Router;
-import org.privacyinternational.thornsec.profile.type.Server;
-import org.privacyinternational.thornsec.profile.type.Service;
 
 /**
  * This Class represents a Server. It is either used directly, or is called via
@@ -79,7 +71,6 @@ public class ServerModel extends AMachineModel {
 
 	public void init() throws AThornSecException {
 		this.setOS(getOS());
-		this.addTypes();
 		this.addProfiles();
 		this.addAdmins();
 		this.addISODetails();
@@ -137,19 +128,6 @@ public class ServerModel extends AMachineModel {
 
 	private void addProfile(String profile) throws InvalidProfileException {
 		this.profiles.put(profile, reflectedProfile(profile));
-	}
-
-	private void addTypes() throws AThornSecException {
-		for (final MachineType type : getData().getTypes()) {
-			switch (type) {
-				case DEDICATED -> addType(type, new Dedicated((DedicatedModel) this));
-				case HYPERVISOR -> addType(type, new Hypervisor((HypervisorModel) this));
-				case ROUTER -> addType(type, new Router(this));
-				case SERVICE -> addType(type, new Service(this));
-				case SERVER -> addType(MachineType.SERVER, new Server(this));
-				default -> throw new InvalidTypeException(type + " is not a valid type");
-			}
-		}		
 	}
 
 	@Override

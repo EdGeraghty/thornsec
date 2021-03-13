@@ -23,7 +23,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.privacyinternational.thornsec.core.StringUtils;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
@@ -38,17 +37,12 @@ import org.privacyinternational.thornsec.core.model.machine.configuration.networ
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.StaticInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
-import org.privacyinternational.thornsec.core.profile.AProfile;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.HostName;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IncompatibleAddressException;
 import inet.ipaddr.MACAddressString;
 import inet.ipaddr.mac.MACAddress;
-import org.privacyinternational.thornsec.profile.type.AMachine;
-import org.privacyinternational.thornsec.profile.type.Device;
-import org.privacyinternational.thornsec.profile.type.Server;
-import org.privacyinternational.thornsec.profile.type.Service;
 
 /**
  * This class represents a Machine on our network.
@@ -65,8 +59,6 @@ public abstract class AMachineModel extends AModel {
 
 	private InternetAddress emailAddress;
 
-	private Map<MachineType, AProfile> types;
-
 	private Boolean throttled;
 
 	private Set<TrafficRule> firewallRules;
@@ -75,7 +67,6 @@ public abstract class AMachineModel extends AModel {
 	AMachineModel(AMachineData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData, networkModel);
 
-		setTypesFromData(myData);
 		setEmailFromData(myData);
 		setNICsFromData(myData);
 		setDomainFromData(myData);
@@ -144,34 +135,6 @@ public abstract class AMachineModel extends AModel {
 		}
 	}
 
-	private void setTypesFromData(AMachineData myData) {
-		this.types = new LinkedHashMap<>();
-
-		myData.getTypes().forEach(this::addType);
-	}
-
-	public final void addType(MachineType type) {
-//		//assertNotNull(type);
-
-		switch (type) {
-			case DEVICE:
-				addType(type, new Device((ADeviceModel)this));
-				break;
-			case SERVER:
-				addType(type, new Server((ServerModel)this));
-				break;
-			case SERVICE:
-				addType(type, new Service((ServiceModel)this));
-				break;
-			default:
-				break;
-		}
-	}
-
-	public final void addType(MachineType type, AMachine profile) {
-		this.types.put(type, profile);
-	}
-
 	public final void addNetworkInterface(NetworkInterfaceModel ifaceModel) {
 		if (this.networkInterfaces == null) {
 			this.networkInterfaces = new HashMap<>();
@@ -228,16 +191,6 @@ public abstract class AMachineModel extends AModel {
 
 	public final void setIsThrottled(Boolean throttled) {
 		this.throttled = throttled;
-	}
-
-	public Collection<IUnit> getUnits() throws AThornSecException {
-		final Collection<IUnit> typesUnits = new ArrayList<>();
-
-		for (final AProfile type : getTypes().values()) {
-			typesUnits.addAll(type.getUnits());
-		}
-
-		return typesUnits;
 	}
 
 	/**
@@ -300,26 +253,6 @@ public abstract class AMachineModel extends AModel {
 		}
 
 		return null;
-	}
-
-	public final void addType(MachineType type, AProfile profile) {
-		if (this.types == null) {
-			this.types = new LinkedHashMap<>();
-		}
-
-		this.types.put(type, profile);
-	}
-	
-	public final Map<MachineType, AProfile> getTypes() {
-		return this.types;
-	}
-
-	public final Boolean isType(MachineType type) {
-		return getType(type) != null;
-	}
-
-	public AProfile getType(MachineType type) {
-		return this.types.getOrDefault(type, null);
 	}
 
 	public Set<TrafficRule> getFirewallRules() {

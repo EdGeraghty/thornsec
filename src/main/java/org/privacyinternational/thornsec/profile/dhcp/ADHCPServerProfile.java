@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import inet.ipaddr.IPAddress;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 
 import org.privacyinternational.thornsec.core.iface.IUnit;

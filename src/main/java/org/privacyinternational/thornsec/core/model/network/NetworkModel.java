@@ -28,15 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
-import org.privacyinternational.thornsec.core.data.machine.DedicatedData;
-import org.privacyinternational.thornsec.core.data.machine.InternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.ServerData;
-import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.HypervisorData;
-import org.privacyinternational.thornsec.core.data.machine.ServiceData;
-import org.privacyinternational.thornsec.core.data.machine.UserDeviceData;
+
+import org.privacyinternational.thornsec.core.data.machine.*;
 import org.privacyinternational.thornsec.core.data.network.NetworkData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
@@ -70,9 +63,8 @@ import inet.ipaddr.IncompatibleAddressException;
  */
 public class NetworkModel {
 	private final String label;
-	private NetworkData data;
-	private final Map<String, UserModel> users;
-	private Map<String, AMachineModel> machines;
+	private Set<AMachineModel> machines;
+
 	private Map<String, Collection<IUnit>> networkUnits;
 
 	private Map<MachineType, IPAddress> defaultSubnets;

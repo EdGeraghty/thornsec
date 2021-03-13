@@ -36,7 +36,6 @@ import inet.ipaddr.IPAddressString;
 import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.DedicatedData;
 import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
 import org.privacyinternational.thornsec.core.data.machine.HypervisorData;
@@ -73,9 +72,9 @@ public class NetworkData extends AData {
 
 	private Set<HostName> upstreamDNS;
 
-	private final Map<MachineType, IPAddress> subnets;
+	private Map<String, IPAddress> subnets;
 
-	private final Map<String, AMachineData> machines;
+	private final Set<AMachineData> machines;
 	private final Map<String, UserData> users;
 
 	/**
@@ -100,7 +99,7 @@ public class NetworkData extends AData {
 
 		this.subnets = new Hashtable<>();
 
-		this.machines = new LinkedHashMap<>();
+		this.machines = new HashSet<>();
 		this.users = new LinkedHashMap<>();
 	}
 
@@ -287,11 +286,9 @@ public class NetworkData extends AData {
 	
 	private void readSubnet(String label, String ip) throws InvalidIPAddressException, InvalidPropertyException {
 		try {
-			this.subnets.put(MachineType.fromString(label), new IPAddressString(ip).toAddress());
+			this.subnets.put(label, new IPAddressString(ip).toAddress());
 		} catch (AddressStringException | IncompatibleAddressException e) {
 			throw new InvalidIPAddressException(ip + " is an invalid subnet");
-		} catch (InvalidTypeException e) {
-			throw new InvalidPropertyException(label + " is not a valid Machine Type");
 		}
 	}
 
@@ -472,7 +469,7 @@ public class NetworkData extends AData {
 	 */
 	private void putMachine(AMachineData... machinesData) throws InvalidMachineException {
 		for (AMachineData machineData : machinesData) {
-			if (this.machines.put(machineData.getLabel(), machineData) != null) {
+			if (!this.machines.add(machineData)) {
 				throw new InvalidMachineException("You have a duplicate machine ("
 						+ machineData.getLabel() + ") in your network");
 			}
@@ -480,47 +477,19 @@ public class NetworkData extends AData {
 	}
 
 	/**
-	 * Get the MachineData for all machines on this network.
-	 * 
-	 * @return a map of all machines' data on the network, indexed by label
-	 */
-	public Map<String, AMachineData> getMachinesData() {
-		return this.machines;
-	}
-
-	/**
 	 * Get a given machine's data. You're not guaranteed that this machine is
 	 * there, if you're reading from a config file 
 	 *
 	 * @param label the label of the Machine you wish to get
-	 * @return
+	 * @return the Machine's data
 	 */
 	public AMachineData getMachineData(String label) {
-		return getMachinesData().get(label);
+		return getMachines().stream()
+				.filter(m -> m.getLabel().equalsIgnoreCase(label))
+				.findFirst()
+				.get();
 	}
 	
-	private Set<HostName> getHostNameArray(String key) throws InvalidHostException {
-		if (!getData().containsKey(key)) {
-			return null;
-		}
-
-		Set<HostName> hosts = new HashSet<>();
-		final JsonArray jsonHosts = getData().getJsonArray(key);
-
-		for (final JsonValue jsonHost : jsonHosts) {
-			HostName host = new HostName(((JsonString) jsonHost).getString());
-
-			if (!host.isValid()) {
-				throw new InvalidHostException(((JsonString) jsonHost).getString()
-						+ " is an invalid host");
-			}
-
-			hosts.add(host);
-		}
-
-		return hosts;
-	}
-
 	// Network only data
 	public final String getUser() throws NoValidUsersException {
 		if (this.myUser == null) {
@@ -595,11 +564,11 @@ public class NetworkData extends AData {
 		return Optional.ofNullable(this.domain);
 	}
 
-	public Optional<Map<MachineType, IPAddress>> getSubnets() {
+	public Optional<Map<String, IPAddress>> getSubnets() {
 		return Optional.ofNullable(this.subnets);
 	}
 
-	public Optional<IPAddress> getSubnet(MachineType subnet) {
+	public Optional<IPAddress> getSubnet(String subnet) {
 		return Optional.ofNullable(this.subnets.get(subnet));
 	}
 
@@ -611,7 +580,7 @@ public class NetworkData extends AData {
 		return Optional.ofNullable(getMachineData(machine).getData().getJsonObject(properties));
 	}
 
-	public Map<String, AMachineData> getMachines() {
+	public Set<AMachineData> getMachines() {
 		////assertNotNull(this.machines);
 
 		return this.machines;
@@ -620,16 +589,13 @@ public class NetworkData extends AData {
 	/**
 	 * Gets all machines which have a given Type declared in their Data
 	 * @param type The type of machines to get
-	 * @return Optionally a Map of machines, indexed by their label
+	 * @return Optionally a specialised Set of machineDatas
 	 */
-	public Optional<Map<String, AMachineData>> getMachines(MachineType type) {
-		Map<String, AMachineData> machines = getMachines().entrySet()
-				.stream()
-				.filter(Objects::nonNull)
-				.filter(kvp -> kvp.getValue().isType(type))
-				.collect(Collectors.toMap(kvp -> kvp.getKey(), kvp -> kvp.getValue()));
-
-		return Optional.ofNullable(machines);
+	public Set<AMachineData> getMachines(Class<AMachineData> type) {
+		return getMachines().stream()
+				.filter(type::isInstance)
+				.map(type::cast)
+				.collect(Collectors.toSet());
 	}
 
 	public Map<String, UserData> getUsers() {

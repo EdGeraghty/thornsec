@@ -16,7 +16,8 @@ package org.privacyinternational.thornsec.core.data.machine;
 public class UserDeviceData extends ADeviceData {
 	public UserDeviceData(String label) {
 		super(label);
-		
-		this.putType(MachineType.USER);
+	}
+
+	@Override
 	}
 }
