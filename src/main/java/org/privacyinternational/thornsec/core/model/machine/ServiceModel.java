@@ -39,7 +39,7 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 public class ServiceModel extends ServerModel {
 
 	private Map<String, ADiskModel> disks;
-	private HypervisorModel hypervisor;
+	private ServerModel hypervisor;
 
 	private static final Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
 	private static final Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
@@ -64,9 +64,7 @@ public class ServiceModel extends ServerModel {
 	public void init() throws AThornSecException {
 		super.init();
 
-		String hypervisorLabel = getData().getHypervisor().getLabel();
-		HypervisorModel hv = (HypervisorModel) getNetworkModel().getMachineModel(hypervisorLabel); 
-		setHypervisor(hv);
+		this.hypervisor = (ServerModel) getNetworkModel().getMachineModel(getData().getHypervisor().getLabel());
 
 		initDisks();
 	}
@@ -99,16 +97,8 @@ public class ServiceModel extends ServerModel {
 		}
 	}
 
-	public String getHypervisorLabel() {
-		return this.hypervisor.getLabel();
-	}
-
-	public HypervisorModel getHypervisorModel() throws InvalidMachineModelException {
-		return (HypervisorModel) getNetworkModel().getMachineModel(getData().getLabel());
-	}
-
-	public void setHypervisor(HypervisorModel hypervisorModel) {
-		this.hypervisor = hypervisorModel;
+	public ServerModel getHypervisor() throws InvalidMachineModelException {
+		return this.hypervisor;
 	}
 
 	public void addDisk(ADiskModel disk) {
