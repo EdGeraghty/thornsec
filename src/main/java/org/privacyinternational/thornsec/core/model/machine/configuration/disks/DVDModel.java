@@ -21,9 +21,8 @@ public class DVDModel extends ADiskModel {
 	}
 
 	public DVDModel(String label, File filename) throws InvalidDiskFilenameException {
-		super(null, null);
+		super(new DiskData(label), null);
 		
-		setLabel(label);
 		setFilename(filename);
 	}
 }
