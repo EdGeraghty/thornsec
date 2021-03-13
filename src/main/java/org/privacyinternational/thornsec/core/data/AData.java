@@ -94,4 +94,15 @@ public class AData {
 	public final void setData(JsonObject data) {
 		this.data = data;
 	}
+
+	/**
+	 *
+	 * @param key
+	 * @return true if key is present in the data, false otherwise (including if data is null)
+	 */
+	public boolean keyIsPresent(String key) {
+		return (null != getData() && getData().containsKey(key));
+	}
+
+}
 }
