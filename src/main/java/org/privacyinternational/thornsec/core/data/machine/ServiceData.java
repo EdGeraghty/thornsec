@@ -24,7 +24,7 @@ import org.privacyinternational.thornsec.profile.type.Hypervisor;
  * something which runs on a {@link Hypervisor} - i.e. a Virtual Machine
  */
 public class ServiceData extends ServerData {
-	private HypervisorData hypervisor;
+	private ServerData hypervisor;
 
 	private Map<String, DiskData> disks;
 
@@ -170,21 +170,17 @@ public class ServiceData extends ServerData {
 	/**
 	 * @return the {@code label} of this service's HyperVisor
 	 */
-	public final HypervisorData getHypervisor() {
-		//assertNotNull(this.hypervisor);
-
+	public final ServerData getHypervisor() {
 		return this.hypervisor;
 	}
 
 	/**
 	 * Set the Hypervisor for this machine - warning, this is unchecked. You're
 	 * expected to make sure this machine exists elsewhere.
-	 * 
+	 *
 	 * @param hv The label of the hypervisor machine
 	 */
-	public final void setHypervisor(HypervisorData hv) {
-		//assertNotNull(hv);
-
+	public final void setHypervisor(ServerData hv) {
 		this.hypervisor = hv;
 	}
 	

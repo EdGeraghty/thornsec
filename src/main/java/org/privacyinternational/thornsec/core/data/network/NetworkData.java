@@ -9,15 +9,11 @@ package org.privacyinternational.thornsec.core.data.network;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,9 +32,7 @@ import inet.ipaddr.IPAddressString;
 import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.DedicatedData;
 import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.HypervisorData;
 import org.privacyinternational.thornsec.core.data.machine.InternalDeviceData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
@@ -48,7 +42,6 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidHostExceptio
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidJSONException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
-import org.privacyinternational.thornsec.core.exception.data.MissingPropertiesException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidMachineException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
@@ -127,25 +120,18 @@ public class NetworkData extends AData {
 		return this;
 	}
 
-	private HypervisorData readHyperVisor(String label, JsonObject hypervisorData)
+	private ServerData readHyperVisor(String label, JsonObject hypervisorData)
 			throws ADataException {
 
-		HypervisorData hv = new HypervisorData(label);
-		hv.read(getData());
-		hv.read(hypervisorData);
-
-		// They *should* contain information about their services
-		if (!hypervisorData.containsKey("services")) {
-			throw new MissingPropertiesException(label +
-					" doesn't contain any services. Please check your config");
-		}
+		ServerData hv = new ServerData(label);
+		hv.read(getData(), getConfigFilePath());
+		hv.read(hypervisorData, getConfigFilePath());
 
 		JsonObject services = hypervisorData.getJsonObject("services");
 
 		for (final String serviceLabel : services.keySet()) {
 			ServiceData service = readService(serviceLabel, services.getJsonObject(serviceLabel));
 
-			hv.addService(service);
 			service.setHypervisor(hv);
 
 			this.putMachine(service);
@@ -181,13 +167,9 @@ public class NetworkData extends AData {
 
 		// If we've just hit a hypervisor machine, we need to dig a little,
 		// because the services are nested inside
-		if (serverData.isType(MachineType.HYPERVISOR)) {
+		// They *should* contain information about their services
+		if (serverDataObject.containsKey("services")) {
 			serverData = readHyperVisor(label, serverDataObject);
-		}
-		else if (serverData.isType(MachineType.DEDICATED)) {
-			serverData = new DedicatedData(label);
-			serverData.read(getData()); //Read in network-level defaults
-			serverData.read(serverDataObject); //Read in server-specific settings
 		}
 
 		this.putMachine(serverData);
