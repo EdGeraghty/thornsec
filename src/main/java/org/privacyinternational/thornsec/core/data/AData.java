@@ -40,18 +40,6 @@ public class AData {
 	}
 
 	/**
-	 * Abstract JSON read method - must be overridden by descendants
-	 *
-	 * @param data the JSON data
-	 * @return the built AData
-	 * @throws ADataException
-	 * @throws IOException
-	 * @throws JsonParsingException
-	 * @throws URISyntaxException
-	 */
-	protected abstract AData read(JsonObject data) throws ADataException;
-
-	/**
 	 * JSON read method - must be overridden by descendants
 	 *
 	 * @param data the JSON data
@@ -64,8 +52,9 @@ public class AData {
 	 */
 	public AData read(JsonObject data, Path configFilePath) throws ADataException {
 		this.configFilePath = configFilePath;
+		this.data = data;
 
-		return this.read(data);
+		return this;
 	}
 
 	/**
