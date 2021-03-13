@@ -68,7 +68,7 @@ public class NetworkData extends AData {
 	private Map<String, IPAddress> subnets;
 
 	private final Set<AMachineData> machines;
-	private final Map<String, UserData> users;
+	private final Set<UserData> users;
 
 	/**
 	 * Create a new Network, populated with null values.
@@ -93,7 +93,7 @@ public class NetworkData extends AData {
 		this.subnets = new Hashtable<>();
 
 		this.machines = new HashSet<>();
-		this.users = new LinkedHashMap<>();
+		this.users = new HashSet<>();
 	}
 
 	/**
@@ -435,7 +435,7 @@ public class NetworkData extends AData {
 			UserData user = new UserData(userLabel);
 			user.read(jsonUsers.getJsonObject(userLabel));
 
-			if (this.users.put(user.getLabel(), user) != null) {
+			if (!this.users.add(user)) {
 				throw new InvalidUserException("You have a duplicate user ("
 						+ user.getLabel() + ") in your network");
 			}
@@ -580,7 +580,7 @@ public class NetworkData extends AData {
 				.collect(Collectors.toSet());
 	}
 
-	public Map<String, UserData> getUsers() {
+	public Set<UserData> getUsers() {
 		return this.users;
 	}
 }
