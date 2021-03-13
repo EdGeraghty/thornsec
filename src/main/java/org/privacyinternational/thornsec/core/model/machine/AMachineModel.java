@@ -7,14 +7,12 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +52,8 @@ import inet.ipaddr.mac.MACAddress;
 public abstract class AMachineModel extends AModel {
 	private Map<String, NetworkInterfaceModel> networkInterfaces;
 
+	private NetworkModel networkModel;
+
 	private HostName domain;
 	private Set<String> cnames;
 
@@ -65,7 +65,9 @@ public abstract class AMachineModel extends AModel {
 	private Set<IPAddress> externalIPs;
 
 	AMachineModel(AMachineData myData, NetworkModel networkModel) throws AThornSecException {
-		super(myData, networkModel);
+		super(myData);
+
+		this.networkModel = networkModel;
 
 		setEmailFromData(myData);
 		setNICsFromData(myData);
@@ -73,6 +75,15 @@ public abstract class AMachineModel extends AModel {
 		setCNAMEsFromData(myData);
 		setExternalIPsFromData(myData);
 		setFirewallFromData(myData);
+	}
+
+	@Override
+	public Collection<IUnit> getUnits() throws AThornSecException {
+		return new ArrayList<>();
+	}
+
+	public final NetworkModel getNetworkModel() {
+		return networkModel;
 	}
 
 	private void setFirewallFromData(AMachineData myData) {
