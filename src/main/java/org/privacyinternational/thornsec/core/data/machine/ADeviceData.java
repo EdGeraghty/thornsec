@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -30,8 +31,8 @@ public abstract class ADeviceData extends AMachineData {
 	}
 
 	@Override
-	public ADeviceData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public ADeviceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readIsManaged(data);
 		readNICs(data);

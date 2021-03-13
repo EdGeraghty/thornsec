@@ -8,6 +8,7 @@
 package org.privacyinternational.thornsec.core.data.machine;
 
 
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,8 +47,8 @@ public class ServiceData extends ServerData {
 	}
 
 	@Override
-	public ServiceData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public ServiceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readOS();
 		readDisks();

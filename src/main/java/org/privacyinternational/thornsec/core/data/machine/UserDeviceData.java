@@ -7,6 +7,11 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+
+import javax.json.JsonObject;
+import java.nio.file.Path;
+
 /**
  * Represents an external-only device on our network.
  * 
@@ -19,5 +24,9 @@ public class UserDeviceData extends ADeviceData {
 	}
 
 	@Override
+	public UserDeviceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
+
+		return this;
 	}
 }

@@ -108,8 +108,8 @@ public class NetworkData extends AData {
 	 * @return 
 	 */
 	@Override
-	public NetworkData read(JsonObject networkJSONData) throws ADataException {
-		super.setData(networkJSONData);
+	public NetworkData read(JsonObject networkJSONData, Path configFilePath) throws ADataException {
+		super.read(networkJSONData, configFilePath);
 
 		readIncludes();
 		readUpstreamDNS();
@@ -156,8 +156,8 @@ public class NetworkData extends AData {
 	
 	private ServiceData readService(String label, JsonObject serviceData) throws ADataException {
 		final ServiceData service = new ServiceData(label);
-		service.read(getData());
-		service.read(serviceData);
+		service.read(getData(), getConfigFilePath());
+		service.read(serviceData, getConfigFilePath());
 
 		return service;
 	}
@@ -176,8 +176,8 @@ public class NetworkData extends AData {
 		// We have to read it in first to find out what it is - we can then
 		// replace it with a specialised version
 		ServerData serverData = new ServerData(label);
-		serverData.read(getData()); //Read in network-level defaults
-		serverData.read(serverDataObject); //Read in server-specific settings
+		serverData.read(getData(), getConfigFilePath()); //Read in network-level defaults
+		serverData.read(serverDataObject, getConfigFilePath()); //Read in server-specific settings
 
 		// If we've just hit a hypervisor machine, we need to dig a little,
 		// because the services are nested inside
@@ -217,7 +217,7 @@ public class NetworkData extends AData {
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
 			final UserDeviceData device = new UserDeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice));
+			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
 
 			if (device.getNetworkInterfaces().isPresent()) {
 				putMachine(device);
@@ -234,7 +234,7 @@ public class NetworkData extends AData {
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
 			final ExternalDeviceData device = new ExternalDeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice));
+			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
 
 			putMachine(device);
 		}
@@ -246,7 +246,7 @@ public class NetworkData extends AData {
 
 			for (final String jsonDevice : jsonDevices.keySet()) {
 				final InternalDeviceData device = new InternalDeviceData(jsonDevice);
-				device.read(jsonDevices.getJsonObject(jsonDevice));
+				device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
 
 				putMachine(device);
 			}

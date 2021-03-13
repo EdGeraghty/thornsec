@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -111,8 +112,8 @@ public class ServerData extends AMachineData {
 	}
 
 	@Override
-	public ServerData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public ServerData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readNICs(data);
 		readAdmins(data);

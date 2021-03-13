@@ -11,6 +11,8 @@ import javax.json.JsonObject;
 
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 
+import java.nio.file.Path;
+
 /**
  * Represents an internal-only device on our network.
  * 
@@ -27,8 +29,8 @@ public class InternalDeviceData extends ADeviceData {
 	}
 
 	@Override
-	public InternalDeviceData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public InternalDeviceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		return this;
 	}

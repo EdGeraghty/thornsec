@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -73,8 +74,8 @@ public abstract class AMachineData extends AData {
 	}
 
 	@Override
-	protected AMachineData read(JsonObject data) throws ADataException {
-		super.setData(data);
+	public AMachineData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readEmailAddress();
 		readDomain();
