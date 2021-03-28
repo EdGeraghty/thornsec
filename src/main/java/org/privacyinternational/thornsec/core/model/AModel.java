@@ -9,7 +9,9 @@ package org.privacyinternational.thornsec.core.model;
 
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+import org.privacyinternational.thornsec.core.iface.IUnit;
+
+import java.util.Collection;
 
 /**
  * This class represents a Model of some type.
@@ -18,8 +20,6 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
  */
 public abstract class AModel {
 
-	private String label;
-	private final NetworkModel networkModel;
 	private final AData myData;
 
 	/**
@@ -35,11 +35,8 @@ public abstract class AModel {
 	 * 
 	 * @param myData The AData object representing persistent configurations
 	 * 		such as a JSON file
-	 * @param networkModel The Network to which this Model belongs
 	 */
-	protected AModel(AData myData, NetworkModel networkModel) {
-		this.setLabel(myData.getLabel());
-		this.networkModel = networkModel;
+	protected AModel(AData myData) {
 		this.myData = myData;
 	}
 
@@ -49,16 +46,7 @@ public abstract class AModel {
 	 * @return the model's label, corresponding with its Data
 	 */
 	public final String getLabel() {
-		return this.label;
-	}
-
-	/**
-	 * Get the NetworkModel in which this AModel resides.
-	 * 
-	 * @return this AModel's Network
-	 */
-	public final NetworkModel getNetworkModel() {
-		return this.networkModel;
+		return getData().getLabel();
 	}
 
 	/**
@@ -79,7 +67,5 @@ public abstract class AModel {
 	 */
 	public abstract void init() throws AThornSecException;
 
-	protected void setLabel(String label) {
-		this.label = label;
-	}
+	public abstract Collection<IUnit> getUnits() throws AThornSecException;
 }
