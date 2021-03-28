@@ -71,8 +71,7 @@ public class ThornsecModel {
 			final NetworkData networkData = new NetworkData(network.getKey());
 			networkData.read((JsonObject) network.getValue(), configFilePath);
 
-			final NetworkModel networkModel = new NetworkModel(network.getKey());
-			networkModel.setData(networkData);
+			final NetworkModel networkModel = new NetworkModel(networkData);
 
 			this.networks.put(network.getKey(), networkModel);
 		}

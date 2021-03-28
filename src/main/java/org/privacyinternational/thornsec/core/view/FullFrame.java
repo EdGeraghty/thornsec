@@ -26,11 +26,9 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
-import org.privacyinternational.thornsec.core.data.machine.ServerData;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidDeviceModelException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidServerModelException;
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
+import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.model.network.ThornsecModel;
@@ -134,14 +132,9 @@ public class FullFrame {
 
 			final String device = e.getPath().getLastPathComponent().toString();
 
-			try {
-				if (model.getMachineModel(device) == null) {
-					return;
-				}
-			} catch (InvalidMachineModelException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} // Stop it crashing on labels!
+			if (model.getMachineModel(device) == null) {
+				return;
+			}
 
 			detailsPanel.removeAll();
 
@@ -260,12 +253,7 @@ public class FullFrame {
 			final GridBagConstraints g = new GridBagConstraints();
 
 			final String serverLabel = e.getPath().getLastPathComponent().toString();
-			try {
-				model.getMachineModel(serverLabel);
-			} catch (InvalidMachineModelException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			model.getMachineModel(serverLabel);
 
 			final ServerListener listener = new ServerListener(serverLabel, model, out, System.in);
 
@@ -296,24 +284,19 @@ public class FullFrame {
 			final JLabel addresses = new JLabel();
 
 			addresses.setText(addresses.getText() + "<html><body><ul>");
-			try {
-				final Collection<NetworkInterfaceModel> ifaces = model.getNetworkInterfaces(serverLabel);
-				if (ifaces.size() > 0) {
-					for (final NetworkInterfaceModel iface : ifaces) {
-						if (iface.getAddresses().isEmpty()) {
-							continue;
-						}
-						
-						final Collection<IPAddress> ipAddresses = iface.getAddresses().get();
+			final Collection<NetworkInterfaceModel> ifaces = model.getMachineModel(serverLabel).get().getNetworkInterfaces();
+			if (ifaces.size() > 0) {
+				for (final NetworkInterfaceModel iface : ifaces) {
+					if (iface.getAddresses().isEmpty()) {
+						continue;
+					}
 
-						for (final IPAddress address : ipAddresses) {
-							addresses.setText(addresses.getText() + "<li>" + address.toCompressedString() + "</li>");
-						}
+					final Collection<IPAddress> ipAddresses = iface.getAddresses().get();
+
+					for (final IPAddress address : ipAddresses) {
+						addresses.setText(addresses.getText() + "<li>" + address.toCompressedString() + "</li>");
 					}
 				}
-			} catch (final InvalidMachineModelException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 			addresses.setText(addresses.getText() + "</ul></body></html>");
 

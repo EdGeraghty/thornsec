@@ -58,7 +58,7 @@ public class ServerModel extends AMachineModel {
 
 		this.runningProcesses = new Processes(this);
 		this.users = new UserAccounts(this);
-		this.firewall = new ShorewallFirewall(this);
+		this.firewall = null;//new ShorewallFirewall(this);
 
 		this.iso = null;
 		this.isoSHA512 = null;
@@ -106,7 +106,7 @@ public class ServerModel extends AMachineModel {
 
 	private void addAdmins(Collection<String> usernames) throws InvalidUserException {
 		for (String username : usernames) {
-			if (getNetworkModel().getUser(username).isPresent()) {
+			if (getNetworkModel().getUserModel(username).isPresent()) {
 				//TODO
 				//this.users.addAdmin(getNetworkModel().getUser(username).get());
 			}

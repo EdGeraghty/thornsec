@@ -64,7 +64,13 @@ public class ServiceModel extends ServerModel {
 	public void init() throws AThornSecException {
 		super.init();
 
-		this.hypervisor = (ServerModel) getNetworkModel().getMachineModel(getData().getHypervisor().getLabel());
+		this.hypervisor = (ServerModel) getNetworkModel()
+											.getMachineModel(
+													getData()
+														.getHypervisor()
+														.getLabel()
+											)
+											.orElseThrow();
 
 		initDisks();
 	}
@@ -88,11 +94,11 @@ public class ServiceModel extends ServerModel {
 		}
 
 		if (getDisk("boot").isEmpty()) {
-			File bootDiskPath = new File(hypervisor.getVMBase().getAbsolutePath() + "/disks/boot/" + getLabel() + "/boot.vmdk");
+			HardDiskModel bootDisk = new HardDiskModel("boot", new File("/disks/boot/" + getLabel() + "/boot.vmdk"));
 			addDisk(new HardDiskModel("boot", bootDiskPath));
 		}
 		if (getDisk("data").isEmpty()) {
-			File dataDiskPath = new File(this.hypervisor.getVMBase().getAbsolutePath() + "/disks/data/" + getLabel() + "/data.vmdk");
+			File dataDiskPath = new File("/disks/data/" + getLabel() + "/data.vmdk");
 			addDisk(new HardDiskModel("data", dataDiskPath));
 		}
 	}

@@ -7,12 +7,8 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-import java.util.Collection;
-
-import org.privacyinternational.thornsec.core.data.machine.ADeviceData;
+import org.privacyinternational.thornsec.core.data.machine.DeviceData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
-import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 
 /**
@@ -21,10 +17,10 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
  * A device is something which is managed by ThornSec, but is not directly
  * configured. For instance, printers, or user machines.
  */
-abstract public class ADeviceModel extends AMachineModel {
+  public class DeviceModel extends AMachineModel {
 	private Boolean managed;
 
-	public ADeviceModel(ADeviceData myData, NetworkModel networkModel)
+	public DeviceModel(DeviceData myData, NetworkModel networkModel)
 			throws AThornSecException  {
 		super(myData, networkModel);
 
@@ -43,5 +39,16 @@ abstract public class ADeviceModel extends AMachineModel {
 		return getNetworkInterfaces()
 				.stream()
 				.anyMatch((nic) -> nic.getMac().isPresent());
+	}
+
+	/**
+	 * Initialise this model. This is where logic which relies on, for example,
+	 * other models existing on our Network should live.
+	 *
+	 * @throws AThornSecException if something goes wrong.
+	 */
+	@Override
+	public void init() throws AThornSecException {
+
 	}
 }
