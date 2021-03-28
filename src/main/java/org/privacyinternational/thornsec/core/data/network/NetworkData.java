@@ -88,7 +88,7 @@ public class NetworkData extends AData {
 
 		this.upstreamDNS = null;
 
-		this.subnets = new Hashtable<>();
+		this.subnets = null;
 
 		this.machines = new HashSet<>();
 		this.users = new HashSet<>();
@@ -265,12 +265,16 @@ public class NetworkData extends AData {
 		final JsonObject jsonSubnets = getData().getJsonObject("subnets");
 
 		for (final String label : jsonSubnets.keySet()) {
-			String ip = ((JsonString)jsonSubnets.getJsonString(label)).getString();
+			String ip = (jsonSubnets.getJsonString(label)).getString();
 			readSubnet(label, ip);
 		}
 	}
 	
 	private void readSubnet(String label, String ip) throws InvalidIPAddressException, InvalidPropertyException {
+		if (null == this.subnets) {
+			this.subnets = new HashMap<>();
+		}
+
 		try {
 			this.subnets.put(label, new IPAddressString(ip).toAddress());
 		} catch (AddressStringException | IncompatibleAddressException e) {
