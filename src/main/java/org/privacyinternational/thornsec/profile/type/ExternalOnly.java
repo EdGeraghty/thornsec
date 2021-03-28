@@ -11,7 +11,7 @@ import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.ExternalOnlyDeviceModel;
+import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ import java.util.HashSet;
  */
 public class ExternalOnly extends Device {
 
-	public ExternalOnly(ExternalOnlyDeviceModel me) {
+	public ExternalOnly(DeviceModel me) {
 		super(me);
 	}
 

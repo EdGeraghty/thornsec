@@ -9,7 +9,6 @@ package org.privacyinternational.thornsec.profile.type;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
@@ -27,15 +26,8 @@ import org.privacyinternational.thornsec.profile.guest.Alpine;
  */
 public class Service extends Server {
 
-	public Service(ServerModel me) {
+	public Service(ServiceModel me) {
 		super(me);
-	}
-
-	public final Hypervisor getHypervisor() throws InvalidMachineModelException {
-		String label = getServerModel().getHypervisorLabel();
-		return (Hypervisor) getNetworkModel()
-								.getMachineModel(label)
-								.getType(MachineType.HYPERVISOR);
 	}
 
 	public final AOS getGuestProfile() throws AThornSecException {

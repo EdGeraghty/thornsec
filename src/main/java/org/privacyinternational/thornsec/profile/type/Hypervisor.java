@@ -7,16 +7,14 @@
  */
 package org.privacyinternational.thornsec.profile.type;
 
-import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.HypervisorModel;
+import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
-import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
@@ -35,7 +33,7 @@ import java.util.Set;
  * These are things which should be done on a HyperVisor machine, regardless of
  * what hypervisor layer it's actually running
  */
-public class Hypervisor extends AStructuredProfile {
+public class Hypervisor extends AMachine {
 
 	private final AHypervisorProfile virtualbox;
 	private final HypervisorScripts scripts;
@@ -48,7 +46,7 @@ public class Hypervisor extends AStructuredProfile {
 	 * @throws ADataException
 	 * @throws InvalidMachineModelException 
 	 */
-	public Hypervisor(HypervisorModel me) throws JsonParsingException, ADataException, InvalidMachineModelException {
+	public Hypervisor(ServerModel me) throws JsonParsingException, ADataException, InvalidMachineModelException {
 		super(me);
 
 		this.virtualbox = new Virtualbox(me);
@@ -62,7 +60,7 @@ public class Hypervisor extends AStructuredProfile {
 		units.addAll(this.virtualbox.getInstalled());
 		units.addAll(this.scripts.getInstalled());
 
-		units.add(new DirUnit("thornsec_base_dir", "proceed", getServerModel().getVMBase().getAbsolutePath()));
+		//units.add(new DirUnit("thornsec_base_dir", "proceed", getVMBase().getAbsolutePath()));
 
 		units.add(new InstalledUnit("whois", "proceed", "whois"));
 		units.add(new InstalledUnit("tmux", "proceed", "tmux"));
@@ -104,51 +102,14 @@ public class Hypervisor extends AStructuredProfile {
 	public Collection<IUnit> getLiveConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		getServerModel().getServices().forEach(service -> {
-			units.addAll(service.getUserPasswordUnits());
-			units.addAll(virtualbox.buildServiceVM(service, getNetworkBridge()));
-		});
+//		getServerModel().getServices().forEach(service -> {
+//			units.addAll(service.getUserPasswordUnits());
+//			units.addAll(virtualbox.buildServiceVM(service, getNetworkBridge()));
+//		});
 		
 		units.addAll(this.virtualbox.getLiveConfig());
 		units.addAll(this.scripts.getLiveConfig());
 
 		return units;
-	}
-
-	private Collection<IUnit> getDisksFormattedUnits(String service) throws InvalidMachineModelException {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		((ServiceModel)getNetworkModel().getMachineModel(service)).getDisks().forEach((label, disk) -> {
-			// For now, do all this as root. We probably want to move to another user, idk
-			units.add(new SimpleUnit(service + "_" + label + "_disk_formatted", "proceed",
-					"", //No config to do here
-					"sudo bash -c 'export LIBGUESTFS_BACKEND_SETTINGS=force_tcg;" + "virt-filesystems -a " + disk.getFilename() + "'", "", "fail",
-					service + "'s " + label + " disk is unformatted, please configure the service and try mounting again."));
-		});
-
-		return units;
-	}
-
-	private Collection<IUnit> getDiskLoopbackUnits(String service) throws InvalidMachineModelException {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		for (ADiskModel disk : ((ServiceModel)getNetworkModel().getMachineModel(service)).getDisks().values().stream().filter(disk -> disk.getMedium() == Medium.DISK).toArray(ADiskModel[]::new)) {
-			// For now, do all this as root. We probably want to move to another user, idk
-
-			units.add(new SimpleUnit(service + "_" + disk.getLabel() + "_disk_loopback_mounted", service + "_" + disk.getLabel() + "_disk_formatted",
-					"sudo bash -c '" + " export LIBGUESTFS_BACKEND_SETTINGS=force_tcg;" + " guestmount -a " + disk.getFilename() + " -i" // Inspect the disk for the relevant partition
-							+ " -o direct_io" // All read operations must be done against live, not cache
-							+ " --ro" // _MOUNT THE DISK READ ONLY_
-							+ " " + disk.getFilePath() + "/live/" + "'",
-					"sudo mount | grep " + disk.getFilePath(), "", "fail",
-					"I was unable to loopback mount the " + disk.getLabel() + " disk for " + service + " in " + getMachineModel().getLabel() + "."));
-		}
-
-		return units;
-	}
-
-	@Override
-	public HypervisorModel getServerModel() {
-		return (HypervisorModel) super.getServerModel();
 	}
 }

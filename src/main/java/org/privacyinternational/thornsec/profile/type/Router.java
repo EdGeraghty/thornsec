@@ -9,22 +9,18 @@ package org.privacyinternational.thornsec.profile.type;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.json.stream.JsonParsingException;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidServerModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.BondInterfaceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.BondModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.DummyModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.networking.MACVLANModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.MACVLANTrunkModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
@@ -59,8 +55,8 @@ public class Router extends AMachine {
 
 		masqueradeWANIfaces();
 		buildLANIfaces();
-		buildVLANs();
-
+		buildTrunk();
+		//TODO: build the VLANS themselves
 		this.firewall = me.getFirewall();
 		this.dhcpServer = new ISCDHCPServer(me);
 		this.dnsServer = new UnboundDNSServer(me);
@@ -116,39 +112,12 @@ public class Router extends AMachine {
 	 * Builds our various VLANs, but only if they're required.
 	 * @return a collection of the VLANs built in this method
 	 * @throws InvalidIPAddressException if an IP address is invalid
-	 * @throws InvalidServerModelException if a given ServerModel doesn't exist
-	 * @throws InvalidNetworkInterfaceException 
+	 * @throws InvalidNetworkInterfaceException
 	 */
-	private final MACVLANTrunkModel buildVLANs() throws InvalidIPAddressException, InvalidServerModelException, InvalidNetworkInterfaceException {
-		Set<MachineType> vlans = new LinkedHashSet<>();
-		vlans.add(MachineType.SERVER);
-		vlans.add(MachineType.INTERNAL_ONLY);
-		vlans.add(MachineType.EXTERNAL_ONLY);
-		vlans.add(MachineType.USER);
-		vlans.add(MachineType.ADMIN);
-		if (getNetworkModel().buildAutoGuest()) {
-			vlans.add(MachineType.GUEST);
-		}
-
+	private final MACVLANTrunkModel buildTrunk() throws InvalidNetworkInterfaceException {
 		final MACVLANTrunkModel trunk = new MACVLANTrunkModel();
 		trunk.setIface(this.vlanTrunk.getIface());
 		getMachineModel().addNetworkInterface(trunk);
-
-		for (MachineType type : vlans) {
-			if (getNetworkModel().getMachines(type).isEmpty()) {
-				continue;
-			}
-
-			MACVLANModel vlan = new MACVLANModel();
-			vlan.setIface(type.toString());
-			vlan.setSubnet(getNetworkModel().getSubnet(type));
-			vlan.addAddress(getNetworkModel().getSubnet(type).getLowerNonZeroHost());
-			vlan.setType(type);
-			vlan.setRoutingPolicyRuleFrom(getNetworkModel().getSubnet(type).getLower());
-			vlan.setRoutingPolicyRuleTo(getNetworkModel().getSubnet(type).getLower());
-			trunk.addVLAN(vlan);
-			getMachineModel().addNetworkInterface(vlan);
-		}
 
 		return trunk;
 	}

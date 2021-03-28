@@ -18,6 +18,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
+import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyArrayException;
@@ -165,7 +166,7 @@ public class Webproxy extends AStructuredProfile {
 			Boolean isDefault = true;
 
 			for (String backendLabel : getBackends()) {
-				final AMachineModel backendObj = getNetworkModel().getMachineModel(backendLabel);
+				final AMachineModel backendObj = getNetworkModel().getMachineModel(backendLabel).orElseThrow();
 
 				final HostName domain = backendObj.getDomain();
 				final String logDir = "/var/log/nginx/" + backendLabel + "." + domain + "/";
@@ -250,9 +251,12 @@ public class Webproxy extends AStructuredProfile {
 
 		getMachineModel().addListen(443);
 
-		for (final String backend : getBackends()) {
-			getMachineModel().addDNAT(getNetworkModel().getMachineModel(backend), 80, 443);
-		}
+		//getBackends().forEach(backendLabel -> {
+		//	getNetworkModel()
+		//		.getMachineModel(backendLabel)
+		//		.orElseThrow(InvalidMachineModelException::new)
+		//		.addDNAT(80, 443);
+		//});
 
 		return units;
 	}
