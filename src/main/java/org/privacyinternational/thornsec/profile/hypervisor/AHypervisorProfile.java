@@ -9,8 +9,9 @@ package org.privacyinternational.thornsec.profile.hypervisor;
 
 import java.util.Collection;
 
+import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.HypervisorModel;
+import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 
@@ -19,7 +20,7 @@ import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
  */
 public abstract class AHypervisorProfile extends AStructuredProfile {
 
-	public AHypervisorProfile(HypervisorModel machine) {
+	public AHypervisorProfile(ServerModel machine) {
 		super(machine);
 	}
 
@@ -49,10 +50,5 @@ public abstract class AHypervisorProfile extends AStructuredProfile {
 	 * @param service The ServiceModel to build on our hypervisor
 	 * @param bridge NIC to bridge our Service to
 	 */
-	public abstract Collection<IUnit> buildServiceVM(ServiceModel service, String bridge);
-
-	@Override
-	public HypervisorModel getServerModel() {
-		return (HypervisorModel) super.getServerModel();
-	}
+	public abstract Collection<IUnit> buildServiceVM(ServiceModel service, String bridge) throws InvalidMachineModelException;
 }
