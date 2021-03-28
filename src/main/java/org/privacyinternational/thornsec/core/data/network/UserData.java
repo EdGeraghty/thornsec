@@ -47,7 +47,6 @@ public class UserData extends AData {
 		this.wireguardPSK = null;
 	}
 
-	@Override
 	public UserData read(JsonObject data) {
 		this.username = data.getString("username", null);
 		this.fullName = data.getString("fullname", "Dr McNuggets");

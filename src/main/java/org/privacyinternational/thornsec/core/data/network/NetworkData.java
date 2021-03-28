@@ -32,11 +32,9 @@ import inet.ipaddr.IPAddressString;
 import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.InternalDeviceData;
+import org.privacyinternational.thornsec.core.data.machine.DeviceData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
-import org.privacyinternational.thornsec.core.data.machine.UserDeviceData;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
@@ -198,8 +196,10 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("users");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final UserDeviceData device = new UserDeviceData(jsonDevice);
+			final DeviceData device = new DeviceData(jsonDevice);
 			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+			device.putProfile("UserDevice");
 
 			if (device.getNetworkInterfaces().isPresent()) {
 				putMachine(device);
@@ -215,8 +215,10 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("guests");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final ExternalDeviceData device = new ExternalDeviceData(jsonDevice);
+			final DeviceData device = new DeviceData(jsonDevice);
 			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+			device.putProfile("ExternalDevice");
 
 			putMachine(device);
 		}
@@ -227,8 +229,10 @@ public class NetworkData extends AData {
 			final JsonObject jsonDevices = getData().getJsonObject("peripherals");
 
 			for (final String jsonDevice : jsonDevices.keySet()) {
-				final InternalDeviceData device = new InternalDeviceData(jsonDevice);
+				final DeviceData device = new DeviceData(jsonDevice);
 				device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+				device.putProfile("InternalDevice");
 
 				putMachine(device);
 			}

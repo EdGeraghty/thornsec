@@ -47,6 +47,7 @@ import inet.ipaddr.IPAddressString;
  */
 public abstract class AMachineData extends AData {
 	public static Boolean DEFAULT_IS_THROTTLED = true;
+	protected Set<String> profiles;
 
 	private Map<String, NetworkInterfaceData> networkInterfaces;
 	private Set<IPAddress> externalIPAddresses;
@@ -71,6 +72,7 @@ public abstract class AMachineData extends AData {
 		this.externalIPAddresses = new LinkedHashSet<>();
 		this.cnames = new LinkedHashSet<>();
 		this.trafficRules = new LinkedHashSet<>();
+		this.profiles = null;
 	}
 
 	@Override
@@ -370,5 +372,30 @@ public abstract class AMachineData extends AData {
 
 	private void setDomain(HostName domain) {
 		this.domain = domain;
+	}
+
+	/**
+	 * @param data
+	 */
+	protected void readProfiles(JsonObject data) {
+		if (!data.containsKey("profiles")) {
+			return;
+		}
+
+		data.getJsonArray("profiles").forEach(profile ->
+			putProfile(((JsonString)profile).getString())
+		);
+	}
+
+	public void putProfile(String... profiles) {
+		if (this.profiles == null) {
+			this.profiles = new LinkedHashSet<>();
+		}
+
+		this.profiles.addAll(Arrays.asList(profiles));
+	}
+
+	public final Optional<Set<String>> getProfiles() {
+		return Optional.ofNullable(this.profiles);
 	}
 }

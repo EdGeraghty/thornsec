@@ -3,6 +3,7 @@ package org.privacyinternational.thornsec.core.exec;
 import java.io.OutputStream;
 import java.net.InetAddress;
 
+import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 
@@ -27,7 +28,7 @@ public class ManageExec {
 		this.password = password;
 	}
 
-	public ManageExec(ServerModel serverModel, NetworkModel networkModel, String cmd, OutputStream out) {
+	public ManageExec(AMachineModel serverModel, NetworkModel networkModel, String cmd, OutputStream out) {
 		// TODO Auto-generated constructor stub
 	}
 

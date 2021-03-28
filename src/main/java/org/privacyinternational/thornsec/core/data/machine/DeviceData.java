@@ -21,17 +21,17 @@ import inet.ipaddr.MACAddressString;
  * is the parent class for all devices on our network. These are things like
  * users, or printers, or similar.
  */
-public abstract class ADeviceData extends AMachineData {
+public class DeviceData extends AMachineData {
 	private Boolean managed;
 
-	protected ADeviceData(String label) {
+	public DeviceData(String label) {
 		super(label);
 
 		this.managed = null;
 	}
 
 	@Override
-	public ADeviceData read(JsonObject data, Path configFilePath) throws ADataException {
+	public DeviceData read(JsonObject data, Path configFilePath) throws ADataException {
 		super.read(data, configFilePath);
 
 		readIsManaged(data);

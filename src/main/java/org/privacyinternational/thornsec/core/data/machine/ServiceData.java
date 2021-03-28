@@ -142,16 +142,6 @@ public class ServiceData extends ServerData {
 	}
 
 	/**
-	 * Retrieve a given DiskData by its label
-	 * 
-	 * @param label the DiskData label
-	 * @return the DiskData, if it's attached to this machine
-	 */
-	public final Optional<DiskData> getDiskData(String label) {
-		return Optional.ofNullable(getDisks().get().get(label));
-	}
-
-	/**
 	 * Get all of the disks associated with this Service
 	 * 
 	 * @return a Map<label, DiskData> of all disks
@@ -185,19 +175,6 @@ public class ServiceData extends ServerData {
 	}
 	
 	/**
-	 * Get a disk's size from its data, if it's set in the JSON, otherwise return
-	 * a default value
-	 * 
-	 * @param diskLabel the disk's label
-	 * @return Either the disk's size as set in the JSON or the defaultSize
-	 */
-	public Optional<Integer> getDiskSize(String diskLabel) {
-		Optional<DiskData> disk = getDiskData(diskLabel);
-
-		return disk.flatMap(DiskData::getSize);
-
-	}
-		/**
 	 * @return The CPU execution cap as an absolute percentage {1-100}
 	 */
 	public Optional<Integer> getCPUExecutionCap() {
