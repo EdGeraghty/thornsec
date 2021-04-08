@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -20,20 +21,18 @@ import inet.ipaddr.MACAddressString;
  * is the parent class for all devices on our network. These are things like
  * users, or printers, or similar.
  */
-public abstract class ADeviceData extends AMachineData {
+public class DeviceData extends AMachineData {
 	private Boolean managed;
 
-	protected ADeviceData(String label) {
+	public DeviceData(String label) {
 		super(label);
 
 		this.managed = null;
-
-		this.putType(MachineType.DEVICE);
 	}
 
 	@Override
-	public ADeviceData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public DeviceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readIsManaged(data);
 		readNICs(data);

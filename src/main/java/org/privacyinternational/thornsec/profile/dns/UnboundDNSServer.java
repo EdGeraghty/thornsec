@@ -7,13 +7,11 @@
  */
 package org.privacyinternational.thornsec.profile.dns;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
+import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.runtime.ARuntimeException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
@@ -36,13 +34,49 @@ import inet.ipaddr.IPAddress;
  * Please see https://nlnetlabs.nl/projects/unbound/about/ for more details.
  */
 public class UnboundDNSServer extends ADNSServerProfile {
-	private static final Integer DEFAULT_UPSTREAM_DNS_PORT = 853;
+
+	private class UnboundConfig extends AData {
+		public UnboundConfig() {
+			super("unbound_config");
+		}
+
+		public Set<HostName> getUpstreamDNSServers() throws InvalidHostException {
+			String key = "upstream_dns";
+
+			if (!keyIsPresent(key)) {
+				return new HashSet<>(
+					Arrays.asList(
+						new HostName("1.1.1.1:853"),
+						new HostName("8.8.8.8:853")
+					)
+				);
+			}
+
+			return super.getHostNameArray(key);
+		}
+
+		/**
+		 * Read in whether or not we should be doing network-level ad-blocking.
+		 */
+		public boolean doAdBlocking() {
+			String key = "adblocking";
+
+			if (!keyIsPresent(key)) {
+				return false;
+			}
+
+			return getData().getBoolean(key);
+		}
+
+	}
 
 	private static final String UNBOUND_CONFIG_DIR = "/etc/unbound/";
 	private static final String UNBOUND_CONFIG_DROPIN_DIR = UNBOUND_CONFIG_DIR + "unbound.conf.d/";
 	private static final String UNBOUND_CONFIG_FILE = UNBOUND_CONFIG_DIR + "unbound.conf";
 
 	private static final String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
+
+	private UnboundConfig data;
 
 	private final Map<HostName, Set<AMachineModel>> zones;
 
@@ -55,9 +89,17 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	public UnboundDNSServer(ServerModel me) {
 		super(me);
 
+		this.data = new UnboundConfig();
+		this.data.setData(me.getData().getData().getJsonObject("unbound"));
+
 		this.zones = new Hashtable<>();
 		this.unboundConf = null;
 	}
+
+	private UnboundConfig getMyConfig() {
+		return this.data;
+	}
+
 
 	/**
 	 * Builds our unbound config file, see 
@@ -126,13 +168,17 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		msgCacheSize(50);
 		soRCVBuffer(0);
 
-		adBlocking(getNetworkModel().doAdBlocking());
+		adBlocking(getMyConfig().doAdBlocking());
 		rootHints(UNBOUND_CONFIG_DIR + "root.hints");
 
 		setInternalZones();
 		rDNS("nodefault");
 
-		forwardZone();
+		try {
+			forwardZone();
+		} catch (InvalidHostException e) {
+			throw new InvalidProfileException("Invalid hostname in upstream DNS servers.\n\n" + e.getLocalizedMessage());
+		}
 
 		return units;
 	}
@@ -140,14 +186,11 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	/**
 	 * Set our upstream DNS servers
 	 */
-	private void forwardZone() {
+	private void forwardZone() throws InvalidHostException {
 		this.unboundConf.appendLine("\tforward-zone:");
 		this.unboundConf.appendLine("\t\tname: \\\".\\\"");
-		for (final HostName upstream : getNetworkModel().getUpstreamDNSServers()) {
+		for (final HostName upstream : getMyConfig().getUpstreamDNSServers()) {
 			Integer port = upstream.getPort();
-			if (port == null) {
-				port = DEFAULT_UPSTREAM_DNS_PORT;
-			}
 			if (port == 853) {
 				this.unboundConf.appendLine("\t\tforward-ssl-upstream: yes");
 			}
@@ -318,6 +361,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * @param x number
 	 * @return true if the number is a power of two
 	 */
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	private boolean isPowerOfTwo(int x) {
 		return ((x & (x - 1)) == 0);
 	}
@@ -734,7 +778,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	private Collection<IUnit> populateInternalZones() {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		addRecord(getNetworkModel().getMachines().values());
+		addRecord(getNetworkModel().getMachines());
 
 		return units;
 	}
@@ -765,7 +809,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		getServerModel().addSystemUsername("unbound");
 		getServerModel().addProcessString("/usr/sbin/unbound -d$");
 
-		if (getNetworkModel().doAdBlocking()) {
+		if (getMyConfig().doAdBlocking()) {
 			units.add(new InstalledUnit("ca_certificates", "proceed", "ca-certificates"));
 			units.add(new InstalledUnit("wget", "proceed", "wget"));
 		}
@@ -796,7 +840,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		units.add(unboundConfD);
 
 		// Start by updating the ad block list (if req'd)
-		if (getNetworkModel().doAdBlocking()) {
+		if (getMyConfig().doAdBlocking()) {
 			units.add(getAdBlockFileUnit());
 		}
 
@@ -874,7 +918,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getPersistentFirewall() throws ARuntimeException, InvalidPortException {
+	public Collection<IUnit> getPersistentFirewall() throws ARuntimeException, InvalidPortException, InvalidHostException {
 		getUpstreamDNSRules();
 
 		//Our local server listens on both TCP&UDP (for now, at least)
@@ -888,8 +932,8 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * Build the firewall rules required for communicating with our upstream DNS
 	 * @throws InvalidPortException
 	 */
-	private void getUpstreamDNSRules() throws InvalidPortException {
-		for (HostName upstream : getNetworkModel().getUpstreamDNSServers()) {
+	private void getUpstreamDNSRules() throws InvalidPortException, InvalidHostException {
+		for (HostName upstream : getMyConfig().getUpstreamDNSServers()) {
 			//DNS, by default, is UDP
 			Encapsulation upstreamProto = Encapsulation.UDP;
 

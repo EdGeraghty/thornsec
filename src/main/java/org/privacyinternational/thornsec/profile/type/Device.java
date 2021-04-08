@@ -7,14 +7,14 @@
  */
 package org.privacyinternational.thornsec.profile.type;
 
-import org.privacyinternational.thornsec.core.model.machine.ADeviceModel;
+import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 /**
  * This is a device on our network
  */
 public class Device extends AMachine {
 
-	public Device(ADeviceModel me) {
+	public Device(DeviceModel me) {
 		super(me);
 	}
 }

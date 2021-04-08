@@ -8,7 +8,6 @@
 package org.privacyinternational.thornsec.profile.hypervisor;
 
 import inet.ipaddr.HostName;
-import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Medium;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
@@ -16,7 +15,7 @@ import org.privacyinternational.thornsec.core.exception.data.machine.InvalidServ
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidServerModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.HypervisorModel;
+import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.DVDModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.HardDiskModel;
@@ -25,6 +24,7 @@ import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class Virtualbox extends AHypervisorProfile {
 	final static String USER_PREFIX = "vboxuser_";
 	final static String GROUP = "vboxusers";
 
-	public Virtualbox(HypervisorModel me) {
+	public Virtualbox(ServerModel me) {
 		super(me);
 	}
 
@@ -53,14 +53,14 @@ public class Virtualbox extends AHypervisorProfile {
 		Set<HardDiskModel> hdds = service.getDisks()
 										 .values()
 										 .stream()
-										 .filter(disk -> disk.getMedium() == Medium.DISK)
+										 .filter(disk -> disk instanceof HardDiskModel)
 										 .map(HardDiskModel.class::cast)
 										 .collect(Collectors.toSet());
 
 		Set<DVDModel> dvds = service.getDisks()
 									.values()
 									.stream()
-									.filter(disk -> disk.getMedium() == Medium.DVD)
+									.filter(disk -> disk instanceof DVDModel)
 									.map(DVDModel.class::cast)
 									.collect(Collectors.toSet());
 
@@ -277,7 +277,7 @@ public class Virtualbox extends AHypervisorProfile {
 	protected Collection<IUnit> buildBackups(ServiceModel service) {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
+		final String baseDir = getVMBase().getAbsolutePath();
 		final String backupDir = baseDir + "/backups/" + service.getLabel();
 
 		units.add(
@@ -325,6 +325,11 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
+	private File getVMBase() {
+		//TODO:
+		return new File("/srv/ThornSec");
+	}
+
 	/**
 	 * Build and attach logs directory to a given service
 	 *
@@ -335,7 +340,7 @@ public class Virtualbox extends AHypervisorProfile {
 	protected Collection<IUnit> buildLogs(ServiceModel service) {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
+		final String baseDir = getVMBase().getAbsolutePath();
 		final String logDir = baseDir + "/logs/" + service.getLabel();
 
 		units.add(
@@ -379,9 +384,9 @@ public class Virtualbox extends AHypervisorProfile {
 		return units;
 	}
 
-	private IUnit createVMUser(ServiceModel service) {
+	private IUnit createVMUser(ServiceModel service) throws InvalidMachineModelException {
 		return new SimpleUnit(
-			service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user",
+			service.getHypervisor().getLabel() + "_virtualbox_" + service.getLabel() + "_user",
 			"virtualbox_installed",
 			"sudo adduser " + USER_PREFIX + service.getLabel()
 				+ " --system" //create with no aging information in /etc/shadow
@@ -397,9 +402,9 @@ public class Virtualbox extends AHypervisorProfile {
 				+ service.getLabel() + " will not be installed.");
 	}
 
-	private IUnit createVM(ServiceModel service) {
+	private IUnit createVM(ServiceModel service) throws InvalidMachineModelException {
 		return new SimpleUnit(
-			service.getLabel() + "_exists", service.getHypervisorLabel() + "_virtualbox_" + service.getLabel() + "_user",
+			service.getLabel() + "_exists", service.getHypervisor().getLabel() + "_virtualbox_" + service.getLabel() + "_user",
 			"sudo -u " + USER_PREFIX + service.getLabel() + " VBoxManage createvm"
 				+ "--name " + service.getLabel()
 				+ " --ostype \"" + GROUP + "\""
@@ -425,7 +430,7 @@ public class Virtualbox extends AHypervisorProfile {
 
 	private Collection<IUnit> createSockets(ServiceModel service) {
 		final Collection<IUnit> units = new ArrayList<>();
-		final String ttySocketDir = getServerModel().getVMBase().getPath() + "/sockets/" + service.getLabel();
+		final String ttySocketDir = getVMBase().getPath() + "/sockets/" + service.getLabel();
 
 		units.add(
 			new DirUnit(
@@ -516,8 +521,8 @@ public class Virtualbox extends AHypervisorProfile {
 	}
 
 	@Override
-	public Collection<IUnit> buildServiceVM(ServiceModel service, String networkBridge) {
-		final String baseDir = getServerModel().getVMBase().getAbsolutePath();
+	public Collection<IUnit> buildServiceVM(ServiceModel service, String networkBridge) throws InvalidMachineModelException {
+		final String baseDir = getVMBase().getAbsolutePath();
 
 		final Collection<IUnit> units = new ArrayList<>();
 
@@ -561,8 +566,8 @@ public class Virtualbox extends AHypervisorProfile {
 
 
 		getServerModel().addProcessString("/usr/lib/virtualbox/VBoxHeadless --comment " + service.getLabel() + " --startvm `if id '" + USER_PREFIX + service.getLabel()
-						+ "' >/dev/null 2>&1; then sudo -u " + USER_PREFIX + service.getLabel() + " bash -c 'VBoxManage list runningvms | grep "
-						+ service.getLabel() + "' | awk '{ print $2 }' | tr -d '{}'; else echo ''; fi` --vrde config *$");
+				+ "' >/dev/null 2>&1; then sudo -u " + USER_PREFIX + service.getLabel() + " bash -c 'VBoxManage list runningvms | grep "
+				+ service.getLabel() + "' | awk '{ print $2 }' | tr -d '{}'; else echo ''; fi` --vrde config *$");
 		getServerModel().addProcessString("awk \\{");
 		getServerModel().addProcessString("tr -d \\{\\}$");
 		getServerModel().getUserModel().addUsername(USER_PREFIX + service.getLabel());
@@ -579,7 +584,7 @@ public class Virtualbox extends AHypervisorProfile {
 				"busybox wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O - | sudo apt-key add -",
 				"apt-key list | grep virtualbox", "", "fail",
 				"I couldn't import the PGP public key corresponding to"
-				+ " the VirtualBox Debian repository. VirtualBox won't be installed."));
+						+ " the VirtualBox Debian repository. VirtualBox won't be installed."));
 
 		FileUnit source = new FileUnit("virtualbox_repository", "virtualbox_pgp",
 				"/etc/apt/sources.list.d/virtualbox.list",

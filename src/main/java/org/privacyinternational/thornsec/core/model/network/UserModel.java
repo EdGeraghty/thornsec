@@ -20,7 +20,7 @@ public class UserModel {
 
 	private final UserData myData;
 
-	public UserModel(UserData myData) throws AThornSecException {
+	public UserModel(UserData myData) {
 		this.myData = myData;
 	}
 

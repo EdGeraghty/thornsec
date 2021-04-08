@@ -19,6 +19,7 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.Network
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
+import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
@@ -62,6 +63,8 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		}
 	}
 
+	private NetworkModel networkModel;
+
 	private String comment;
 	private String iface;
 	private Inet inet;
@@ -86,7 +89,9 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	 * @throws InvalidNetworkInterfaceException 
 	 */
 	protected NetworkInterfaceModel(NetworkInterfaceData ifaceData, NetworkModel networkModel) throws InvalidNetworkInterfaceException {
-		super(ifaceData, networkModel);
+		super(ifaceData);
+
+		this.networkModel = networkModel;
 
 		this.netDevSettings = new HashMap<>();
 		this.networkSettings = new HashMap<>();
@@ -103,6 +108,10 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		this.gateway = null;
 		this.mac = null;
 		this.comment = null;
+	}
+
+	public NetworkModel getNetworkModel() {
+		return networkModel;
 	}
 
 	/**
@@ -518,5 +527,10 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	 */
 	public void setConfigureWithoutCarrier(Boolean configureWithoutCarrier) {
 		addToNetwork(Section.NETWORK, "ConfigureWithoutCarrier", configureWithoutCarrier);
+	}
+
+	@Override
+	public Collection<IUnit> getUnits() {
+		return new ArrayList<>();
 	}
 }

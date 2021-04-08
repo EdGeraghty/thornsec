@@ -9,6 +9,7 @@ package org.privacyinternational.thornsec.core.data.machine.configuration;
 
 //import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -84,7 +85,7 @@ public class NetworkInterfaceData extends AData {
 	}
 
 	@Override
-	public NetworkInterfaceData read(JsonObject data) throws ADataException {
+	public NetworkInterfaceData read(JsonObject data, Path configFilePath) throws ADataException {
 		this.iface = data.getString("iface", null);
 
 		readInet(data);

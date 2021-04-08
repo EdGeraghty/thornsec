@@ -11,7 +11,7 @@ import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.UserDeviceModel;
+import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -21,7 +21,7 @@ import java.util.LinkedHashSet;
  */
 public class User extends AMachine {
 
-	public User(UserDeviceModel me) {
+	public User(DeviceModel me) {
 		super(me);
 	}
 

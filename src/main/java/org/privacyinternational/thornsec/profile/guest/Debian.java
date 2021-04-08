@@ -252,7 +252,7 @@ public class Debian extends AOS {
 		//this.preseed = new FileUnit("preseed_" + getServerModel().getLabel(), cleanedFilename + "_downloaded", isoDir + "/preseed.cfg", "root", "root", 0700, "");
 		
 		String username = getNetworkModel().getData().getUser();
-		UserModel user = getNetworkModel().getUser(username)
+		UserModel user = getNetworkModel().getUserModel(username)
 							.orElseThrow(() -> new InvalidUserException(username));
 
 		String domain = getServerModel().getDomain().getHost();

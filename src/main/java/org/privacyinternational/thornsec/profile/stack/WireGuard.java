@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import javax.json.JsonObject;
 
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
@@ -65,12 +64,13 @@ public class WireGuard extends AStructuredProfile {
 			e.printStackTrace();
 		}
 
-		for (UserModel user : getNetworkModel().getUsers().values()) {
+		for (UserModel user : getNetworkModel().getUsers()) {
 			nic.addWireGuardPeer(user);
 		}
 
 		nic.setListenPort(this.listenPort);
-		nic.addAddress(getNetworkModel().getSubnet(MachineType.VPN));
+		//TODO
+		//nic.addAddress(getNetworkModel().getSubnet(MachineType.VPN));
 
 		getMachineModel().addNetworkInterface(nic);
 

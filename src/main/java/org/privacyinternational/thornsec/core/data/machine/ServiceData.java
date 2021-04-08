@@ -8,6 +8,7 @@
 package org.privacyinternational.thornsec.core.data.machine;
 
 
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import org.privacyinternational.thornsec.profile.type.Hypervisor;
  * something which runs on a {@link Hypervisor} - i.e. a Virtual Machine
  */
 public class ServiceData extends ServerData {
-	private HypervisorData hypervisor;
+	private ServerData hypervisor;
 
 	private Map<String, DiskData> disks;
 
@@ -32,8 +33,6 @@ public class ServiceData extends ServerData {
 
 	public ServiceData(String label) {
 		super(label);
-
-		putType(MachineType.SERVICE);
 
 		this.hypervisor = null;
 
@@ -48,8 +47,8 @@ public class ServiceData extends ServerData {
 	}
 
 	@Override
-	public ServiceData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public ServiceData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readOS();
 		readDisks();
@@ -143,16 +142,6 @@ public class ServiceData extends ServerData {
 	}
 
 	/**
-	 * Retrieve a given DiskData by its label
-	 * 
-	 * @param label the DiskData label
-	 * @return the DiskData, if it's attached to this machine
-	 */
-	public final Optional<DiskData> getDiskData(String label) {
-		return Optional.ofNullable(getDisks().get().get(label));
-	}
-
-	/**
 	 * Get all of the disks associated with this Service
 	 * 
 	 * @return a Map<label, DiskData> of all disks
@@ -171,38 +160,21 @@ public class ServiceData extends ServerData {
 	/**
 	 * @return the {@code label} of this service's HyperVisor
 	 */
-	public final HypervisorData getHypervisor() {
-		//assertNotNull(this.hypervisor);
-
+	public final ServerData getHypervisor() {
 		return this.hypervisor;
 	}
 
 	/**
 	 * Set the Hypervisor for this machine - warning, this is unchecked. You're
 	 * expected to make sure this machine exists elsewhere.
-	 * 
+	 *
 	 * @param hv The label of the hypervisor machine
 	 */
-	public final void setHypervisor(HypervisorData hv) {
-		//assertNotNull(hv);
-
+	public final void setHypervisor(ServerData hv) {
 		this.hypervisor = hv;
 	}
 	
 	/**
-	 * Get a disk's size from its data, if it's set in the JSON, otherwise return
-	 * a default value
-	 * 
-	 * @param diskLabel the disk's label
-	 * @return Either the disk's size as set in the JSON or the defaultSize
-	 */
-	public Optional<Integer> getDiskSize(String diskLabel) {
-		Optional<DiskData> disk = getDiskData(diskLabel);
-
-		return disk.flatMap(DiskData::getSize);
-
-	}
-		/**
 	 * @return The CPU execution cap as an absolute percentage {1-100}
 	 */
 	public Optional<Integer> getCPUExecutionCap() {

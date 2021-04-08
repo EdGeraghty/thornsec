@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -45,44 +46,8 @@ import inet.ipaddr.IPAddressString;
  * somewhere in DNS-world.
  */
 public abstract class AMachineData extends AData {
-	// These are the only types of machine I'll recognise until I'm told otherwise...
-	public enum MachineType {
-		ROUTER("Router"),
-		SERVER("Servers"),
-		HYPERVISOR("Hypervisors"),
-		DEDICATED("Dedicateds"),
-		SERVICE("Services"),
-		DEVICE("Devices"),
-		USER("Users"),
-		INTERNAL_ONLY("InternalOnlys"),
-		EXTERNAL_ONLY("ExternalOnlys"),
-		ADMIN("Administrators"),
-		GUEST("Guests"),
-		VPN("VPN"),
-		INTERNET("Internet");
-
-		private final String machineType;
-
-		MachineType(String machineType) {
-			this.machineType = machineType;
-		}
-
-		@Override
-		public String toString() {
-			return this.machineType;
-		}
-		
-	    public static MachineType fromString(String text) throws InvalidTypeException {
-	        for (MachineType type : MachineType.values()) {
-	            if (type.toString().equalsIgnoreCase(text)) {
-	                return type;
-	            }
-	        }
-	        throw new InvalidTypeException(text + " is not a valid machine type");
-	    }
-	}
-
 	public static Boolean DEFAULT_IS_THROTTLED = true;
+	protected Set<String> profiles;
 
 	private Map<String, NetworkInterfaceData> networkInterfaces;
 	private Set<IPAddress> externalIPAddresses;
@@ -97,8 +62,6 @@ public abstract class AMachineData extends AData {
 
 	private HostName domain;
 
-	protected Set<MachineType> types;
-
 	protected AMachineData(String label) {
 		super(label);
 
@@ -106,15 +69,15 @@ public abstract class AMachineData extends AData {
 		this.emailAddress = null;
 		this.throttled = null;
 
-		this.types = new LinkedHashSet<>();
 		this.externalIPAddresses = new LinkedHashSet<>();
 		this.cnames = new LinkedHashSet<>();
 		this.trafficRules = new LinkedHashSet<>();
+		this.profiles = null;
 	}
 
 	@Override
-	protected AMachineData read(JsonObject data) throws ADataException {
-		super.setData(data);
+	public AMachineData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readEmailAddress();
 		readDomain();
@@ -407,27 +370,32 @@ public abstract class AMachineData extends AData {
 		}		
 	}
 
-
 	private void setDomain(HostName domain) {
 		this.domain = domain;
 	}
 
-	protected void putType(String... types) {
-		for (String type : types) {
-			MachineType machineType = MachineType.valueOf(type.replaceAll("[^a-zA-Z]", "").toUpperCase());
-			putType(machineType);
+	/**
+	 * @param data
+	 */
+	protected void readProfiles(JsonObject data) {
+		if (!data.containsKey("profiles")) {
+			return;
 		}
+
+		data.getJsonArray("profiles").forEach(profile ->
+			putProfile(((JsonString)profile).getString())
+		);
 	}
 
-	protected void putType(MachineType... types) {
-		this.types.addAll(Arrays.asList(types));
+	public void putProfile(String... profiles) {
+		if (this.profiles == null) {
+			this.profiles = new LinkedHashSet<>();
+		}
+
+		this.profiles.addAll(Arrays.asList(profiles));
 	}
 
-	public final Collection<MachineType> getTypes() {
-		return this.types;
-	}
-	
-	public final Boolean isType(MachineType type) {
-		return this.getTypes().contains(type);
+	public final Optional<Set<String>> getProfiles() {
+		return Optional.ofNullable(this.profiles);
 	}
 }

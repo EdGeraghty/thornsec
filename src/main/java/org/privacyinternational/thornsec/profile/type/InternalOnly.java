@@ -7,14 +7,14 @@
  */
 package org.privacyinternational.thornsec.profile.type;
 
-import org.privacyinternational.thornsec.core.model.machine.InternalOnlyDeviceModel;
+import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 /**
  * This is an internal-only device on our network
  */
 public class InternalOnly extends Device {
 
-	public InternalOnly(InternalOnlyDeviceModel me) {
+	public InternalOnly(DeviceModel me) {
 		super(me);
 	}
 }

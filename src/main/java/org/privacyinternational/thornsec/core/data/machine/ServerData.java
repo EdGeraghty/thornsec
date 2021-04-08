@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -63,7 +64,6 @@ public class ServerData extends AMachineData {
 	}
 
 	private Set<HostName> sshSources;
-	private Set<String> profiles;
 	private Set<String> adminUsernames;
 	private final Set<IPAddress> remoteAdminIPAddresses;
 
@@ -89,9 +89,6 @@ public class ServerData extends AMachineData {
 		super(label);
 
 		this.sshSources = null;
-		this.profiles = null;
-
-		this.putType(MachineType.SERVER);
 
 		this.adminUsernames = null;
 		this.remoteAdminIPAddresses = null;
@@ -113,13 +110,12 @@ public class ServerData extends AMachineData {
 	}
 
 	@Override
-	public ServerData read(JsonObject data) throws ADataException {
-		super.read(data);
+	public ServerData read(JsonObject data, Path configFilePath) throws ADataException {
+		super.read(data, configFilePath);
 
 		readNICs(data);
 		readAdmins(data);
 		readSSHSources(data);
-		readTypes(data);
 		readProfiles(data);
 		readSSHSettings(data);
 		readUpdate(data);
@@ -133,13 +129,13 @@ public class ServerData extends AMachineData {
 	
 	private NetworkInterfaceData readNIC(Direction dir, JsonObject nic) throws ADataException {
 		NetworkInterfaceData newIface = new NetworkInterfaceData(getLabel());
-		newIface.read(nic);
+		newIface.read(nic, getConfigFilePath());
 		newIface.setDirection(dir);
 
 		Optional<NetworkInterfaceData> existingIface = getNetworkInterface(newIface.getIface());
 		if (existingIface.isPresent()) {
 			newIface = existingIface.get();
-			newIface.read(nic);
+			newIface.read(nic, getConfigFilePath());
 		}
 
 		return newIface;
@@ -316,32 +312,6 @@ public class ServerData extends AMachineData {
 	/**
 	 * @param data
 	 */
-	private void readProfiles(JsonObject data) {
-		if (!data.containsKey("profiles")) {
-			return;
-		}
-
-		data.getJsonArray("profiles").forEach(profile ->
-			putProfile(((JsonString)profile).getString())
-		);
-	}
-
-	/**
-	 * @param data
-	 */
-	private void readTypes(JsonObject data) {
-		if (!data.containsKey("types")) {
-			return;
-		}
-
-		data.getJsonArray("types").forEach(type ->
-			putType(((JsonString)type).getString())
-		);
-	}
-
-	/**
-	 * @param data
-	 */
 	private void readSSHSources(JsonObject data) {
 		if (!data.containsKey("ssh_sources")) {
 			return;
@@ -415,14 +385,6 @@ public class ServerData extends AMachineData {
 		this.adminSSHConnectPort = port;
 	}
 
-	private void putProfile(String... profiles) {
-		if (this.profiles == null) {
-			this.profiles = new LinkedHashSet<>();
-		}
-
-		this.profiles.addAll(Arrays.asList(profiles));
-	}
-
 	private void putSSHSource(HostName... sources) {
 		if (this.sshSources == null) {
 			this.sshSources = new LinkedHashSet<>();
@@ -492,10 +454,6 @@ public class ServerData extends AMachineData {
 
 	public final Optional<Boolean> getUpdate() {
 		return Optional.ofNullable(this.update);
-	}
-
-	public final Optional<Set<String>> getProfiles() {
-		return Optional.ofNullable(this.profiles);
 	}
 
 	public final Optional<Collection<IPAddress>> getSSHSources() {

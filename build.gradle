@@ -22,6 +22,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_15
 }
 
+compileJava {
+    //Stop it throwing arbitrary encoding errors
+    options.encoding = "UTF-8"
+}
+compileTestJava {
+    options.encoding = "UTF-8"
+}
+javadoc {
+    options.encoding = "UTF-8"
+}
+
 dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:28.2-jre'

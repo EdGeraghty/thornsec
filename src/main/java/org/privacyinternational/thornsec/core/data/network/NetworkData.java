@@ -9,17 +9,9 @@ package org.privacyinternational.thornsec.core.data.network;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -36,20 +28,14 @@ import inet.ipaddr.IPAddressString;
 import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
-import org.privacyinternational.thornsec.core.data.machine.AMachineData.MachineType;
-import org.privacyinternational.thornsec.core.data.machine.DedicatedData;
-import org.privacyinternational.thornsec.core.data.machine.ExternalDeviceData;
-import org.privacyinternational.thornsec.core.data.machine.HypervisorData;
-import org.privacyinternational.thornsec.core.data.machine.InternalDeviceData;
+import org.privacyinternational.thornsec.core.data.machine.DeviceData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
-import org.privacyinternational.thornsec.core.data.machine.UserDeviceData;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidJSONException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
-import org.privacyinternational.thornsec.core.exception.data.MissingPropertiesException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidMachineException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
@@ -73,10 +59,10 @@ public class NetworkData extends AData {
 
 	private Set<HostName> upstreamDNS;
 
-	private final Map<MachineType, IPAddress> subnets;
+	private Map<String, IPAddress> subnets;
 
-	private final Map<String, AMachineData> machines;
-	private final Map<String, UserData> users;
+	private final Set<AMachineData> machines;
+	private final Set<UserData> users;
 
 	/**
 	 * Create a new Network, populated with null values.
@@ -98,10 +84,10 @@ public class NetworkData extends AData {
 
 		this.upstreamDNS = null;
 
-		this.subnets = new Hashtable<>();
+		this.subnets = null;
 
-		this.machines = new LinkedHashMap<>();
-		this.users = new LinkedHashMap<>();
+		this.machines = new HashSet<>();
+		this.users = new HashSet<>();
 	}
 
 	/**
@@ -109,8 +95,8 @@ public class NetworkData extends AData {
 	 * @return 
 	 */
 	@Override
-	public NetworkData read(JsonObject networkJSONData) throws ADataException {
-		super.setData(networkJSONData);
+	public NetworkData read(JsonObject networkJSONData, Path configFilePath) throws ADataException {
+		super.read(networkJSONData, configFilePath);
 
 		readIncludes();
 		readUpstreamDNS();
@@ -128,25 +114,18 @@ public class NetworkData extends AData {
 		return this;
 	}
 
-	private HypervisorData readHyperVisor(String label, JsonObject hypervisorData)
+	private ServerData readHyperVisor(String label, JsonObject hypervisorData)
 			throws ADataException {
 
-		HypervisorData hv = new HypervisorData(label);
-		hv.read(getData());
-		hv.read(hypervisorData);
-
-		// They *should* contain information about their services
-		if (!hypervisorData.containsKey("services")) {
-			throw new MissingPropertiesException(label +
-					" doesn't contain any services. Please check your config");
-		}
+		ServerData hv = new ServerData(label);
+		hv.read(getData(), getConfigFilePath());
+		hv.read(hypervisorData, getConfigFilePath());
 
 		JsonObject services = hypervisorData.getJsonObject("services");
 
 		for (final String serviceLabel : services.keySet()) {
 			ServiceData service = readService(serviceLabel, services.getJsonObject(serviceLabel));
 
-			hv.addService(service);
 			service.setHypervisor(hv);
 
 			this.putMachine(service);
@@ -157,8 +136,8 @@ public class NetworkData extends AData {
 	
 	private ServiceData readService(String label, JsonObject serviceData) throws ADataException {
 		final ServiceData service = new ServiceData(label);
-		service.read(getData());
-		service.read(serviceData);
+		service.read(getData(), getConfigFilePath());
+		service.read(serviceData, getConfigFilePath());
 
 		return service;
 	}
@@ -177,18 +156,14 @@ public class NetworkData extends AData {
 		// We have to read it in first to find out what it is - we can then
 		// replace it with a specialised version
 		ServerData serverData = new ServerData(label);
-		serverData.read(getData()); //Read in network-level defaults
-		serverData.read(serverDataObject); //Read in server-specific settings
+		serverData.read(getData(), getConfigFilePath()); //Read in network-level defaults
+		serverData.read(serverDataObject, getConfigFilePath()); //Read in server-specific settings
 
 		// If we've just hit a hypervisor machine, we need to dig a little,
 		// because the services are nested inside
-		if (serverData.isType(MachineType.HYPERVISOR)) {
+		// They *should* contain information about their services
+		if (serverDataObject.containsKey("services")) {
 			serverData = readHyperVisor(label, serverDataObject);
-		}
-		else if (serverData.isType(MachineType.DEDICATED)) {
-			serverData = new DedicatedData(label);
-			serverData.read(getData()); //Read in network-level defaults
-			serverData.read(serverDataObject); //Read in server-specific settings
 		}
 
 		this.putMachine(serverData);
@@ -217,8 +192,10 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("users");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final UserDeviceData device = new UserDeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice));
+			final DeviceData device = new DeviceData(jsonDevice);
+			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+			device.putProfile("UserDevice");
 
 			if (device.getNetworkInterfaces().isPresent()) {
 				putMachine(device);
@@ -234,8 +211,10 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("guests");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final ExternalDeviceData device = new ExternalDeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice));
+			final DeviceData device = new DeviceData(jsonDevice);
+			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+			device.putProfile("ExternalDevice");
 
 			putMachine(device);
 		}
@@ -246,8 +225,10 @@ public class NetworkData extends AData {
 			final JsonObject jsonDevices = getData().getJsonObject("peripherals");
 
 			for (final String jsonDevice : jsonDevices.keySet()) {
-				final InternalDeviceData device = new InternalDeviceData(jsonDevice);
-				device.read(jsonDevices.getJsonObject(jsonDevice));
+				final DeviceData device = new DeviceData(jsonDevice);
+				device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+
+				device.putProfile("InternalDevice");
 
 				putMachine(device);
 			}
@@ -280,18 +261,20 @@ public class NetworkData extends AData {
 		final JsonObject jsonSubnets = getData().getJsonObject("subnets");
 
 		for (final String label : jsonSubnets.keySet()) {
-			String ip = ((JsonString)jsonSubnets.getJsonString(label)).getString();
+			String ip = (jsonSubnets.getJsonString(label)).getString();
 			readSubnet(label, ip);
 		}
 	}
 	
 	private void readSubnet(String label, String ip) throws InvalidIPAddressException, InvalidPropertyException {
+		if (null == this.subnets) {
+			this.subnets = new HashMap<>();
+		}
+
 		try {
-			this.subnets.put(MachineType.fromString(label), new IPAddressString(ip).toAddress());
+			this.subnets.put(label, new IPAddressString(ip).toAddress());
 		} catch (AddressStringException | IncompatibleAddressException e) {
 			throw new InvalidIPAddressException(ip + " is an invalid subnet");
-		} catch (InvalidTypeException e) {
-			throw new InvalidPropertyException(label + " is not a valid Machine Type");
 		}
 	}
 
@@ -456,7 +439,7 @@ public class NetworkData extends AData {
 			UserData user = new UserData(userLabel);
 			user.read(jsonUsers.getJsonObject(userLabel));
 
-			if (this.users.put(user.getLabel(), user) != null) {
+			if (!this.users.add(user)) {
 				throw new InvalidUserException("You have a duplicate user ("
 						+ user.getLabel() + ") in your network");
 			}
@@ -472,7 +455,7 @@ public class NetworkData extends AData {
 	 */
 	private void putMachine(AMachineData... machinesData) throws InvalidMachineException {
 		for (AMachineData machineData : machinesData) {
-			if (this.machines.put(machineData.getLabel(), machineData) != null) {
+			if (!this.machines.add(machineData)) {
 				throw new InvalidMachineException("You have a duplicate machine ("
 						+ machineData.getLabel() + ") in your network");
 			}
@@ -480,47 +463,19 @@ public class NetworkData extends AData {
 	}
 
 	/**
-	 * Get the MachineData for all machines on this network.
-	 * 
-	 * @return a map of all machines' data on the network, indexed by label
-	 */
-	public Map<String, AMachineData> getMachinesData() {
-		return this.machines;
-	}
-
-	/**
 	 * Get a given machine's data. You're not guaranteed that this machine is
 	 * there, if you're reading from a config file 
 	 *
 	 * @param label the label of the Machine you wish to get
-	 * @return
+	 * @return the Machine's data
 	 */
 	public AMachineData getMachineData(String label) {
-		return getMachinesData().get(label);
+		return getMachines().stream()
+				.filter(m -> m.getLabel().equalsIgnoreCase(label))
+				.findFirst()
+				.get();
 	}
 	
-	private Set<HostName> getHostNameArray(String key) throws InvalidHostException {
-		if (!getData().containsKey(key)) {
-			return null;
-		}
-
-		Set<HostName> hosts = new HashSet<>();
-		final JsonArray jsonHosts = getData().getJsonArray(key);
-
-		for (final JsonValue jsonHost : jsonHosts) {
-			HostName host = new HostName(((JsonString) jsonHost).getString());
-
-			if (!host.isValid()) {
-				throw new InvalidHostException(((JsonString) jsonHost).getString()
-						+ " is an invalid host");
-			}
-
-			hosts.add(host);
-		}
-
-		return hosts;
-	}
-
 	// Network only data
 	public final String getUser() throws NoValidUsersException {
 		if (this.myUser == null) {
@@ -595,11 +550,11 @@ public class NetworkData extends AData {
 		return Optional.ofNullable(this.domain);
 	}
 
-	public Optional<Map<MachineType, IPAddress>> getSubnets() {
+	public Optional<Map<String, IPAddress>> getSubnets() {
 		return Optional.ofNullable(this.subnets);
 	}
 
-	public Optional<IPAddress> getSubnet(MachineType subnet) {
+	public Optional<IPAddress> getSubnet(String subnet) {
 		return Optional.ofNullable(this.subnets.get(subnet));
 	}
 
@@ -611,7 +566,7 @@ public class NetworkData extends AData {
 		return Optional.ofNullable(getMachineData(machine).getData().getJsonObject(properties));
 	}
 
-	public Map<String, AMachineData> getMachines() {
+	public Set<AMachineData> getMachines() {
 		////assertNotNull(this.machines);
 
 		return this.machines;
@@ -620,19 +575,16 @@ public class NetworkData extends AData {
 	/**
 	 * Gets all machines which have a given Type declared in their Data
 	 * @param type The type of machines to get
-	 * @return Optionally a Map of machines, indexed by their label
+	 * @return Optionally a specialised Set of machineDatas
 	 */
-	public Optional<Map<String, AMachineData>> getMachines(MachineType type) {
-		Map<String, AMachineData> machines = getMachines().entrySet()
-				.stream()
-				.filter(Objects::nonNull)
-				.filter(kvp -> kvp.getValue().isType(type))
-				.collect(Collectors.toMap(kvp -> kvp.getKey(), kvp -> kvp.getValue()));
-
-		return Optional.ofNullable(machines);
+	public Set<AMachineData> getMachines(Class<AMachineData> type) {
+		return getMachines().stream()
+				.filter(type::isInstance)
+				.map(type::cast)
+				.collect(Collectors.toSet());
 	}
 
-	public Map<String, UserData> getUsers() {
+	public Set<UserData> getUsers() {
 		return this.users;
 	}
 }
