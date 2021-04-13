@@ -5,14 +5,12 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirMountedUnit;

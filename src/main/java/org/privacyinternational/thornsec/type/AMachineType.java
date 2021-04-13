@@ -1,4 +1,4 @@
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,12 +11,12 @@ import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 /**
  * This class represents configurations on a Machine on your network
  */
-public abstract class AMachine extends AStructuredProfile {
+public abstract class AMachineType extends AStructuredProfile {
 	
-	public AMachine(AMachineModel me) {
+	public AMachineType(AMachineModel me) {
 		super(me);
 	}
-	
+
 	@Override
 	public Collection<IUnit> getPersistentConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();

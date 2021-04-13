@@ -5,14 +5,14 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 /**
  * This is a device on our network
  */
-public class Device extends AMachine {
+public class Device extends AMachineType {
 
 	public Device(DeviceModel me) {
 		super(me);
