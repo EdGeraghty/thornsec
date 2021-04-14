@@ -62,6 +62,7 @@ public class ServerModel extends AMachineModel {
 		return (ServerData) super.getData();
 	}
 
+	@Override
 	public void init() throws AThornSecException {
 		this.setOS(getOS());
 		this.addProfiles();
