@@ -45,7 +45,7 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	public ISCDHCPServer(ServerModel me) throws AThornSecException {
 		super(me);
 
-		me.addProcessString("/usr/sbin/dhcpd -4 -q -cf /etc/dhcp/dhcpd.conf");
+		//me.addProcessString("/usr/sbin/dhcpd -4 -q -cf /etc/dhcp/dhcpd.conf");
 	}
 
 	/**
