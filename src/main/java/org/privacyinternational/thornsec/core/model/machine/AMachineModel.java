@@ -79,7 +79,13 @@ public abstract class AMachineModel extends AModel {
 	}
 
 	private void setTypeFromData() throws InvalidProfileException {
-		this.type = reflectedType(getData().getType());
+		String type = getData().getType();
+
+		if (null == type || type.equals("")) {
+			throw new InvalidProfileException("Must provide a type for " + getLabel());
+		}
+
+		this.type = reflectedType(type);
 	}
 
 	protected AProfile reflectedProfile(String profile) throws InvalidProfileException {
