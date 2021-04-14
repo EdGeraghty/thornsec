@@ -7,13 +7,10 @@
  */
 package org.privacyinternational.thornsec.profile.dhcp;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import inet.ipaddr.AddressStringException;
+import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
-import inet.ipaddr.ipv4.IPv4Address;
+import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
@@ -28,8 +25,9 @@ import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.EnabledServiceUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.RunningUnit;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.IncompatibleAddressException;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Configure and set up our various different networks, and offer IP addresses
