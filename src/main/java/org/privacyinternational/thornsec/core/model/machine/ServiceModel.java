@@ -147,7 +147,7 @@ public class ServiceModel extends ServerModel {
 						.orElse(100);
 	}
 
-	public Collection<? extends IUnit> getUserPasswordUnits() {
+	public Collection<IUnit> getUserPasswordUnits() {
 		// TODO Auto-generated method stub
 		return new ArrayList<>();
 	}

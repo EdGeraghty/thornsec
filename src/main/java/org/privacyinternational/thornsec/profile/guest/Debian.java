@@ -34,8 +34,8 @@ class PreseedFile extends FileUnit {
 	
 	public PreseedFile() {
 		super("preseed", "proceed", null);
-		this.lateCommand = new LinkedHashSet<String>();
-		this.debianInstaller = new LinkedHashSet<String>();
+		this.lateCommand = new LinkedHashSet<>();
+		this.debianInstaller = new LinkedHashSet<>();
 	}
 
 	private void buildSuper() {
