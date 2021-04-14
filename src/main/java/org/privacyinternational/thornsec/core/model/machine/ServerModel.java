@@ -49,8 +49,8 @@ public class ServerModel extends AMachineModel {
 
 		this.os = null;
 
-		this.runningProcesses = null;//new Processes(this);
-		this.users = null;//new UserAccounts(this);
+		this.runningProcesses = new Processes(this);
+		this.users = new UserAccounts(this);
 		this.firewall = null;//new ShorewallFirewall(this);
 
 		this.iso = null;
