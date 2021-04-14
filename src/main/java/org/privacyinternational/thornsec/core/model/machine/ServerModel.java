@@ -7,18 +7,11 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidGuestOSException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidProfileException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.model.network.UserModel;
@@ -26,12 +19,15 @@ import org.privacyinternational.thornsec.core.profile.AProfile;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileAppendUnit;
 import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
-import org.privacyinternational.thornsec.profile.firewall.router.ShorewallFirewall;
 import org.privacyinternational.thornsec.profile.guest.AOS;
 import org.privacyinternational.thornsec.profile.guest.Alpine;
 import org.privacyinternational.thornsec.profile.guest.Debian;
 import org.privacyinternational.thornsec.profile.machine.configuration.Processes;
 import org.privacyinternational.thornsec.profile.machine.configuration.UserAccounts;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * This Class represents a Server. It is either used directly, or is called via
@@ -43,8 +39,6 @@ public class ServerModel extends AMachineModel {
 	private final AFirewallProfile firewall;
 	// private final ConfigFiles configFiles;
 	private final UserAccounts users;
-	
-	private final Map<String, AProfile> profiles;
 
 	private AOS os;
 	private String iso;
@@ -54,10 +48,9 @@ public class ServerModel extends AMachineModel {
 		super(myData, networkModel);
 
 		this.os = null;
-		this.profiles = new LinkedHashMap<>();
 
-		this.runningProcesses = new Processes(this);
-		this.users = new UserAccounts(this);
+		this.runningProcesses = null;//new Processes(this);
+		this.users = null;//new UserAccounts(this);
 		this.firewall = null;//new ShorewallFirewall(this);
 
 		this.iso = null;
@@ -81,23 +74,6 @@ public class ServerModel extends AMachineModel {
 		this.isoSHA512 = getData().getIsoSha512();
 	}
 
-	protected AProfile reflectedProfile(String profile) throws InvalidProfileException {
-		Collection<Class<?>> classes;
-		try {
-			classes = new ClassesInPackageScanner()
-					.setResourceNameFilter((packageName, fileName) ->
-							fileName.equals(profile + ".class"))
-					.scan("org.privacyinternational.thornsec.profile");
-
-			return (AProfile) Class.forName(classes.iterator().next().getName())
-					.getDeclaredConstructor(ServerModel.class)
-					.newInstance(this);
-		} catch (Exception e) {
-			throw new InvalidProfileException("Profile " + profile + " threw an"
-					+ " exception\n\n" + e.getLocalizedMessage());
-		}
-	}
-
 	private void addAdmins() throws InvalidUserException {
 		if (getData().getAdmins().isPresent()) {
 			addAdmins(getData().getAdmins().get());
@@ -114,20 +90,6 @@ public class ServerModel extends AMachineModel {
 				throw new InvalidUserException(username);
 			}
 		}
-	}
-
-	private void addProfiles() throws InvalidProfileException {
-		if (getData().getProfiles().isEmpty()) {
-			return;
-		}
-
-		for (String profile : getData().getProfiles().get()) {
-			addProfile(profile);
-		}
-	}
-
-	private void addProfile(String profile) throws InvalidProfileException {
-		this.profiles.put(profile, reflectedProfile(profile));
 	}
 
 	@Override
@@ -207,10 +169,6 @@ public class ServerModel extends AMachineModel {
 
 	public Boolean getAutoUpdate() {
 		return getData().getUpdate().orElse(true);
-	}
-
-	public Map<String, AProfile> getProfiles() {
-		return this.profiles;
 	}
 
 	public Integer getSSHListenPort() {
