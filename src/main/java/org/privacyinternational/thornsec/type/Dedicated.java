@@ -5,7 +5,7 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 
@@ -13,7 +13,7 @@ import org.privacyinternational.thornsec.core.model.machine.ServerModel;
  * This is a dedicated server on your network. This is something ThornSec needs
  * to know about, but shouldn't attempt to configure
  */
-public class Dedicated extends AMachine {
+public class Dedicated extends AMachineType {
 
 	public Dedicated(ServerModel me)  {
 		super(me);

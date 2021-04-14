@@ -127,6 +127,7 @@ public class NetworkData extends AData {
 			ServiceData service = readService(serviceLabel, services.getJsonObject(serviceLabel));
 
 			service.setHypervisor(hv);
+			service.setType("Service");
 
 			this.putMachine(service);
 		}
@@ -179,8 +180,7 @@ public class NetworkData extends AData {
 
 	private void readMachines() throws ADataException {
 		readServers();
-		readInternalDevices();
-		readExternalDevices();
+		readDevices();
 		readUserDevices();
 	}
 
@@ -195,7 +195,7 @@ public class NetworkData extends AData {
 			final DeviceData device = new DeviceData(jsonDevice);
 			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
 
-			device.putProfile("UserDevice");
+			device.setType("User");
 
 			if (device.getNetworkInterfaces().isPresent()) {
 				putMachine(device);
@@ -203,36 +203,19 @@ public class NetworkData extends AData {
 		}
 	}
 
-	private void readExternalDevices() throws ADataException {
-		if (!getData().containsKey("guests")) {
+	private void readDevices() throws ADataException {
+		if (!getData().containsKey("devices")) {
 			return;
 		}
 
-		final JsonObject jsonDevices = getData().getJsonObject("guests");
+		final JsonObject jsonDevices = getData().getJsonObject("devices");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
 			final DeviceData device = new DeviceData(jsonDevice);
 			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
 
-			device.putProfile("ExternalDevice");
-
 			putMachine(device);
 		}
-	}
-
-	private void readInternalDevices() throws ADataException {
-		if (getData().containsKey("peripherals")) {
-			final JsonObject jsonDevices = getData().getJsonObject("peripherals");
-
-			for (final String jsonDevice : jsonDevices.keySet()) {
-				final DeviceData device = new DeviceData(jsonDevice);
-				device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
-
-				device.putProfile("InternalDevice");
-
-				putMachine(device);
-			}
-		}	
 	}
 
 	private void readServers() throws ADataException {
@@ -567,8 +550,6 @@ public class NetworkData extends AData {
 	}
 
 	public Set<AMachineData> getMachines() {
-		////assertNotNull(this.machines);
-
 		return this.machines;
 	}
 

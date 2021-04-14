@@ -7,15 +7,9 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import org.privacyinternational.thornsec.core.data.machine.ServiceData;
-import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
+import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
+import org.privacyinternational.thornsec.core.data.machine.ServiceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
@@ -28,6 +22,9 @@ import org.privacyinternational.thornsec.core.model.machine.configuration.disks.
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.HardDiskModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.DHCPClientInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * This model represents a Service on our network.
@@ -42,8 +39,7 @@ public class ServiceModel extends ServerModel {
 	private static final Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
 	private static final Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
 
-	public ServiceModel(ServerData myData, NetworkModel networkModel)
-			throws AThornSecException {
+	public ServiceModel(ServerData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData, networkModel);
 
 		if (null == this.getNetworkInterfaces()) {
@@ -64,9 +60,9 @@ public class ServiceModel extends ServerModel {
 
 		this.hypervisor = (ServerModel) getNetworkModel()
 											.getMachineModel(
-													getData()
-														.getHypervisor()
-														.getLabel()
+												getData()
+													.getHypervisor()
+													.getLabel()
 											)
 											.orElseThrow();
 
@@ -151,7 +147,7 @@ public class ServiceModel extends ServerModel {
 						.orElse(100);
 	}
 
-	public Collection<? extends IUnit> getUserPasswordUnits() {
+	public Collection<IUnit> getUserPasswordUnits() {
 		// TODO Auto-generated method stub
 		return new ArrayList<>();
 	}

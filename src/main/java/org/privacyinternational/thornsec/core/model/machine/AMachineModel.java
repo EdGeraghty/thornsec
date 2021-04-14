@@ -7,18 +7,9 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
+import inet.ipaddr.*;
+import inet.ipaddr.mac.MACAddress;
 import org.privacyinternational.thornsec.core.StringUtils;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
@@ -29,18 +20,22 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.Traffic
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
+import org.privacyinternational.thornsec.core.exception.runtime.InvalidProfileException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.DHCPClientInterfaceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.StaticInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
-import inet.ipaddr.AddressStringException;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.IncompatibleAddressException;
-import inet.ipaddr.MACAddressString;
-import inet.ipaddr.mac.MACAddress;
+import org.privacyinternational.thornsec.core.profile.AProfile;
+import org.privacyinternational.thornsec.type.AMachineType;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.beans.Expression;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * This class represents a Machine on our network.
@@ -50,9 +45,12 @@ import inet.ipaddr.mac.MACAddress;
  * This is where we stash our various networking rules
  */
 public abstract class AMachineModel extends AModel {
+	private final Map<String, AProfile> profiles;
+	private AMachineType type;
+
 	private Map<String, NetworkInterfaceModel> networkInterfaces;
 
-	private NetworkModel networkModel;
+	private final NetworkModel networkModel;
 
 	private HostName domain;
 	private Set<String> cnames;
@@ -69,12 +67,56 @@ public abstract class AMachineModel extends AModel {
 
 		this.networkModel = networkModel;
 
-		setEmailFromData(myData);
-		setNICsFromData(myData);
-		setDomainFromData(myData);
-		setCNAMEsFromData(myData);
-		setExternalIPsFromData(myData);
-		setFirewallFromData(myData);
+		setEmailFromData();
+		setNICsFromData();
+		setDomainFromData();
+		setCNAMEsFromData();
+		setExternalIPsFromData();
+		setFirewallFromData();
+
+		this.profiles = new LinkedHashMap<>();
+		setTypeFromData();
+	}
+
+	private void setTypeFromData() throws InvalidProfileException {
+		String type = getData().getType();
+
+		if (null == type || type.equals("")) {
+			throw new InvalidProfileException("Must provide a type for " + getLabel());
+		}
+
+		this.type = reflectedType(type);
+	}
+
+	protected AProfile reflectedProfile(String profile) throws InvalidProfileException {
+		Collection<Class<?>> classes;
+		try {
+			classes = new ClassesInPackageScanner()
+					.setResourceNameFilter((packageName, fileName) ->
+							fileName.equals(profile + ".class"))
+					.scan("org.privacyinternational.thornsec.profile");
+
+			return (AProfile) Class.forName(classes.iterator().next().getName())
+					.getDeclaredConstructor(ServerModel.class)
+					.newInstance(this);
+		} catch (Exception e) {
+			throw new InvalidProfileException("Profile " + profile + " threw an"
+					+ " exception\n\n" + e.getLocalizedMessage());
+		}
+	}
+
+	protected void addProfiles() throws InvalidProfileException {
+		if (getData().getProfiles().isEmpty()) {
+			return;
+		}
+
+		for (String profile : getData().getProfiles().get()) {
+			addProfile(profile);
+		}
+	}
+
+	private void addProfile(String profile) throws InvalidProfileException {
+		this.profiles.put(profile, reflectedProfile(profile));
 	}
 
 	@Override
@@ -86,37 +128,36 @@ public abstract class AMachineModel extends AModel {
 		return networkModel;
 	}
 
-	private void setFirewallFromData(AMachineData myData) {
-		this.firewallRules = myData.getTrafficRules();
+	private void setFirewallFromData() {
+		this.firewallRules = getData().getTrafficRules();
 	}
 
 	public void addFirewallRule(TrafficRule rule) {
 		this.firewallRules.add(rule);
 	}
 
-	private void setExternalIPsFromData(AMachineData myData) {
-		this.externalIPs = myData.getExternalIPs();	
+	private void setExternalIPsFromData() {
+		this.externalIPs = getData().getExternalIPs();
 	}
 
-	private void setCNAMEsFromData(AMachineData myData) {
-		this.cnames = myData.getCNAMEs().orElse(new LinkedHashSet<>());
+	private void setCNAMEsFromData() {
+		this.cnames = getData().getCNAMEs().orElse(new LinkedHashSet<>());
 	}
 
-	private void setDomainFromData(AMachineData myData) {
-		this.domain = myData.getDomain().orElse(new HostName("lan"));
+	private void setDomainFromData() {
+		this.domain = getData().getDomain().orElse(new HostName("lan"));
 	}
 
 	/**
 	 * Set up and initialise our various NICs as set from our Data
-	 * @param myData
 	 * @throws AThornSecException
 	 */
-	private void setNICsFromData(AMachineData myData) throws AThornSecException {
-		if (myData.getNetworkInterfaces().isEmpty()) {
+	private void setNICsFromData() throws AThornSecException {
+		if (getData().getNetworkInterfaces().isEmpty()) {
 			return;
 		}
 
-		for (NetworkInterfaceData nicData : myData.getNetworkInterfaces().get().values()) {
+		for (NetworkInterfaceData nicData : getData().getNetworkInterfaces().get().values()) {
 			NetworkInterfaceModel nicModel = buildNICFromData(nicData);
 			nicModel.init();
 			this.addNetworkInterface(nicModel);
@@ -137,9 +178,9 @@ public abstract class AMachineModel extends AModel {
 		return nicModel;
 	}
 
-	private void setEmailFromData(AMachineData myData) {
+	private void setEmailFromData() {
 		try {
-			this.emailAddress = myData.getEmailAddress()
+			this.emailAddress = getData().getEmailAddress()
 					.orElse(new InternetAddress(getLabel() + "@" + getDomain()));
 		} catch (AddressException e) {
 			;; // You should not be able to get here. 
@@ -437,4 +478,31 @@ public abstract class AMachineModel extends AModel {
 	public void addDNAT(AMachineModel originalDestination, Integer... ports) throws InvalidPortException {
 		addDNAT(Encapsulation.TCP, originalDestination, ports);
 	}
+
+	protected AMachineType reflectedType(String type) throws InvalidProfileException {
+		Class<?> typeClass;
+		try {
+			typeClass = new ClassesInPackageScanner()
+								.setResourceNameFilter((packageName, fileName) ->
+									fileName.equals(type + ".class")
+								)
+								.scan("org.privacyinternational.thornsec.type")
+								.iterator().next();
+
+			return (AMachineType) new Expression(typeClass, "new", new Object[]{this}).getValue();
+		} catch (Exception e) {
+			throw new InvalidProfileException("Type " + type + " threw an"
+					+ " exception\n\n" + e.getLocalizedMessage());
+		}
+	}
+
+	public Map<String, AProfile> getProfiles() {
+		return this.profiles;
+	}
+
+	@Override
+	public AMachineData getData() {
+		return (AMachineData) super.getData();
+	}
+
 }

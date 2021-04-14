@@ -7,11 +7,11 @@
  */
 package org.privacyinternational.thornsec.core;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.privacyinternational.thornsec.core.model.network.ThornsecModel;
 import org.privacyinternational.thornsec.core.view.FullFrame;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Main {
 
@@ -39,7 +39,13 @@ public class Main {
 
 		final ThornsecModel model = new ThornsecModel();
 		model.read(jsonPath);
-		model.init();
+
+		try {
+			model.init();
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getLocalizedMessage());
+		}
 
 		new FullFrame(model);
 	}

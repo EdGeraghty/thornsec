@@ -116,7 +116,6 @@ public class ServerData extends AMachineData {
 		readNICs(data);
 		readAdmins(data);
 		readSSHSources(data);
-		readProfiles(data);
 		readSSHSettings(data);
 		readUpdate(data);
 		readMirror(data);

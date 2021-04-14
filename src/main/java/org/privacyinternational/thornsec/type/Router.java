@@ -5,7 +5,7 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +41,7 @@ import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
  *
  * If you want to make changes in here, you'll have a lot of reading to do :)!
  */
-public class Router extends AMachine {
+public class Router extends AMachineType {
 	private final ADNSServerProfile dnsServer;
 	private final ADHCPServerProfile dhcpServer;
 	private final AFirewallProfile firewall;

@@ -5,7 +5,7 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
@@ -13,10 +13,6 @@ import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
-import org.privacyinternational.thornsec.core.unit.SimpleUnit;
-import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import org.privacyinternational.thornsec.profile.HypervisorScripts;
 import org.privacyinternational.thornsec.profile.hypervisor.AHypervisorProfile;
@@ -25,7 +21,6 @@ import org.privacyinternational.thornsec.profile.hypervisor.Virtualbox;
 import javax.json.stream.JsonParsingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * This is the representation of your HyperVisor itself.
@@ -33,7 +28,7 @@ import java.util.Set;
  * These are things which should be done on a HyperVisor machine, regardless of
  * what hypervisor layer it's actually running
  */
-public class Hypervisor extends AMachine {
+public class Hypervisor extends AMachineType {
 
 	private final AHypervisorProfile virtualbox;
 	private final HypervisorScripts scripts;

@@ -5,7 +5,7 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
@@ -19,7 +19,7 @@ import java.util.LinkedHashSet;
 /**
  * This is a User Device
  */
-public class User extends AMachine {
+public class User extends AMachineType {
 
 	public User(DeviceModel me) {
 		super(me);

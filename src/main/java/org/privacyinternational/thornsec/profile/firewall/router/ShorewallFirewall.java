@@ -11,8 +11,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.privacyinternational.thornsec.core.StringUtils;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
@@ -38,7 +36,7 @@ import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import inet.ipaddr.HostName;
 import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
-import org.privacyinternational.thornsec.profile.type.Router;
+import org.privacyinternational.thornsec.type.Router;
 
 /**
  * For more information on this Firewall, please see

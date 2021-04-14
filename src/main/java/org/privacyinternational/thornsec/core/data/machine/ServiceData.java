@@ -17,7 +17,7 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.DiskDat
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
-import org.privacyinternational.thornsec.profile.type.Hypervisor;
+import org.privacyinternational.thornsec.type.Hypervisor;
 
 /**
  * This Class represents the data of a Service For our purposes, this is

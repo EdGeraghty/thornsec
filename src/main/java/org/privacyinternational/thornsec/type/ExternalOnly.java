@@ -5,7 +5,7 @@
  *
  * Pull requests encouraged.
  */
-package org.privacyinternational.thornsec.profile.type;
+package org.privacyinternational.thornsec.type;
 
 import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;

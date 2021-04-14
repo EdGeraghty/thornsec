@@ -19,7 +19,6 @@ import org.privacyinternational.thornsec.core.exec.network.APassphrase;
 import org.privacyinternational.thornsec.core.exec.network.OpenKeePassPassphrase;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.model.network.UserModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
@@ -35,8 +34,8 @@ class PreseedFile extends FileUnit {
 	
 	public PreseedFile() {
 		super("preseed", "proceed", null);
-		this.lateCommand = new LinkedHashSet<String>();
-		this.debianInstaller = new LinkedHashSet<String>();
+		this.lateCommand = new LinkedHashSet<>();
+		this.debianInstaller = new LinkedHashSet<>();
 	}
 
 	private void buildSuper() {

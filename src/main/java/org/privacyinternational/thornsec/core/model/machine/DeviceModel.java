@@ -24,7 +24,7 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 			throws AThornSecException  {
 		super(myData, networkModel);
 
-		this.managed = myData.isManaged().orElse(false);
+		this.managed = getData().isManaged().orElse(false);
 	}
 
 	final public Boolean isManaged() {
@@ -50,5 +50,10 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 	@Override
 	public void init() throws AThornSecException {
 
+	}
+
+	@Override
+	public DeviceData getData() {
+		return (DeviceData) super.getData();
 	}
 }
