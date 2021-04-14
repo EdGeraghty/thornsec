@@ -42,8 +42,7 @@ public class ServiceModel extends ServerModel {
 	private static final Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
 	private static final Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
 
-	public ServiceModel(ServerData myData, NetworkModel networkModel)
-			throws AThornSecException {
+	public ServiceModel(ServerData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData, networkModel);
 
 		if (null == this.getNetworkInterfaces()) {
@@ -64,9 +63,9 @@ public class ServiceModel extends ServerModel {
 
 		this.hypervisor = (ServerModel) getNetworkModel()
 											.getMachineModel(
-													getData()
-														.getHypervisor()
-														.getLabel()
+												getData()
+													.getHypervisor()
+													.getLabel()
 											)
 											.orElseThrow();
 
