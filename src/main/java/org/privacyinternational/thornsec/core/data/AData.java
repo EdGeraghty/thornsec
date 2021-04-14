@@ -7,7 +7,6 @@
  */
 package org.privacyinternational.thornsec.core.data;
 
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -70,8 +69,6 @@ public class AData {
 	 * @return the object label
 	 */
 	public final String getLabel() {
-		////assertNotNull(this.label);
-
 		return this.label;
 	}
 

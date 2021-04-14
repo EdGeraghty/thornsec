@@ -550,8 +550,6 @@ public class NetworkData extends AData {
 	}
 
 	public Set<AMachineData> getMachines() {
-		////assertNotNull(this.machines);
-
 		return this.machines;
 	}
 
