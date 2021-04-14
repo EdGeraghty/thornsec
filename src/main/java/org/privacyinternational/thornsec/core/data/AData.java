@@ -52,9 +52,6 @@ public class AData {
 	 * @param configFilePath path to the config file the data came from
 	 * @return 
 	 * @throws ADataException
-	 * @throws IOException
-	 * @throws JsonParsingException
-	 * @throws URISyntaxException
 	 */
 	public AData read(JsonObject data, Path configFilePath) throws ADataException {
 		this.configFilePath = configFilePath;
@@ -91,9 +88,9 @@ public class AData {
 	}
 
 	/**
-	 * Sets the object's data.
+	 * Set the object's data
 	 *
-	 * @param data the new data
+	 * @param data
 	 */
 	public final void setData(JsonObject data) {
 		this.data = data;
