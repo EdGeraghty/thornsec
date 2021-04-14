@@ -19,7 +19,6 @@ import org.privacyinternational.thornsec.core.exec.network.APassphrase;
 import org.privacyinternational.thornsec.core.exec.network.OpenKeePassPassphrase;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
 import org.privacyinternational.thornsec.core.model.network.UserModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
