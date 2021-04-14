@@ -7,21 +7,10 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
+import inet.ipaddr.AddressStringException;
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
+import inet.ipaddr.IPAddressString;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
@@ -32,11 +21,15 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressExc
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidEmailAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidTypeException;
-import inet.ipaddr.AddressStringException;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Abstract class for something representing a "Machine" on our network.
@@ -47,6 +40,8 @@ import inet.ipaddr.IPAddressString;
  */
 public abstract class AMachineData extends AData {
 	public static Boolean DEFAULT_IS_THROTTLED = true;
+
+	protected String type;
 	protected Set<String> profiles;
 
 	private Map<String, NetworkInterfaceData> networkInterfaces;
@@ -72,7 +67,9 @@ public abstract class AMachineData extends AData {
 		this.externalIPAddresses = new LinkedHashSet<>();
 		this.cnames = new LinkedHashSet<>();
 		this.trafficRules = new LinkedHashSet<>();
+
 		this.profiles = null;
+		this.type = null;
 	}
 
 	@Override
@@ -83,10 +80,23 @@ public abstract class AMachineData extends AData {
 		readDomain();
 		readCNAMEs();
 		readFirewallRules();
+		readProfiles();
+		readType();
 
 		return this;
 	}
 
+	private void readType() {
+		if (!getData().containsKey("type")) {
+			return;
+		}
+
+		setType(getData().getString("type"));
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 	/**
 	 * Read in any firewall-related data
 	 * 
@@ -375,14 +385,13 @@ public abstract class AMachineData extends AData {
 	}
 
 	/**
-	 * @param data
 	 */
-	protected void readProfiles(JsonObject data) {
-		if (!data.containsKey("profiles")) {
+	protected void readProfiles() {
+		if (!getData().containsKey("profiles")) {
 			return;
 		}
 
-		data.getJsonArray("profiles").forEach(profile ->
+		getData().getJsonArray("profiles").forEach(profile ->
 			putProfile(((JsonString)profile).getString())
 		);
 	}
@@ -393,6 +402,10 @@ public abstract class AMachineData extends AData {
 		}
 
 		this.profiles.addAll(Arrays.asList(profiles));
+	}
+
+	public final String getType() {
+		return this.type;
 	}
 
 	public final Optional<Set<String>> getProfiles() {
