@@ -1,3 +1,10 @@
+/*
+ * This code is part of the ThornSec project.
+ *
+ * To learn more, please head to its GitHub repo: @privacyint
+ *
+ * Pull requests encouraged.
+ */
 package org.privacyinternational.thornsec.type;
 
 import java.util.ArrayList;
@@ -10,7 +17,9 @@ import org.privacyinternational.thornsec.core.model.machine.configuration.networ
 import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 
 /**
- * This class represents configurations on a Machine on your network
+ * Any machine on a given network can only be of one Type, and that is represented here.
+ *
+ * A Type is designed to translate Core's Models into their functional counterparts.
  */
 public class AMachineType extends AStructuredProfile {
 	
@@ -18,6 +27,11 @@ public class AMachineType extends AStructuredProfile {
 		super(me);
 	}
 
+	/**
+	 * Returns all Units for configuring this Type
+	 * @return All units pertaining to this Type
+	 * @throws AThornSecException if something goes wrong
+	 */
 	@Override
 	public Collection<IUnit> getUnits() throws AThornSecException {
 		Collection<IUnit> units = new ArrayList<>(getNetworkInterfaceUnits());
