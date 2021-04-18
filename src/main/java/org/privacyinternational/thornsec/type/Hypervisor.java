@@ -51,8 +51,6 @@ public class Hypervisor extends AMachineType {
 
 		units.addAll(this.virtualbox.getInstalled());
 
-		//units.add(new DirUnit("thornsec_base_dir", "proceed", getVMBase().getAbsolutePath()));
-
 		units.add(new InstalledUnit("whois", "proceed", "whois"));
 		units.add(new InstalledUnit("tmux", "proceed", "tmux"));
 		units.add(new InstalledUnit("socat", "proceed", "socat"));
@@ -90,11 +88,6 @@ public class Hypervisor extends AMachineType {
 	@Override
 	public Collection<IUnit> getLiveConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
-
-//		getServerModel().getServices().forEach(service -> {
-//			units.addAll(service.getUserPasswordUnits());
-//			units.addAll(virtualbox.buildServiceVM(service, getNetworkBridge()));
-//		});
 		
 		units.addAll(this.virtualbox.getLiveConfig());
 
