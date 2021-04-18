@@ -14,7 +14,6 @@ import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineMo
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
-import org.privacyinternational.thornsec.profile.HypervisorScripts;
 import org.privacyinternational.thornsec.profile.hypervisor.AHypervisorProfile;
 import org.privacyinternational.thornsec.profile.hypervisor.Virtualbox;
 
@@ -31,7 +30,6 @@ import java.util.Collection;
 public class Hypervisor extends AMachineType {
 
 	private final AHypervisorProfile virtualbox;
-	private final HypervisorScripts scripts;
 
 	/**
 	 * Create a new HyperVisor box, with initialised NICs, and initialise the
@@ -45,7 +43,6 @@ public class Hypervisor extends AMachineType {
 		super(me);
 
 		this.virtualbox = new Virtualbox(me);
-		this.scripts = new HypervisorScripts(me);
 	}
 
 	@Override
@@ -53,14 +50,13 @@ public class Hypervisor extends AMachineType {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(this.virtualbox.getInstalled());
-		units.addAll(this.scripts.getInstalled());
 
 		//units.add(new DirUnit("thornsec_base_dir", "proceed", getVMBase().getAbsolutePath()));
 
 		units.add(new InstalledUnit("whois", "proceed", "whois"));
 		units.add(new InstalledUnit("tmux", "proceed", "tmux"));
 		units.add(new InstalledUnit("socat", "proceed", "socat"));
-
+		units.add(new InstalledUnit("metal_git", "proceed", "git"));
 		return units;
 	}
 
@@ -69,7 +65,6 @@ public class Hypervisor extends AMachineType {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(this.virtualbox.getPersistentConfig());
-		units.addAll(this.scripts.getPersistentConfig());
 
 		return units;
 	}
@@ -79,7 +74,6 @@ public class Hypervisor extends AMachineType {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(this.virtualbox.getPersistentFirewall());
-		units.addAll(this.scripts.getPersistentFirewall());
 
 		return units;
 	}
@@ -103,7 +97,6 @@ public class Hypervisor extends AMachineType {
 //		});
 		
 		units.addAll(this.virtualbox.getLiveConfig());
-		units.addAll(this.scripts.getLiveConfig());
 
 		return units;
 	}
