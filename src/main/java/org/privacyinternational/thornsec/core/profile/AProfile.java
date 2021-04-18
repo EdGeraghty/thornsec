@@ -17,8 +17,6 @@ public abstract class AProfile implements IProfile {
 	private final AMachineModel me;
 
 	protected AProfile(AMachineModel me) {
-//		//assertNotNull(me);
-
 		this.me = me;
 	}
 
