@@ -52,14 +52,4 @@ public class Service extends Server {
 	public ServiceModel getServerModel() {
 		return (ServiceModel) super.getServerModel();
 	}
-
-	@Override
-	public Collection<IUnit> getPersistentFirewall() throws AThornSecException {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		units.addAll(super.getPersistentFirewall());
-//		//getMachineModel().addEgress("download.virtualbox.org");
-
-		return units;
-	}
 }
