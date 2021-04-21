@@ -106,15 +106,6 @@ public class Debian extends AOS {
 		units.add(new InstalledUnit("net_tools", "proceed", "net-tools"));
 		units.add(new InstalledUnit("htop", "proceed", "htop"));
 
-		// Before we go any further... now the machine is at least up to date, and has a
-		// couple of useful diagnostics packages installed...
-		getMachineModel().getNetworkInterfaces().forEach(nic -> {
-			nic.getNetworkFile().ifPresent(file -> units.add(file));
-			nic.getNetDevFile().ifPresent(file -> units.add(file));
-		});
-
-		units.addAll(this.aptSources.getUnits());
-
 		units.addAll(super.getInstalled());
 		
 		units.add(new SimpleUnit("apt_autoremove", "proceed", "sudo apt-get autoremove --purge --assume-yes", "sudo apt-get autoremove --purge --assume-no | grep \"0 to remove\"",
