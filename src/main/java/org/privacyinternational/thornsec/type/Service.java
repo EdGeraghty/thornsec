@@ -16,8 +16,6 @@ import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirMountedUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileAppendUnit;
-import org.privacyinternational.thornsec.profile.guest.AOS;
-import org.privacyinternational.thornsec.profile.guest.Alpine;
 
 /**
  * This is a Service, which represents a VM on a HyperVisor
@@ -26,11 +24,6 @@ public class Service extends Server {
 
 	public Service(ServiceModel me) {
 		super(me);
-	}
-
-	public final AOS getGuestProfile() throws AThornSecException {
-		//return getServerModel().get;
-		return new Alpine(getServerModel());
 	}
 
 	@Override

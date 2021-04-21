@@ -7,27 +7,21 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.StringUtils;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * This class represents a "Server" on our network - that is, a computer which
@@ -40,27 +34,6 @@ public class ServerData extends AMachineData {
 
 	public enum SSHConnection {
 		DIRECT, TUNNELLED
-	}
-
-	public enum GuestOS {
-		DEBIAN_64("debian_amd64"),
-		DEBIAN_32("alpine_x86"),
-		ALPINE_64("alpine_amd64"),
-		ALPINE_32("alpine_x86");
-	
-		public static final Set<GuestOS> alpine = EnumSet.of(ALPINE_32, ALPINE_64);
-		public static final Set<GuestOS> debian = EnumSet.of(DEBIAN_32, DEBIAN_64);
-	
-		private final String guestOS;
-	
-		GuestOS(String guestOS) {
-			this.guestOS = guestOS;
-		}
-	
-		@Override
-		public String toString() {
-			return this.guestOS;
-		}
 	}
 
 	private Set<HostName> sshSources;
@@ -81,7 +54,7 @@ public class ServerData extends AMachineData {
 
 	private Integer ram;
 	private Integer cpus;
-	protected GuestOS guestOS;
+	protected String guestOS;
 	protected String iso;
 	protected String isoSHA512;
 
@@ -482,14 +455,14 @@ public class ServerData extends AMachineData {
 			return;
 		}
 
-		setOS(getData().getString("os"));		
+		setOS(getData().getString("os"));
 	}
 
 	private void setOS(String os) {
-		this.guestOS = GuestOS.valueOf(os);
+		this.guestOS = os;
 	}
 
-	public Optional<GuestOS> getOS() {
+	public Optional<String> getOS() {
 		return Optional.ofNullable(this.guestOS);
 	}
 

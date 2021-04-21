@@ -7,8 +7,8 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
+import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
-import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
 import org.privacyinternational.thornsec.core.exception.runtime.InvalidGuestOSException;
@@ -20,7 +20,6 @@ import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileAppendUnit;
 import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
 import org.privacyinternational.thornsec.profile.guest.AOS;
-import org.privacyinternational.thornsec.profile.guest.Alpine;
 import org.privacyinternational.thornsec.profile.guest.Debian;
 import org.privacyinternational.thornsec.profile.machine.configuration.Processes;
 import org.privacyinternational.thornsec.profile.machine.configuration.UserAccounts;
@@ -64,7 +63,7 @@ public class ServerModel extends AMachineModel {
 
 	@Override
 	public void init() throws AThornSecException {
-		this.setOS(getOS());
+		this.setOS();
 		this.addProfiles();
 		this.addAdmins();
 		this.addISODetails();
@@ -180,21 +179,37 @@ public class ServerModel extends AMachineModel {
 		return getData().getCPUs().orElse(2);
 	}
 
-	protected void setOS(GuestOS os) throws AThornSecException {
-		if (GuestOS.debian.contains(os)) {
-			this.os = new Debian(this);
+	protected void setOS() throws AThornSecException {
+		if (getData().getOS().isEmpty()) {
+			return;
 		}
-		else if (GuestOS.alpine.contains(os)) {
-			this.os = new Alpine(this);
-		}
-		else {
-			throw new InvalidGuestOSException(os.toString());
+
+		this.os = reflectedOS(getData().getOS().get());
+	}
+
+	protected AOS reflectedOS(String os) throws InvalidGuestOSException {
+		Collection<Class<?>> classes;
+		try {
+			classes = new ClassesInPackageScanner()
+					.setResourceNameFilter((packageName, fileName) ->
+							fileName.equals(os + ".class"))
+					.scan("org.privacyinternational.thornsec.profile.guest");
+
+			return (AOS) Class.forName(classes.iterator().next().getName())
+					.getDeclaredConstructor(ServerModel.class)
+					.newInstance(this);
+		} catch (Exception e) {
+			throw new InvalidGuestOSException("Guest OS " + os + " threw an"
+					+ " exception\n\n" + e.getLocalizedMessage());
 		}
 	}
 
-	public GuestOS getOS() {
-		return getData().getOS()
-						.orElse(GuestOS.DEBIAN_64);
+	public AOS getOS() throws AThornSecException {
+		if (null == this.os) {
+			return new Debian(this);
+		}
+
+		return this.os;
 	}
 
 	public Optional<String> getIsoUrl() {

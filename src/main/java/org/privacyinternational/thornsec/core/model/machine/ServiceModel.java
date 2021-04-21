@@ -8,7 +8,6 @@
 package org.privacyinternational.thornsec.core.model.machine;
 
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
-import org.privacyinternational.thornsec.core.data.machine.ServerData.GuestOS;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
@@ -22,6 +21,8 @@ import org.privacyinternational.thornsec.core.model.machine.configuration.disks.
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.HardDiskModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.DHCPClientInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+import org.privacyinternational.thornsec.profile.guest.AOS;
+import org.privacyinternational.thornsec.profile.guest.Alpine;
 
 import java.io.File;
 import java.util.*;
@@ -49,9 +50,12 @@ public class ServiceModel extends ServerModel {
 	}
 
 	@Override
-	public GuestOS getOS() {
-		return getData().getOS()
-						.orElse(GuestOS.ALPINE_64);
+	public AOS getOS() throws AThornSecException {
+		if (getData().getOS().isEmpty()) {
+			return new Alpine(this);
+		}
+
+		return super.getOS();
 	}
 
 	@Override
