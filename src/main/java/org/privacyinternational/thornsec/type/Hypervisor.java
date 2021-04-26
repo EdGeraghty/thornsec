@@ -20,7 +20,7 @@ import java.util.Collection;
  * These are things which should be done on a HyperVisor machine, regardless of
  * what hypervisor layer it's actually running
  */
-public class Hypervisor extends AMachineType {
+public class Hypervisor extends Server {
 
 	/**
 	 * Create a new HyperVisor box, with initialised NICs, and initialise the
@@ -40,5 +40,10 @@ public class Hypervisor extends AMachineType {
 		units.add(new InstalledUnit("metal_git", "proceed", "git"));
 
 		return units;
+	}
+
+	@Override
+	public String getVLAN() {
+		return "Hypervisor";
 	}
 }

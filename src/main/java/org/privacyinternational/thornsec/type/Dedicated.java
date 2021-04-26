@@ -13,10 +13,14 @@ import org.privacyinternational.thornsec.core.model.machine.ServerModel;
  * This is a dedicated server on your network. This is something ThornSec needs
  * to know about, but shouldn't attempt to configure
  */
-public class Dedicated extends AMachineType {
+public class Dedicated extends Server {
 
 	public Dedicated(ServerModel me)  {
 		super(me);
 	}
 
+	@Override
+	public String getVLAN() {
+		return "Dedicated";
+	}
 }

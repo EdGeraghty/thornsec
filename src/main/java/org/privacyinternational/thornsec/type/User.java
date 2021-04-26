@@ -19,7 +19,7 @@ import java.util.LinkedHashSet;
 /**
  * This is a User Device
  */
-public class User extends AMachineType {
+public class User extends Device {
 
 	public User(DeviceModel me) {
 		super(me);
@@ -31,5 +31,10 @@ public class User extends AMachineType {
 		getMachineModel().addEgress(TrafficRule.Encapsulation.TCP, new HostName("*"));
 
 		return new LinkedHashSet<>();
+	}
+
+	@Override
+	public String getVLAN() {
+		return "User";
 	}
 }

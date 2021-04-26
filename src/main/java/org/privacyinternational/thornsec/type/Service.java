@@ -52,4 +52,9 @@ public class Service extends Server {
 	public ServiceModel getServerModel() {
 		return (ServiceModel) super.getServerModel();
 	}
+
+	@Override
+	public String getVLAN() {
+		return "Service";
+	}
 }

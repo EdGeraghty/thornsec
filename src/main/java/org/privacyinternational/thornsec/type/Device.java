@@ -12,8 +12,12 @@ import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 /**
  * This is a device on our network
  */
-public class Device extends AMachineType {
+public abstract class Device extends AMachineType {
 
+	/**
+	 * Device is never intended to be called directly
+	 * @param me
+	 */
 	public Device(DeviceModel me) {
 		super(me);
 	}

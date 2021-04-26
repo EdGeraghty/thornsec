@@ -41,7 +41,7 @@ import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
  *
  * If you want to make changes in here, you'll have a lot of reading to do :)!
  */
-public class Router extends AMachineType {
+public class Router extends Server {
 	private final ADNSServerProfile dnsServer;
 	private final ADHCPServerProfile dhcpServer;
 	private final AFirewallProfile firewall;
@@ -242,5 +242,10 @@ public class Router extends AMachineType {
 		units.addAll(super.getPersistentFirewall());
 
 		return units;
+	}
+
+	@Override
+	public String getVLAN() {
+		return "";
 	}
 }

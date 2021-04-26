@@ -17,4 +17,9 @@ public class InternalOnly extends Device {
 	public InternalOnly(DeviceModel me) {
 		super(me);
 	}
+
+	@Override
+	public String getVLAN() {
+		return "InternalOnly";
+	}
 }

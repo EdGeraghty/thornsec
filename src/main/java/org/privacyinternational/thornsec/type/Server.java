@@ -12,7 +12,7 @@ import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 /**
  * This is a Server, which represents a VM on a HyperVisor
  */
-public class Server extends AMachineType {
+public abstract class Server extends AMachineType {
 
 	public Server(ServerModel me) {
 		super(me);

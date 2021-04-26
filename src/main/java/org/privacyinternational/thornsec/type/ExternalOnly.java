@@ -36,4 +36,9 @@ public class ExternalOnly extends Device {
 
 		return units;
 	}
+
+	@Override
+	public String getVLAN() {
+		return "ExternalOnly";
+	}
 }

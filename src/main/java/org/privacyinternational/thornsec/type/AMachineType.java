@@ -20,11 +20,17 @@ import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
  *
  * A Type is designed to translate Core's Models into their functional counterparts.
  */
-public class AMachineType extends AStructuredProfile {
+public abstract class AMachineType extends AStructuredProfile {
 	
 	public AMachineType(AMachineModel me) {
 		super(me);
 	}
+
+	/**
+	 * Which VLAN does this machine type belong to?
+	 * @return a String representing the VLAN's name
+	 */
+	public abstract String getVLAN();
 
 	/**
 	 * Returns all Units for configuring this Type
