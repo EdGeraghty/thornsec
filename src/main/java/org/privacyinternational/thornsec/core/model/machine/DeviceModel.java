@@ -31,16 +31,6 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 		return this.managed;
 	}
 
-	final protected void setIsManaged(Boolean managed) {
-		this.managed = managed;
-	}
-
-	final public Boolean hasRealNICs() {
-		return getNetworkInterfaces()
-				.stream()
-				.anyMatch((nic) -> nic.getMac().isPresent());
-	}
-
 	/**
 	 * Initialise this model. This is where logic which relies on, for example,
 	 * other models existing on our Network should live.

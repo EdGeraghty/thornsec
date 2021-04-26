@@ -209,22 +209,8 @@ public abstract class AMachineModel extends AModel {
 		return this.emailAddress;
 	}
 
-	public final void setEmailAddress(InternetAddress emailAddress) {
-		//assertNotNull(emailAddress);
-
-		this.emailAddress = emailAddress;
-	}
-
 	public final Optional<Set<String>> getCNAMEs() {
 		return Optional.ofNullable(this.cnames);
-	}
-
-	public final void putCNAME(String... cnames) {
-		if (this.cnames == null) {
-			this.cnames = new LinkedHashSet<>();
-		}
-
-		this.cnames.addAll(Arrays.asList(cnames));
 	}
 
 	public HostName getDomain() {
@@ -237,10 +223,6 @@ public abstract class AMachineModel extends AModel {
 	
 	public final Boolean isThrottled() {
 		return this.throttled;
-	}
-
-	public final void setIsThrottled(Boolean throttled) {
-		this.throttled = throttled;
 	}
 
 	/**
