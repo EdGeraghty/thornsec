@@ -67,9 +67,9 @@ public abstract class AMachineModel extends AModel {
 
 		this.networkModel = networkModel;
 
-		setEmailFromData();
 		setNICsFromData();
 		setDomainFromData();
+		setEmailFromData();
 		setCNAMEsFromData();
 		setFirewallFromData();
 
