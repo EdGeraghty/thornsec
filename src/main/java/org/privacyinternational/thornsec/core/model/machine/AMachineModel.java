@@ -36,6 +36,7 @@ import java.beans.Expression;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a Machine on our network.
@@ -48,7 +49,7 @@ public abstract class AMachineModel extends AModel {
 	private final Map<String, AProfile> profiles;
 	private AMachineType type;
 
-	private Map<String, NetworkInterfaceModel> networkInterfaces;
+	private Collection<NetworkInterfaceModel> networkInterfaces;
 
 	private final NetworkModel networkModel;
 
@@ -60,7 +61,6 @@ public abstract class AMachineModel extends AModel {
 	private Boolean throttled;
 
 	private Set<TrafficRule> firewallRules;
-	private Set<IPAddress> externalIPs;
 
 	AMachineModel(AMachineData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData);
@@ -71,7 +71,6 @@ public abstract class AMachineModel extends AModel {
 		setNICsFromData();
 		setDomainFromData();
 		setCNAMEsFromData();
-		setExternalIPsFromData();
 		setFirewallFromData();
 
 		this.profiles = new LinkedHashMap<>();
@@ -136,10 +135,6 @@ public abstract class AMachineModel extends AModel {
 		this.firewallRules.add(rule);
 	}
 
-	private void setExternalIPsFromData() {
-		this.externalIPs = getData().getExternalIPs();
-	}
-
 	private void setCNAMEsFromData() {
 		this.cnames = getData().getCNAMEs().orElse(new LinkedHashSet<>());
 	}
@@ -189,22 +184,25 @@ public abstract class AMachineModel extends AModel {
 
 	public final void addNetworkInterface(NetworkInterfaceModel ifaceModel) {
 		if (this.networkInterfaces == null) {
-			this.networkInterfaces = new HashMap<>();
+			this.networkInterfaces = new ArrayList<>();
 		}
 
-		this.networkInterfaces.put(ifaceModel.getIface(), ifaceModel);
+		this.networkInterfaces.add(ifaceModel);
 	}
 
 	public final Collection<NetworkInterfaceModel> getNetworkInterfaces() {
-		if (null == this.networkInterfaces) {
-			return null;
-		}
-
-		return this.networkInterfaces.values();
+		return this.networkInterfaces;
 	}
 
+	/**
+	 * Get all public IP addresses assigned to this machine
+	 * @return an ArrayList of all public IP addresses
+	 */
 	public final Collection<IPAddress> getExternalIPs() {
-		return this.externalIPs;
+		return getIPs()
+					.stream()
+					.filter(ip -> !ip.isLocal())
+					.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	public final InternetAddress getEmailAddress() {
@@ -246,29 +244,15 @@ public abstract class AMachineModel extends AModel {
 	}
 
 	/**
-	 * Get all LAN IP addresses relating to this machine. 
+	 * Returns all IP addresses related to this machine
 	 * @return
 	 */
 	public Collection<IPAddress> getIPs() {
-		return getIPs(false);
-	}
-
-	/**
-	 * Returns all IP addresses related to this machine, optionally including
-	 * external IP addresses as set from the data.
-	 * @param includeExternalIPs
-	 * @return
-	 */
-	public Collection<IPAddress> getIPs(boolean includeExternalIPs) {
 		final Collection<IPAddress> ips = new ArrayList<>();
 
 		getNetworkInterfaces().forEach(nic -> {
 			nic.getAddresses().ifPresent(ips::addAll);
 		});
-
-		if (includeExternalIPs) {
-			ips.addAll(this.getExternalIPs());
-		}
 
 		return ips;
 	}
