@@ -1,14 +1,12 @@
 package org.privacyinternational.thornsec.core.data.machine.configuration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import inet.ipaddr.HostName;
+import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
+
+import java.util.*;
 
 public class TrafficRule {
+
 	public enum Encapsulation {
 		UDP, TCP
 	}
@@ -123,5 +121,61 @@ public class TrafficRule {
 
 	public void setSource(String source) {
 		this.source = source;
+	}
+
+
+	public static class Builder {
+		private TrafficRule trafficRule;
+
+		public Builder() {
+			try {
+				trafficRule = new TrafficRule();
+
+				trafficRule.setEncapsulation(TrafficRule.Encapsulation.TCP);
+				trafficRule.addPorts(443);
+			} catch (InvalidPortException e) {
+				;; //In theory...
+				e.printStackTrace();
+			}
+		}
+
+		public Builder withEncapsulation(TrafficRule.Encapsulation encapsulation) {
+			trafficRule.setEncapsulation(encapsulation);
+			return this;
+		}
+
+		public Builder withDestinations(Collection<HostName> destinations) {
+			trafficRule.addDestinations(destinations);
+			return this;
+		}
+
+		public Builder withDestination(HostName destination) {
+			trafficRule.addDestination(destination);
+			return this;
+		}
+
+		public Builder withPort(int port) throws InvalidPortException {
+			trafficRule.addPorts(port);
+			return this;
+		}
+
+		public Builder withPorts(Integer... ports) throws InvalidPortException {
+			trafficRule.addPorts(ports);
+			return this;
+		}
+
+		public Builder withSource(String source) {
+			trafficRule.setSource(source);
+			return this;
+		}
+
+		public Builder withTable(TrafficRule.Table table) {
+			trafficRule.setTable(table);
+			return this;
+		}
+
+		public TrafficRule build() {
+			return trafficRule;
+		}
 	}
 }

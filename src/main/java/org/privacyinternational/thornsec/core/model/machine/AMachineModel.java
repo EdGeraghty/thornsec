@@ -298,21 +298,13 @@ public abstract class AMachineModel extends AModel {
 	 * 			invalid
 	 */
 	public void addEgress(Encapsulation encapsulation, HostName destination) throws InvalidPortException {
-		TrafficRule egressRule = new TrafficRule();
-
-		egressRule.setTable(Table.EGRESS);
-
-		egressRule.setSource(this.getHostName());
-
-		egressRule.addDestination(destination);
-		if (destination.getPort() == null) {
-			egressRule.addPorts(443);
-		}
-		else {
-			egressRule.addPorts(destination.getPort());
-		}
-
-		egressRule.setEncapsulation(encapsulation);
+		TrafficRule egressRule = new TrafficRule.Builder()
+									.withTable(Table.EGRESS)
+									.withDestination(destination)
+									.withEncapsulation(encapsulation)
+									.withSource(this.getHostName())
+									.withPorts(destination.getPort())
+									.build();
 
 		this.addFirewallRule(egressRule);
 	}
@@ -371,13 +363,13 @@ public abstract class AMachineModel extends AModel {
 	 * @throws InvalidPortException if trying to listen on an invalid port
 	 */
 	public void addLANOnlyListen(Encapsulation encapsulation, Integer... ports) throws InvalidPortException {
-		TrafficRule internalListenRule = new TrafficRule();
-
-		internalListenRule.setTable(Table.FORWARD);
-		internalListenRule.setEncapsulation(encapsulation);
-		internalListenRule.addPorts(ports);
-		internalListenRule.addDestination(new HostName(this.getHostName()));
-		internalListenRule.setSource("*");
+		TrafficRule internalListenRule = new TrafficRule.Builder()
+											.withTable(Table.FORWARD)
+											.withEncapsulation(encapsulation)
+											.withPorts(ports)
+											.withDestination(new HostName(this.getHostName()))
+											.withSource("*")
+											.build();
 
 		this.addFirewallRule(internalListenRule);
 	}
@@ -399,13 +391,13 @@ public abstract class AMachineModel extends AModel {
 					+ getLabel() + " but it has no pulicly accessible IP address.");
 		}
 
-		TrafficRule externalListenRule = new TrafficRule();
-
-		externalListenRule.setTable(Table.INGRESS);
-		externalListenRule.setEncapsulation(encapsulation);
-		externalListenRule.addPorts(ports);
-		externalListenRule.addDestination(new HostName(this.getHostName()));
-		externalListenRule.setSource("*");
+		TrafficRule externalListenRule = new TrafficRule.Builder()
+												.withTable(Table.INGRESS)
+												.withEncapsulation(encapsulation)
+												.withPorts(ports)
+												.withDestination(new HostName(this.getHostName()))
+												.withSource("*")
+												.build();
 
 		this.addFirewallRule(externalListenRule);
 	}
@@ -421,13 +413,13 @@ public abstract class AMachineModel extends AModel {
 	 * @throws InvalidPortException 
 	 */
 	public void addDNAT(Encapsulation encapsulation, AMachineModel originalDestination, Integer... ports) throws InvalidPortException {
-		TrafficRule dnatRule = new TrafficRule();
-
-		dnatRule.setTable(Table.DNAT);
-		dnatRule.setEncapsulation(encapsulation);
-		dnatRule.addPorts(ports);
-		dnatRule.setSource(originalDestination.getHostName());
-		dnatRule.addDestination(new HostName(this.getHostName()));
+		TrafficRule dnatRule = new TrafficRule.Builder()
+									.withTable(Table.DNAT)
+									.withEncapsulation(encapsulation)
+									.withPorts(ports)
+									.withSource(originalDestination.getHostName())
+									.withDestination(new HostName(this.getHostName()))
+									.build();
 
 		this.addFirewallRule(dnatRule);
 	}
