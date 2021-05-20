@@ -38,7 +38,7 @@ public class ServerData extends AMachineData {
 
 	private Set<HostName> sshSources;
 	private Set<String> adminUsernames;
-	private final Set<IPAddress> remoteAdminIPAddresses;
+	private Set<IPAddress> remoteAdminIPAddresses;
 
 	private Integer adminSSHConnectPort;
 	private Integer sshListenPort;
@@ -429,12 +429,12 @@ public class ServerData extends AMachineData {
 		return Optional.ofNullable(this.cpus);
 	}
 
-	protected void readOS() {
-		if (!getData().containsKey("os")) {
+	protected void readOS(JsonObject data) {
+		if (!data.containsKey("os")) {
 			return;
 		}
 
-		setOS(getData().getString("os"));
+		setOS(data.getString("os"));
 	}
 
 	private void setOS(String os) {
@@ -445,9 +445,9 @@ public class ServerData extends AMachineData {
 		return Optional.ofNullable(this.guestOS);
 	}
 
-	protected void readISO() {
-		this.iso = getData().getString("iso_url", null);
-		this.isoSHA512 = getData().getString("iso_sha512", null);
+	protected void readISO(JsonObject data) {
+		this.iso = data.getString("iso_url", null);
+		this.isoSHA512 = data.getString("iso_sha512", null);
 	}
 
 	/**

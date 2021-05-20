@@ -8,16 +8,18 @@
 package org.privacyinternational.thornsec.core.data.machine;
 
 
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import javax.json.JsonObject;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
 import org.privacyinternational.thornsec.type.Hypervisor;
+
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * This Class represents the data of a Service For our purposes, this is
@@ -39,21 +41,19 @@ public class ServiceData extends ServerData {
 	public ServiceData read(JsonObject data) throws ADataException {
 		super.read(data);
 
-		readOS();
-		readDisks();
-		readBackupFrequency();
-		readCPUExecutionCap();
-		readISO();
+		readDisks(data);
+		readBackupFrequency(data);
+		readCPUExecutionCap(data);
 
 		return this;
 	}
 
-	private void readBackupFrequency() throws InvalidPropertyException {
-		if (!getData().containsKey("backup_frequency")) {
+	private void readBackupFrequency(JsonObject data) throws InvalidPropertyException {
+		if (!data.containsKey("backup_frequency")) {
 			return;
 		}
 		
-		setBackupFrequency(getData().getInt("backup_frequency"));
+		setBackupFrequency(data.getInt("backup_frequency"));
 	}
 
 	/**
@@ -75,12 +75,12 @@ public class ServiceData extends ServerData {
 	 * 
 	 * @throws InvalidPropertyException if the percentage is invalid
 	 */
-	private void readCPUExecutionCap() throws InvalidPropertyException {
-		if (!getData().containsKey("cpu_execution_cap")) {
+	private void readCPUExecutionCap(JsonObject data) throws InvalidPropertyException {
+		if (!data.containsKey("cpu_execution_cap")) {
 			return;
 		}
 		
-		setCPUExecutionCap(getData().getInt("cpu_execution_cap"));		
+		setCPUExecutionCap(data.getInt("cpu_execution_cap"));
 	}
 
 	/**
@@ -89,17 +89,14 @@ public class ServiceData extends ServerData {
 	 * @throws InvalidDiskSizeException if a disk size is invalid; this could
 	 * 		potentially mean it's too small, or is NaN. 
 	 */
-	private void readDisks() throws InvalidDiskSizeException {
-		if (!getData().containsKey("disks")) {
+	private void readDisks(JsonObject data) throws ADataException {
+		if (!data.containsKey("disks")) {
 			return;
 		}
-		final JsonObject disks = getData().getJsonObject("disks");
+		final JsonObject disks = data.getJsonObject("disks");
 
-		for (final String disk : disks.keySet()) {
-			final DiskData diskData = new DiskData(disk);
-			diskData.read(disks.getJsonObject(disk));
-			
-			this.addDisk(diskData);
+		for (final Map.Entry<String, JsonValue> disk: disks.entrySet()) {
+			this.addDisk(new DiskData(disk.getKey(), getFilePath(), disk.getValue().asJsonObject()));
 		}
 	}
 
