@@ -13,8 +13,8 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.DiskDat
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.DiskModelException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.DVDModel;
@@ -43,10 +43,15 @@ public class ServiceModel extends ServerModel {
 	public ServiceModel(ServerData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData, networkModel);
 
-		if (null == this.getNetworkInterfaces()) {
-			final DHCPClientInterfaceModel nic = new DHCPClientInterfaceModel(new NetworkInterfaceData("eth0"), networkModel);
-			this.addNetworkInterface(nic);
-		}
+		this.hypervisor = (ServerModel) getNetworkModel()
+				.getMachineModel(
+						getData()
+								.getHypervisor()
+								.getLabel()
+				)
+				.orElseThrow();
+
+		initDisks();
 	}
 
 	@Override
@@ -58,28 +63,13 @@ public class ServiceModel extends ServerModel {
 		return super.getOS();
 	}
 
-	@Override
-	public void init() throws AThornSecException {
-		super.init();
-
-		this.hypervisor = (ServerModel) getNetworkModel()
-											.getMachineModel(
-												getData()
-													.getHypervisor()
-													.getLabel()
-											)
-											.orElseThrow();
-
-		initDisks();
-	}
-
 	/**
 	 * Initialise our disks, making sure there's at least a boot disk and a data
 	 * disk.
 	 * 
-	 * @throws DiskModelException
+	 * @throws ADiskDataException
 	 */
-	private void initDisks() throws DiskModelException {
+	private void initDisks() throws ADataException {
 		if (getData().getDisks().isPresent()) {
 			for (DiskData diskData : getData().getDisks().get().values()) {
 				if (diskData instanceof HardDiskData) {

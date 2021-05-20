@@ -31,17 +31,6 @@ import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 		return this.managed;
 	}
 
-	/**
-	 * Initialise this model. This is where logic which relies on, for example,
-	 * other models existing on our Network should live.
-	 *
-	 * @throws AThornSecException if something goes wrong.
-	 */
-	@Override
-	public void init() throws AThornSecException {
-
-	}
-
 	@Override
 	public DeviceData getData() {
 		return (DeviceData) super.getData();

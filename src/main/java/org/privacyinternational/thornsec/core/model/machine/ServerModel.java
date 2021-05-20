@@ -46,27 +46,19 @@ public class ServerModel extends AMachineModel {
 	public ServerModel(ServerData myData, NetworkModel networkModel) throws AThornSecException {
 		super(myData, networkModel);
 
-		this.os = null;
-
 		this.runningProcesses = new Processes(this);
 		this.users = new UserAccounts(this);
 		this.firewall = null;//new ShorewallFirewall(this);
 
-		this.iso = null;
-		this.isoSHA512 = null;
+		this.setOS();
+		this.addProfiles();
+		this.addAdmins();
+		this.addISODetails();
 	}
 
 	@Override
 	public ServerData getData() {
 		return (ServerData) super.getData();
-	}
-
-	@Override
-	public void init() throws AThornSecException {
-		this.setOS();
-		this.addProfiles();
-		this.addAdmins();
-		this.addISODetails();
 	}
 
 	private void addISODetails() {

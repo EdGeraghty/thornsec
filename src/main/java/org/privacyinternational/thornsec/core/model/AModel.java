@@ -59,13 +59,5 @@ public abstract class AModel {
 		return this.myData;
 	}
 
-	/**
-	 * Initialise this model. This is where logic which relies on, for example,
-	 * other models existing on our Network should live.
-	 * 
-	 * @throws AThornSecException if something goes wrong.
-	 */
-	public abstract void init() throws AThornSecException;
-
 	public abstract Collection<IUnit> getUnits() throws AThornSecException;
 }
