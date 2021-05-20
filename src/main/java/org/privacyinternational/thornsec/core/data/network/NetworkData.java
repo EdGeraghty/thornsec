@@ -154,8 +154,7 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("users");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final DeviceData device = new DeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+			final DeviceData device = new DeviceData(jsonDevice, getFilePath(), jsonDevices.getJsonObject(jsonDevice));
 
 			device.setType("User");
 
@@ -173,8 +172,7 @@ public class NetworkData extends AData {
 		final JsonObject jsonDevices = getData().getJsonObject("devices");
 
 		for (final String jsonDevice : jsonDevices.keySet()) {
-			final DeviceData device = new DeviceData(jsonDevice);
-			device.read(jsonDevices.getJsonObject(jsonDevice), getConfigFilePath());
+			final DeviceData device = new DeviceData(jsonDevice, getFilePath(), jsonDevices.getJsonObject(jsonDevice));
 
 			putMachine(device);
 		}
@@ -226,16 +224,12 @@ public class NetworkData extends AData {
 	 * must be an absolute path to a JSON file, in your Operating System's
 	 * native path style.
 	 * 
-	 * @param includePath Absolute path to the JSON file to be read into our
+	 * @param includeFile Absolute path to the JSON file to be read into our
 	 * 		NetworkData
 	 * @throws InvalidPropertyException if the path to the JSON is invalid
 	 * @throws InvalidJSONException 
 	 */
-	private void readInclude(String includePath) throws InvalidPropertyException, InvalidJSONException {
-		assert (null != getConfigFilePath().getParent());
-		String configBase = getConfigFilePath().getParent().toString();
-		Path includeFile = Path.of(configBase, includePath);
-
+	private void readInclude(Path includeFile) throws InvalidPropertyException, InvalidJSONException {
 		try {
 			String rawUTF8Data = Files.readString(includeFile);
 			rawUTF8Data = rawUTF8Data.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)", "");
@@ -273,7 +267,7 @@ public class NetworkData extends AData {
 	 * in this network's data
 	 * @throws NoValidUsersException If there aren't any Users to 
 	 */
-	private void readUsers() throws InvalidUserException, NoValidUsersException {
+	private void readUsers() throws ADataException {
 		if (!getData().containsKey("users") || getData().getJsonObject("users").isEmpty()) {
 			throw new NoValidUsersException("There must be at least one user on"
 					+ " your network");
@@ -282,8 +276,7 @@ public class NetworkData extends AData {
 		JsonObject jsonUsers = getData().getJsonObject("users");
 
 		for (final String userLabel : jsonUsers.keySet()) {
-			UserData user = new UserData(userLabel);
-			user.read(jsonUsers.getJsonObject(userLabel));
+			UserData user = new UserData(userLabel, getFilePath(), jsonUsers.getJsonObject(userLabel));
 
 			if (!this.users.add(user)) {
 				throw new InvalidUserException("You have a duplicate user ("
