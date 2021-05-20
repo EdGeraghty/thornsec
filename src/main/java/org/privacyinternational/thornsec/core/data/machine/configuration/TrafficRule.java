@@ -39,8 +39,10 @@ public class TrafficRule {
 		this.encapsulation = encapsulation;
 	}
 
-	public void addDestinations(Collection<HostName> collection) {
-		this.destinations.addAll(collection);
+	public void addDestinations(Collection<HostName> destinations) {
+		destinations.forEach(
+				destination -> this.addDestination(destination)
+		);
 	}
 
 	public void addDestination(HostName destination) {
