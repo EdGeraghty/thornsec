@@ -70,23 +70,17 @@ public class NetworkInterfaceData extends AData {
 	private IPAddress netmask;
 	private IPAddress broadcast;
 
-	public NetworkInterfaceData(String label) {
-		super(label);
+	public NetworkInterfaceData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 
-		this.iface = null;
-		this.direction = null;
-		this.inet = null;
-		this.addresses = null;
-		this.gateway = null;
-		this.subnet = null;
-		this.broadcast = null;
-		this.mac = null;
-		this.comment = null;
+		if (null == this.iface) {
+			this.iface = label;
+		}
 	}
 
 	@Override
-	public NetworkInterfaceData read(JsonObject data, Path configFilePath) throws ADataException {
-		this.iface = data.getString("iface", null);
+	public NetworkInterfaceData read(JsonObject data) throws ADataException {
+		super.read(data);
 
 		readInet(data);
 		readDirection(data);

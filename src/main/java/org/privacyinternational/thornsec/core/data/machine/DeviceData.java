@@ -7,14 +7,15 @@
  */
 package org.privacyinternational.thornsec.core.data.machine;
 
-import java.nio.file.Path;
-import java.util.Optional;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import inet.ipaddr.MACAddressString;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
-import inet.ipaddr.MACAddressString;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Abstract class for something representing "Device Data" on our network. This
@@ -24,15 +25,13 @@ import inet.ipaddr.MACAddressString;
 public class DeviceData extends AMachineData {
 	private Boolean managed;
 
-	public DeviceData(String label) {
-		super(label);
-
-		this.managed = null;
+	public DeviceData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
 	@Override
-	public DeviceData read(JsonObject data, Path configFilePath) throws ADataException {
-		super.read(data, configFilePath);
+	public DeviceData read(JsonObject data) throws ADataException {
+		super.read(data);
 
 		readIsManaged(data);
 		readNICs(data);
@@ -48,14 +47,14 @@ public class DeviceData extends AMachineData {
 		this.managed = data.getBoolean("managed");
 	}
 
-	private final void readNICs(JsonObject data) throws InvalidNetworkInterfaceException {
+	private final void readNICs(JsonObject data) throws ADataException {
 		if (!data.containsKey("macs")) {
 			return;
 		}
 
 		final JsonArray macs = data.getJsonArray("macs");
 		for (int i = 0; i < macs.size(); ++i) {
-			final NetworkInterfaceData iface = new NetworkInterfaceData(getLabel());
+			final NetworkInterfaceData iface = new NetworkInterfaceData(getLabel(), getFilePath(), Json.createObjectBuilder().build());
 			iface.setIface(getLabel() + i);
 			iface.setMAC(new MACAddressString(macs.getString(i)).getAddress());
 			putNetworkInterface(iface);

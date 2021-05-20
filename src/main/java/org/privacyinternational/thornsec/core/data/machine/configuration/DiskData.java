@@ -7,12 +7,14 @@
  */
 package org.privacyinternational.thornsec.core.data.machine.configuration;
 
-import java.io.File;
-import java.util.Optional;
-import javax.json.JsonObject;
-
 import org.privacyinternational.thornsec.core.data.AData;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
+
+import javax.json.JsonObject;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Represents some form of Disk attached to a Service
@@ -29,14 +31,12 @@ public class DiskData extends AData {
 	private Format format;
 	private File filename;
 
-	public DiskData(String label) {
-		super(label);
-
-		this.format = null;
-		this.filename = null;
+	public DiskData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
-	public DiskData read(JsonObject data) throws InvalidDiskSizeException {
+	@Override
+	public DiskData read(JsonObject data) throws ADiskDataException {
 		if (data.containsKey("format")) {
 			setFormat(Format.valueOf(data.getString("format").toUpperCase()));
 		}

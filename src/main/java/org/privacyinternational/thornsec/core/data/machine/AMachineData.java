@@ -57,24 +57,13 @@ public abstract class AMachineData extends AData {
 
 	private HostName domain;
 
-	protected AMachineData(String label) {
-		super(label);
-
-		this.networkInterfaces = null;
-		this.emailAddress = null;
-		this.throttled = null;
-
-		this.externalIPAddresses = new LinkedHashSet<>();
-		this.cnames = new LinkedHashSet<>();
-		this.trafficRules = new LinkedHashSet<>();
-
-		this.profiles = null;
-		this.type = null;
+	protected AMachineData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
 	@Override
-	public AMachineData read(JsonObject data, Path configFilePath) throws ADataException {
-		super.read(data, configFilePath);
+	public AMachineData read(JsonObject data) throws ADataException {
+		super.read(data);
 
 		readEmailAddress();
 		readDomain();

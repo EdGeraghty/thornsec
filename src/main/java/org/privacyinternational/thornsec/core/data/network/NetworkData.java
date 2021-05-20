@@ -65,29 +65,12 @@ public class NetworkData extends AData {
 	private final Set<UserData> users;
 
 	/**
-	 * Create a new Network, populated with null values.
-	 *
+	 * Create a new Network, reading in the data
 	 * @param label the network's name
+	 * @param data raw network data to read in
 	 */
-	public NetworkData(String label) {
-		super(label);
-
-		this.myUser = null;
-		this.domain = null;
-
-		this.configIP = null;
-
-		this.adBlocking = null;
-		this.autoGenPassphrases = null;
-		this.vpnOnly = null;
-		this.autoGuest = null;
-
-		this.upstreamDNS = null;
-
-		this.subnets = null;
-
-		this.machines = new HashSet<>();
-		this.users = new HashSet<>();
+	public NetworkData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
 	/**
@@ -95,9 +78,7 @@ public class NetworkData extends AData {
 	 * @return 
 	 */
 	@Override
-	public NetworkData read(JsonObject networkJSONData, Path configFilePath) throws ADataException {
-		super.read(networkJSONData, configFilePath);
-
+	public NetworkData read(JsonObject networkJSONData) throws ADataException {
 		readIncludes();
 		readUpstreamDNS();
 		readNetworkDomain();

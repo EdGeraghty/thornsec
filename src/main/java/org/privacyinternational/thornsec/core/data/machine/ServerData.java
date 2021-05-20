@@ -58,33 +58,13 @@ public class ServerData extends AMachineData {
 	protected String iso;
 	protected String isoSHA512;
 
-	public ServerData(String label) {
-		super(label);
-
-		this.sshSources = null;
-
-		this.adminUsernames = null;
-		this.remoteAdminIPAddresses = null;
-
-		this.adminSSHConnectPort = null;
-		this.sshListenPort = null;
-
-		this.update = null;
-
-		this.sshConnection = null;
-
-		this.packageMirrorDirectory = null;
-		this.packageMirror = null;
-
-		this.keePassDB = null;
-
-		this.ram = null;
-		this.cpus = null;
+	public ServerData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
 	@Override
-	public ServerData read(JsonObject data, Path configFilePath) throws ADataException {
-		super.read(data, configFilePath);
+	public ServerData read(JsonObject data) throws ADataException {
+		super.read(data);
 
 		readNICs(data);
 		readAdmins(data);
@@ -100,14 +80,13 @@ public class ServerData extends AMachineData {
 	}
 	
 	private NetworkInterfaceData readNIC(Direction dir, JsonObject nic) throws ADataException {
-		NetworkInterfaceData newIface = new NetworkInterfaceData(getLabel());
-		newIface.read(nic, getConfigFilePath());
+		NetworkInterfaceData newIface = new NetworkInterfaceData(getLabel(), getFilePath(), nic);
 		newIface.setDirection(dir);
 
 		Optional<NetworkInterfaceData> existingIface = getNetworkInterface(newIface.getIface());
 		if (existingIface.isPresent()) {
 			newIface = existingIface.get();
-			newIface.read(nic, getConfigFilePath());
+			newIface.read(nic);
 		}
 
 		return newIface;

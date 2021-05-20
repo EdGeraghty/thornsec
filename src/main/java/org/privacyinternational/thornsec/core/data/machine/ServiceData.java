@@ -31,24 +31,13 @@ public class ServiceData extends ServerData {
 	private Integer backupFrequency;
 	private Integer cpuExecutionCap;
 
-	public ServiceData(String label) {
-		super(label);
-
-		this.hypervisor = null;
-
-		this.iso = null;
-		this.isoSHA512 = null;
-
-		this.backupFrequency = null;
-
-		this.cpuExecutionCap = null;
-
-		this.disks = null;
+	public ServiceData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
 	@Override
-	public ServiceData read(JsonObject data, Path configFilePath) throws ADataException {
-		super.read(data, configFilePath);
+	public ServiceData read(JsonObject data) throws ADataException {
+		super.read(data);
 
 		readOS();
 		readDisks();

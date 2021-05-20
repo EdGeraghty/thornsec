@@ -7,12 +7,15 @@
  */
 package org.privacyinternational.thornsec.core.data.network;
 
+import org.privacyinternational.thornsec.core.data.AData;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import org.privacyinternational.thornsec.core.data.AData;
 
 /**
  * This class represents a User.
@@ -34,20 +37,14 @@ public class UserData extends AData {
 	 * Create a new UserData populated with null values
 	 * @param label
 	 */
-	public UserData(String label) {
-		super(label);
-
-		this.username = null;
-		this.fullName = null;
-		this.sshKey = null;
-		this.homeDir = null;
-		this.defaultPassword = null;
-		this.wireguardKey = null;
-		this.wireguardIPs = null;
-		this.wireguardPSK = null;
+	public UserData(String label, Path filePath, JsonObject data) throws ADataException {
+		super(label, filePath, data);
 	}
 
-	public UserData read(JsonObject data) {
+	@Override
+	public UserData read(JsonObject data) throws ADataException {
+		super.read(data);
+
 		this.username = data.getString("username", null);
 		this.fullName = data.getString("fullname", "Dr McNuggets");
 		this.sshKey = data.getString("ssh", null);
