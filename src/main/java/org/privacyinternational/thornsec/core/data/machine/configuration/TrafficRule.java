@@ -113,20 +113,16 @@ public class TrafficRule {
 		this.source = source;
 	}
 
-
+	/**
+	 * TrafficRule is a perfect place to use a Builder Design Pattern
+	 */
 	public static class Builder {
-		private TrafficRule trafficRule;
+		private final TrafficRule trafficRule;
 
 		public Builder() {
-			try {
-				trafficRule = new TrafficRule();
+			trafficRule = new TrafficRule();
 
-				trafficRule.setEncapsulation(TrafficRule.Encapsulation.TCP);
-				trafficRule.addPorts(443);
-			} catch (InvalidPortException e) {
-				;; //In theory...
-				e.printStackTrace();
-			}
+			trafficRule.setEncapsulation(TrafficRule.Encapsulation.TCP); //Default to TCP
 		}
 
 		public Builder withEncapsulation(TrafficRule.Encapsulation encapsulation) {
