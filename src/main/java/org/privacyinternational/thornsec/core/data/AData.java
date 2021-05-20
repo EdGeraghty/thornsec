@@ -97,35 +97,4 @@ public abstract class AData {
 		return this.filePath;
 	}
 
-	/**
-	 *
-	 * @param key
-	 * @return true if key is present in the data, false otherwise (including if data is null)
-	 */
-	public boolean keyIsPresent(String key) {
-		return ( (null != getData()) && (getData().containsKey(key)) );
-	}
-
-	public Set<HostName> getHostNameArray(String key) throws InvalidHostException {
-		if (!keyIsPresent(key)) {
-			return null;
-		}
-
-		Set<HostName> hosts = new HashSet<>();
-		final JsonArray jsonHosts = getData().getJsonArray(key);
-
-		for (final JsonValue jsonHost : jsonHosts) {
-			HostName host = new HostName(((JsonString) jsonHost).getString());
-
-			if (!host.isValid()) {
-				throw new InvalidHostException(((JsonString) jsonHost).getString()
-						+ " is an invalid host");
-			}
-
-			hosts.add(host);
-		}
-
-		return hosts;
-	}
-
 }
