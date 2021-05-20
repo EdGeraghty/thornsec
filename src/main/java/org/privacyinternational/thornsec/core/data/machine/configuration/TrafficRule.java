@@ -44,6 +44,10 @@ public class TrafficRule {
 	}
 
 	public void addDestination(HostName destination) {
+		if (null == this.destinations) {
+			this.destinations = new HashSet<>();
+		}
+
 		this.destinations.add(destination);
 	}
 
@@ -59,8 +63,12 @@ public class TrafficRule {
 	 * @throws InvalidPortException 
 	 */
 	public void addPorts(Integer... ports) throws InvalidPortException {
-		if (ports == null) {
+		if (null == ports) {
 			return;
+		}
+
+		if (null == this.ports) {
+			this.ports = new HashSet<>();
 		}
 
 		for (Integer port : ports) {
