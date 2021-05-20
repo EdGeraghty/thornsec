@@ -7,39 +7,26 @@
  */
 package org.privacyinternational.thornsec.core.data.network;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.stream.JsonParsingException;
-import inet.ipaddr.AddressStringException;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
-import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.data.machine.DeviceData;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidJSONException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPropertyException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidMachineException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidUserException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidTypeException;
+
+import javax.json.*;
+import javax.json.stream.JsonParsingException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class represents the state of our network *AS DEFINED IN THE JSON*
@@ -48,21 +35,10 @@ import org.privacyinternational.thornsec.core.exception.runtime.InvalidTypeExcep
  */
 public class NetworkData extends AData {
 	private String myUser;
-	private IPAddress configIP;
 	private String domain;
 
-	private Boolean adBlocking;
-	private Boolean autoGenPassphrases;
-
-	private Boolean vpnOnly;
-	private Boolean autoGuest;
-
-	private Set<HostName> upstreamDNS;
-
-	private Map<String, IPAddress> subnets;
-
-	private final Set<AMachineData> machines;
-	private final Set<UserData> users;
+	private Set<AMachineData> machines;
+	private Set<UserData> users;
 
 	/**
 	 * Create a new Network, reading in the data
@@ -80,16 +56,9 @@ public class NetworkData extends AData {
 	@Override
 	public NetworkData read(JsonObject networkJSONData) throws ADataException {
 		readIncludes();
-		readUpstreamDNS();
 		readNetworkDomain();
-		readNetworkConfigIP();
 		readNetworkConfigUser();
-		readAdBlocking();
-		readAutoGenPasswords();
-		readVPNOnly();
-		readAutoGuest();
-		readSubnets();
-		readUsers();
+ 		readUsers();
 		readMachines();
 
 		return this;
@@ -212,97 +181,6 @@ public class NetworkData extends AData {
 	}
 
 	/**
-	 * Read in any Subnet declarations made in the JSON
-	 * @throws InvalidIPAddressException 
-	 * @throws InvalidTypeException 
-	 * @throws InvalidPropertyException 
-	 */
-	private void readSubnets() throws InvalidIPAddressException, InvalidPropertyException {
-		if (!getData().containsKey("subnets")) {
-			return;
-		}
-
-		final JsonObject jsonSubnets = getData().getJsonObject("subnets");
-
-		for (final String label : jsonSubnets.keySet()) {
-			String ip = (jsonSubnets.getJsonString(label)).getString();
-			readSubnet(label, ip);
-		}
-	}
-	
-	private void readSubnet(String label, String ip) throws InvalidIPAddressException, InvalidPropertyException {
-		if (null == this.subnets) {
-			this.subnets = new HashMap<>();
-		}
-
-		try {
-			this.subnets.put(label, new IPAddressString(ip).toAddress());
-		} catch (AddressStringException | IncompatibleAddressException e) {
-			throw new InvalidIPAddressException(ip + " is an invalid subnet");
-		}
-	}
-
-	@Deprecated //TODO: This is a property of a Router
-	private void readAutoGuest() {
-		if (!getData().containsKey("guest_network")) {
-			return;
-		}
-
-		this.autoGuest = getData().getBoolean("guest_network");
-	}
-
-	@Deprecated //TODO: This is a property of a Router
-	private void readVPNOnly() {
-		if (!getData().containsKey("vpn_only")) {
-			return;
-		}
-
-		this.vpnOnly = getData().getBoolean("vpn_only");
-	}
-
-	/**
-	 * Read in whether we should autogenerate secure passwords, or set the
-	 * default from `NETWORK_AUTOGENPASSWDS`
-	 */
-	private void readAutoGenPasswords() {
-		if (!getData().containsKey("autogen_passwds")) {
-			return;
-		}
-
-		this.autoGenPassphrases = getData().getBoolean("autogen_passwds");
-	}
-
-	/**
-	 * Read in whether or not we should be doing network-level ad-blocking.
-	 */
-	@Deprecated //TODO: this should be in Router(), not here.
-	private void readAdBlocking() {
-		if (!getData().containsKey("adblocking")) {
-			return;
-		}
-
-		this.adBlocking = getData().getBoolean("adblocking");
-	}
-
-	/**
-	 * Get the gateway IP address for our configuration
-	 * @throws InvalidIPAddressException 
-	 */
-	private void readNetworkConfigIP() throws InvalidIPAddressException {
-		if (!getData().containsKey("network_config_ip")) {
-			return;
-		}
-
-		this.configIP = new IPAddressString(getData().getString("network_config_ip")
-				.replaceAll("[^\\.0-9]", ""))
-				.getAddress();
-
-		if (this.configIP == null) {
-			throw new InvalidIPAddressException(getData().getString("network_config_ip"));
-		}
-	}
-
-	/**
 	 * Read in our Network-level domain from the JSON
 	 */
 	private void readNetworkDomain() {
@@ -311,14 +189,6 @@ public class NetworkData extends AData {
 		}
 
 		this.domain = getData().getJsonString("domain").getString();
-	}
-
-	private void readUpstreamDNS() throws InvalidHostException {
-		if (!getData().containsKey("upstream_dns")) {
-			return;
-		}
-
-		this.upstreamDNS = getHostNameArray("upstream_dns");
 	}
 
 	/**
@@ -426,20 +296,6 @@ public class NetworkData extends AData {
 		}
 	}
 
-	/**
-	 * Get a given machine's data. You're not guaranteed that this machine is
-	 * there, if you're reading from a config file 
-	 *
-	 * @param label the label of the Machine you wish to get
-	 * @return the Machine's data
-	 */
-	public AMachineData getMachineData(String label) {
-		return getMachines().stream()
-				.filter(m -> m.getLabel().equalsIgnoreCase(label))
-				.findFirst()
-				.get();
-	}
-	
 	// Network only data
 	public final String getUser() throws NoValidUsersException {
 		if (this.myUser == null) {
@@ -450,86 +306,16 @@ public class NetworkData extends AData {
 	}
 
 	/**
-	 * @return the upstream DNS server addresses
-	 */
-	public final Optional<Collection<HostName>> getUpstreamDNSServers() {
-		return Optional.ofNullable(this.upstreamDNS);
-	}
-
-	/**
-	 * Should we automatically build a guest network?
-	 */
-	public final Optional<Boolean> buildAutoGuest() {
-		return Optional.ofNullable(this.autoGuest);
-	}
-
-	/**
-	 * Should we autogenerate passphrases for users who haven't set a default?
-	 */
-	public final Boolean autoGenPassphrasess() {
-		return this.autoGenPassphrases;
-	}
-
-	/**
-	 * Gets the netmask - hardcoded as /30.
-	 *
-	 * @return the netmask (255.255.255.252)
-	 */
-	public final IPAddress getNetmask() {
-		//TODO: THIS
-		return new IPAddressString("255.255.255.252").getAddress();
-	}
-
-	/**
-	 * This is either the IP of our router (if we're inside) or the public IP
-	 * address (if it's an external resource)
-	 */
-	public final IPAddress getConfigIP() throws InvalidIPAddressException {
-		if (this.configIP == null) {
-			throw new InvalidIPAddressException("You must set a valid IP address for this network");
-		}
-
-		return this.configIP;
-	}
-
-	/**
-	 * Should we do ad blocking at the router?
-	 */
-	public final Optional<Boolean> doAdBlocking() {
-		return Optional.ofNullable(this.adBlocking);
-	}
-
-	/**
-	 * Do we require users to be on a VPN connection to use our services?
-	 * (This is only useful for internal services...)
-	 */
-	public final Optional<Boolean> isVPNOnly() {
-		return Optional.ofNullable(this.vpnOnly);
-	}
-
-	/**
 	 * @return the domain which applies to this network
 	 */
 	public final Optional<String> getDomain() {
 		return Optional.ofNullable(this.domain);
 	}
 
-	public Optional<Map<String, IPAddress>> getSubnets() {
-		return Optional.ofNullable(this.subnets);
-	}
-
-	public Optional<IPAddress> getSubnet(String subnet) {
-		return Optional.ofNullable(this.subnets.get(subnet));
-	}
-
-	public Optional<String> getProperty(String label, String property) {
-		return Optional.ofNullable(getMachineData(label).getData().getString(property, null));
-	}
-
-	public Optional<JsonObject> getProperties(String machine, String properties) {
-		return Optional.ofNullable(getMachineData(machine).getData().getJsonObject(properties));
-	}
-
+	/**
+	 * Get all Machines on this network
+	 * @return An
+	 */
 	public Set<AMachineData> getMachines() {
 		return this.machines;
 	}
