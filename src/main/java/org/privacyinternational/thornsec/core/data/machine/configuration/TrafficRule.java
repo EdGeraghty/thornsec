@@ -18,31 +18,11 @@ public class TrafficRule {
 	private Encapsulation encapsulation;
 	private Table table;
 	private String source;
-	private final Set<HostName> destinations;
-	private final Set<Integer> ports;
+	private Set<HostName> destinations;
+	private Set<Integer> ports;
 
-	public TrafficRule(Encapsulation encapsulation, Table table, String source, Set<HostName> destinations, Set<Integer> ports) throws InvalidPortException {
-		this.ports = new LinkedHashSet<>();
-		this.destinations = new LinkedHashSet<>();
+	public TrafficRule() {
 
-		this.encapsulation = encapsulation;
-		this.setTable(table);
-		this.setSource(source);
-		this.addDestinations(destinations);
-		this.addPorts(ports);
-	}
-
-	/**
-	 * Deafult traffic rule to destination, on TCP port 443
-	 * @param destination
-	 * @throws InvalidPortException
-	 */
-	public TrafficRule(String source, HostName destination, Table table) throws InvalidPortException {
-		this(Encapsulation.TCP, table, source, new HashSet<>(Collections.singletonList(destination)), new HashSet<>(Collections.singletonList(443)));
-	}
-
-	public TrafficRule() throws InvalidPortException {
-		this(null, null, null, new LinkedHashSet<>(), new LinkedHashSet<>());
 	}
 
 	/**
