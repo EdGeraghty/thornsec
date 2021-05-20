@@ -64,31 +64,34 @@ public class NetworkData extends AData {
 		return this;
 	}
 
-	private ServerData readHyperVisor(String label, JsonObject hypervisorData)
+	private Map<ServerData, Collection<ServiceData>> readHyperVisor(String label, JsonObject hypervisorData)
 			throws ADataException {
 
-		ServerData hv = new ServerData(label);
-		hv.read(getData(), getConfigFilePath());
-		hv.read(hypervisorData, getConfigFilePath());
+		ServerData hv = new ServerData(label, getFilePath(), getData()); //read in defaults
+		hv.read(hypervisorData); //Then hypervisor-related
 
-		JsonObject services = hypervisorData.getJsonObject("services");
+		JsonObject servicesJsonObject = hypervisorData.getJsonObject("services");
+		Collection<ServiceData> services = new ArrayList<>();
 
-		for (final String serviceLabel : services.keySet()) {
-			ServiceData service = readService(serviceLabel, services.getJsonObject(serviceLabel));
+		for (final String serviceLabel : servicesJsonObject.keySet()) {
+			ServiceData service = readService(serviceLabel, servicesJsonObject.getJsonObject(serviceLabel));
 
 			service.setHypervisor(hv);
-			service.setType("Service");
+			service.setType("Service"); //Don't care if it's already set
 
-			this.putMachine(service);
+			services.add(service);
 		}
 
-		return hv;
+		Map<ServerData, Collection<ServiceData>> toReturn = new LinkedHashMap<>();
+
+		toReturn.put(hv, services);
+
+		return toReturn;
 	}
 	
 	private ServiceData readService(String label, JsonObject serviceData) throws ADataException {
-		final ServiceData service = new ServiceData(label);
-		service.read(getData(), getConfigFilePath());
-		service.read(serviceData, getConfigFilePath());
+		ServiceData service = new ServiceData(label, getFilePath(), getData());
+		service.read(serviceData);
 
 		return service;
 	}
@@ -106,18 +109,27 @@ public class NetworkData extends AData {
 	private void readServer(String label, JsonObject serverDataObject) throws ADataException {
 		// We have to read it in first to find out what it is - we can then
 		// replace it with a specialised version
-		ServerData serverData = new ServerData(label);
-		serverData.read(getData(), getConfigFilePath()); //Read in network-level defaults
-		serverData.read(serverDataObject, getConfigFilePath()); //Read in server-specific settings
+		ServerData serverData = new ServerData(label, getFilePath(), getData()); //Read in network-level defaults
+		serverData.read(serverDataObject); //Read in server-specific settings
 
 		// If we've just hit a hypervisor machine, we need to dig a little,
 		// because the services are nested inside
 		// They *should* contain information about their services
 		if (serverDataObject.containsKey("services")) {
-			serverData = readHyperVisor(label, serverDataObject);
-		}
+			Map<ServerData, Collection<ServiceData>> hvAndServices = readHyperVisor(label, serverDataObject);
+			for (Map.Entry<ServerData, Collection<ServiceData>> entry : hvAndServices.entrySet()) {
+				ServerData hv = entry.getKey();
+				Collection<ServiceData> services = entry.getValue();
 
-		this.putMachine(serverData);
+				this.putMachine(hv);
+				for (ServiceData service : services) {
+					this.putMachine(service);
+				}
+			}
+		}
+		else {
+			this.putMachine(serverData);
+		}
 	}
 
 	private void readNetworkConfigUser() {
