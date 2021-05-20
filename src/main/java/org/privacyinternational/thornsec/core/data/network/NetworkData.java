@@ -215,7 +215,7 @@ public class NetworkData extends AData {
 		}
 
 		for (JsonValue path : getData().getJsonArray("includes")) {
-			readInclude(((JsonString) path).getString());
+			readInclude(Path.of(getFilePath().getParent().toString(), ((JsonString) path).getString()));
 		}
 	}
 
@@ -247,7 +247,7 @@ public class NetworkData extends AData {
 
 			if (includeData.containsKey("includes")) {
 				for (JsonValue path : includeData.getJsonArray("includes")) {
-					this.readInclude(((JsonString) path).getString());
+					this.readInclude(Path.of(getFilePath().getParent().toString(), ((JsonString) path).getString()));
 				}
 			}
 		}
