@@ -28,7 +28,7 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidHostExceptio
  * This is something which has been read() from a JSON, and for our purposes
  * acts as a DAO.
  */
-public class AData {
+public abstract class AData {
 
 	private final String label;
 	private JsonObject data;
