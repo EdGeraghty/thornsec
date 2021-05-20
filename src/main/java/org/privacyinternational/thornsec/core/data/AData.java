@@ -7,20 +7,14 @@
  */
 package org.privacyinternational.thornsec.core.data;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.stream.JsonParsingException;
-
 import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
+
+import javax.json.*;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Abstract class for something representing "Data" on our network.
@@ -109,7 +103,7 @@ public abstract class AData {
 	 * @return true if key is present in the data, false otherwise (including if data is null)
 	 */
 	public boolean keyIsPresent(String key) {
-		return (null != getData() && getData().containsKey(key));
+		return ( (null != getData()) && (getData().containsKey(key)) );
 	}
 
 	public Set<HostName> getHostNameArray(String key) throws InvalidHostException {
