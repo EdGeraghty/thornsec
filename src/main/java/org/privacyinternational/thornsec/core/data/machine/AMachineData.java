@@ -30,6 +30,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Abstract class for something representing a "Machine" on our network.
@@ -46,14 +47,14 @@ public abstract class AMachineData extends AData {
 
 	private Map<String, NetworkInterfaceData> networkInterfaces;
 	private Set<IPAddress> externalIPAddresses;
-	private final Set<String> cnames;
+	private Set<String> cnames;
 
 	// Alerting
 	private InternetAddress emailAddress;
 
 	private Boolean throttled;
 
-	private final Set<TrafficRule> trafficRules;
+	private Set<TrafficRule> trafficRules;
 
 	private HostName domain;
 
@@ -175,17 +176,20 @@ public abstract class AMachineData extends AData {
 	 * @throws InvalidPortException if a port is outside of the valid range
 	 */
 	private void readListenRules(Encapsulation encapsulation, JsonArray ports) throws InvalidPortException {
-		TrafficRule rule = new TrafficRule();
-		rule.setEncapsulation(encapsulation);
-		rule.setSource("*");
-		rule.addDestination(new HostName(getLabel()));
-		rule.setTable(Table.INGRESS);
+		Integer[] _ports = ports.stream()
+				.map(port -> Integer.parseInt(port.toString()))
+				.collect(Collectors.toList())
+				.toArray(Integer[]::new);
 
-		for (final JsonValue port : ports) {
-			rule.addPorts(Integer.parseInt(port.toString()));
-		}
-
-		this.addTrafficRule(rule);
+		this.addTrafficRule(
+			new TrafficRule.Builder()
+					.withEncapsulation(encapsulation)
+					.withDestination(new HostName(getLabel()))
+					.withSource("*")
+					.withPorts(_ports)
+					.withTable(Table.INGRESS)
+				.build()
+		);
 	}
 
 	/**
