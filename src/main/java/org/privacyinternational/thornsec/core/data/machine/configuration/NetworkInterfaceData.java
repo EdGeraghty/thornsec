@@ -82,16 +82,38 @@ public class NetworkInterfaceData extends AData {
 	public NetworkInterfaceData read(JsonObject data) throws ADataException {
 		super.read(data);
 
+		readIface(data);
 		readInet(data);
 		readDirection(data);
 		readAddress(data);
 		readSubnet(data);
 		readBroadcast(data);
+		readNetmask(data);
 		readGateway(data);
 		readMAC(data);
 		readComment(data);
 
 		return this;
+	}
+
+	private void readIface(JsonObject data) {
+		if (!data.containsKey("iface")) {
+			return;
+		}
+
+		this.iface = data.getString("iface");
+	}
+
+	private void readNetmask(JsonObject data) throws InvalidIPAddressException {
+		if (!data.containsKey("netmask")) {
+			return;
+		}
+
+		try {
+			setNetmask(new IPAddressString(data.getString("netmask")).toAddress(IPVersion.IPV4));
+		} catch (AddressStringException | IncompatibleAddressException e) {
+			throw new InvalidIPAddressException(data.getString("netmask"));
+		}
 	}
 
 	/**
