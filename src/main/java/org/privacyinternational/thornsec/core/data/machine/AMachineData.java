@@ -65,22 +65,22 @@ public abstract class AMachineData extends AData {
 	public AMachineData read(JsonObject data) throws ADataException {
 		super.read(data);
 
-		readEmailAddress();
-		readDomain();
-		readCNAMEs();
-		readFirewallRules();
-		readProfiles();
-		readType();
+		readEmailAddress(data);
+		readDomain(data);
+		readCNAMEs(data);
+		readFirewallRules(data);
+		readProfiles(data);
+		readType(data);
 
 		return this;
 	}
 
-	private void readType() {
-		if (!getData().containsKey("type")) {
+	private void readType(JsonObject data) {
+		if (!data.containsKey("type")) {
 			return;
 		}
 
-		setType(getData().getString("type"));
+		setType(data.getString("type"));
 	}
 
 	public void setType(String type) {
@@ -88,60 +88,62 @@ public abstract class AMachineData extends AData {
 	}
 	/**
 	 * Read in any firewall-related data
-	 * 
+	 *
 	 * @throws InvalidPortException if a requested port is outside the valid range
 	 * @throws InvalidIPAddressException if a requested IP address isn't valid
 	 */
-	private void readFirewallRules() throws InvalidPortException, InvalidIPAddressException {
-		if (!getData().containsKey("firewall")) {
+	private void readFirewallRules(JsonObject data) throws InvalidPortException, InvalidIPAddressException {
+		if (!data.containsKey("firewall")) {
 			return;
 		}
-		
-		readFirewallData(getData().getJsonObject("firewall"));		
+
+		readFirewallData(data.getJsonObject("firewall"));
 	}
 
 	/**
 	 * Read in any CNAMEs which have been set in the data
 	 */
-	private void readCNAMEs() {
-		if (!getData().containsKey("cnames")) {
+	private void readCNAMEs(JsonObject data) {
+		if (!data.containsKey("cnames")) {
 			return;
 		}
 
-		final JsonArray cnames = getData().getJsonArray("cnames");
-		
-		for (final JsonValue cname : cnames) {
-			putCNAME(((JsonString) cname).getString());
-		}		
+		if (null == this.cnames) {
+			this.cnames = new HashSet<>();
+		}
+
+		data.getJsonArray("cnames").stream()
+				.map(cname -> ((JsonString) cname).getString())
+				.forEach(this::putCNAME);
 	}
 
 	/**
 	 * Read in this machine's domain, as it may be different to the network's
 	 */
-	private void readDomain() {
-		if (!getData().containsKey("domain")) {
+	private void readDomain(JsonObject data) {
+		if (!data.containsKey("domain")) {
 			return;
 		}
 
-		setDomain(new HostName(getData().getString("domain")));
+		setDomain(new HostName(data.getString("domain")));
 	}
 
 	/**
 	 * Read in this machine's email address, if set
-	 * 
+	 *
 	 * @throws InvalidEmailAddressException if the email address is invalid
 	 */
-	private void readEmailAddress() throws InvalidEmailAddressException {
-		if (!getData().containsKey("email")) {
+	private void readEmailAddress(JsonObject data) throws InvalidEmailAddressException {
+		if (!data.containsKey("email")) {
 			return;
 		}
 
-		setEmailAddress(getData().getString("email"));
+		setEmailAddress(data.getString("email"));
 	}
 
 	/**
 	 * Set this machine's email address.
-	 * 
+	 *
 	 * @param address The email address for this machine
 	 * @throws InvalidEmailAddressException if the email address isn't valid
 	 */
@@ -375,12 +377,12 @@ public abstract class AMachineData extends AData {
 
 	/**
 	 */
-	protected void readProfiles() {
-		if (!getData().containsKey("profiles")) {
+	protected void readProfiles(JsonObject data) {
+		if (!data.containsKey("profiles")) {
 			return;
 		}
 
-		getData().getJsonArray("profiles").forEach(profile ->
+		data.getJsonArray("profiles").forEach(profile ->
 			putProfile(((JsonString)profile).getString())
 		);
 	}
