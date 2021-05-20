@@ -273,6 +273,10 @@ public class NetworkData extends AData {
 					+ " your network");
 		}
 
+		if (null == this.users) {
+			this.users = new LinkedHashSet<>();
+		}
+
 		JsonObject jsonUsers = getData().getJsonObject("users");
 
 		for (final String userLabel : jsonUsers.keySet()) {
@@ -293,6 +297,10 @@ public class NetworkData extends AData {
 	 * 		duplicate label
 	 */
 	private void putMachine(AMachineData... machinesData) throws InvalidMachineException {
+		if (null == this.machines) {
+			this.machines = new LinkedHashSet<>(); //Keep the order
+		}
+
 		for (AMachineData machineData : machinesData) {
 			if (!this.machines.add(machineData)) {
 				throw new InvalidMachineException("You have a duplicate machine ("
