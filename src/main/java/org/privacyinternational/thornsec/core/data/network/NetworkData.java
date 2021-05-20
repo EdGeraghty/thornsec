@@ -253,7 +253,7 @@ public class NetworkData extends AData {
 		}
 		catch (IOException e) {
 			throw new InvalidPropertyException("Invalid path to include:"
-					+ includeFile.toString());
+					+ includeFile);
 		}
 		catch (JsonParsingException e) {
 			throw new InvalidJSONException("Trying to read in " + includeFile.toString()

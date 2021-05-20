@@ -40,8 +40,6 @@ import java.util.stream.Collectors;
  * somewhere in DNS-world.
  */
 public abstract class AMachineData extends AData {
-	public static Boolean DEFAULT_IS_THROTTLED = true;
-
 	protected String type;
 	protected Set<String> profiles;
 

@@ -83,14 +83,6 @@ public class TrafficRule {
 	}
 
 	/**
-	 * @param ports the ports to set
-	 * @throws InvalidPortException 
-	 */
-	public void addPorts(Set<Integer> ports) throws InvalidPortException {
-		addPorts(ports.toArray(Integer[]::new));
-	}
-
-	/**
 	 * @return the destinations
 	 */
 	public Set<HostName> getDestinations() {
@@ -137,11 +129,6 @@ public class TrafficRule {
 
 		public Builder withDestination(HostName destination) {
 			trafficRule.addDestination(destination);
-			return this;
-		}
-
-		public Builder withPort(int port) throws InvalidPortException {
-			trafficRule.addPorts(port);
 			return this;
 		}
 
