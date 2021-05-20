@@ -31,31 +31,37 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidHostExceptio
 public abstract class AData {
 
 	private final String label;
+	private final Path filePath;
 	private JsonObject data;
-	private Path configFilePath;
 
 	/**
-	 * Instantiates a new data object.
+	 * Instantiates a new data object. Automatically reads().
 	 *
 	 * @param label the label for this object
 	 */
-	public AData(String label) {
+	public AData(String label, Path filePath, JsonObject data) throws ADataException {
 		this.label = label;
-		this.data = null;
-		this.configFilePath = null;
+		this.filePath = filePath;
+		this.data = data;
+
+		read(data);
 	}
 
 	/**
-	 * JSON read method - must be overridden by descendants
+	 * JSON read method. Updates the underlying data with read values
 	 *
 	 * @param data the JSON data
-	 * @param configFilePath path to the config file the data came from
-	 * @return 
-	 * @throws ADataException
+	 * @return populated AData object
+	 * @throws ADataException if something is wrong with the Data
 	 */
-	public AData read(JsonObject data, Path configFilePath) throws ADataException {
-		this.configFilePath = configFilePath;
-		this.data = data;
+	public AData read(JsonObject data) throws ADataException {
+		JsonObject currentData = getData();
+
+		JsonObjectBuilder newData = Json.createObjectBuilder();
+		currentData.forEach(newData::add);
+		data.forEach(newData::add);
+
+		setData(newData.build());
 
 		return this;
 	}
@@ -70,18 +76,11 @@ public abstract class AData {
 	}
 
 	/**
-	 * Gets the path to the config file this AData was initially read() against
+	 * Gets the object's raw JSON data.
 	 *
-	 * @return the path, or null if not reading from a file
-	 */
-	public final Path getConfigFilePath() {
-		return this.configFilePath;
-	}
-
-	/**
-	 * Gets the object's data.
+	 * Think carefully about if this is *actually* what you want!
 	 *
-	 * @return the data
+	 * @return the raw data, as a JsonObject
 	 */
 	public final JsonObject getData() {
 		return this.data;
@@ -94,6 +93,14 @@ public abstract class AData {
 	 */
 	public final void setData(JsonObject data) {
 		this.data = data;
+	}
+
+	/**
+	 * Get the path to the original JSON which configured me
+	 * @return a Path to the original JSON
+	 */
+	public final Path getFilePath() {
+		return this.filePath;
 	}
 
 	/**
