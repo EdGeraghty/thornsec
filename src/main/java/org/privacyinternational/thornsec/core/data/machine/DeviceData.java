@@ -39,7 +39,7 @@ public class DeviceData extends AMachineData {
 		return this;
 	}
 
-	private final void readIsManaged(JsonObject data) {
+	private void readIsManaged(JsonObject data) {
 		if (!data.containsKey("managed")) {
 			return;
 		}
@@ -47,7 +47,7 @@ public class DeviceData extends AMachineData {
 		this.managed = data.getBoolean("managed");
 	}
 
-	private final void readNICs(JsonObject data) throws ADataException {
+	private void readNICs(JsonObject data) throws ADataException {
 		if (!data.containsKey("macs")) {
 			return;
 		}
