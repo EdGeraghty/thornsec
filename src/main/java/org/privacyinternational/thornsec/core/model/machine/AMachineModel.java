@@ -492,4 +492,11 @@ public abstract class AMachineModel extends AModel {
 		return (AMachineData) super.getData();
 	}
 
+	/**
+	 * Get the AMachineType we're using to configure the machine
+	 * @return the AMachineType
+	 */
+	public final AMachineType getType() {
+		return this.type;
+	}
 }
