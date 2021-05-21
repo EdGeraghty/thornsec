@@ -7,8 +7,8 @@
  */
 package org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks;
 
-public class InvalidDiskSizeException extends DiskModelException {
-	private static final long serialVersionUID = -4978682429685931190L;
+public class InvalidDiskSizeException extends ADiskDataException {
+	private static final long serialVersionUID = -8351165249687762249L;
 
 	public InvalidDiskSizeException(String message) {
 		super(message);

@@ -9,7 +9,7 @@ package org.privacyinternational.thornsec.core.exception.data.machine.configurat
 
 import java.io.File;
 
-public class InvalidDiskFilenameException extends DiskModelException {
+public class InvalidDiskFilenameException extends ADiskDataException {
 	private static final long serialVersionUID = -4978682429685931190L;
 
 	public InvalidDiskFilenameException(File filename) {

@@ -9,10 +9,13 @@ package org.privacyinternational.thornsec.core.exception.data.machine.configurat
 
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 
-public class DiskModelException extends ADataException {
+import java.io.Serial;
+
+public class ADiskDataException extends ADataException {
+	@Serial
 	private static final long serialVersionUID = -4978682429685931190L;
 
-	public DiskModelException(String message) {
+	public ADiskDataException(String message) {
 		super(message);
 	}
 }

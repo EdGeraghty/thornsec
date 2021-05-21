@@ -13,7 +13,7 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.DiskDat
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Format;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.DiskModelException;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskFilenameException;
+import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 
@@ -23,7 +23,7 @@ public class HardDiskModel extends ADiskModel {
 	private File diffParent;
 	private String comment;
 
-	public HardDiskModel(HardDiskData myData, NetworkModel networkModel) throws DiskModelException {
+	public HardDiskModel(HardDiskData myData, NetworkModel networkModel) throws ADiskDataException {
 		super(myData, networkModel);
 
 		setFormat(myData.getFormat().orElseGet(() -> null));
