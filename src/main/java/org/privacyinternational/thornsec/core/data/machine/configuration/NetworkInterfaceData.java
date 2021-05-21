@@ -9,22 +9,18 @@ package org.privacyinternational.thornsec.core.data.machine.configuration;
 
 //import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import inet.ipaddr.*;
+import inet.ipaddr.IPAddress.IPVersion;
+import inet.ipaddr.mac.MACAddress;
+import org.privacyinternational.thornsec.core.data.AData;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
+
+import javax.json.JsonObject;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
-import javax.json.JsonObject;
-
-import org.privacyinternational.thornsec.core.data.AData;
-import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
-import inet.ipaddr.AddressStringException;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddress.IPVersion;
-import inet.ipaddr.IPAddressString;
-import inet.ipaddr.IncompatibleAddressException;
-import inet.ipaddr.MACAddressString;
-import inet.ipaddr.mac.MACAddress;
 
 /**
  * Represents a network interface. Its internal data represents

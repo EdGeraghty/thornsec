@@ -7,14 +7,12 @@
  */
 package org.privacyinternational.thornsec.core.data;
 
-import inet.ipaddr.HostName;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Abstract class for something representing "Data" on our network.
