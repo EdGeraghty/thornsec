@@ -187,8 +187,6 @@ public class NetworkInterfaceData extends AData {
 
 	/**
 	 * @param data
-	 * @throws AddressStringException
-	 * @throws IncompatibleAddressException
 	 */
 	private void readAddress(JsonObject data) throws InvalidIPAddressException {
 		if (!data.containsKey("address")) {

@@ -81,7 +81,7 @@ public abstract class AData {
 	/**
 	 * Set the object's data
 	 *
-	 * @param data
+	 * @param data new data to set. Overrides whatever may have been there
 	 */
 	public final void setData(JsonObject data) {
 		this.data = data;
