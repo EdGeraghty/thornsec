@@ -10,6 +10,7 @@ package org.privacyinternational.thornsec.core.model.machine.configuration.netwo
 import java.util.Optional;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
+import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
@@ -19,7 +20,7 @@ import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
  * to work, of course.
  */
 public class BondModel extends NetworkInterfaceModel {
-	public BondModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException {
+	public BondModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		super(myData, networkModel);
 		
 		super.setInet(Inet.BOND);

@@ -88,7 +88,7 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	 * Don't invoke me directly.
 	 * @throws InvalidNetworkInterfaceException 
 	 */
-	protected NetworkInterfaceModel(NetworkInterfaceData ifaceData, NetworkModel networkModel) throws InvalidNetworkInterfaceException {
+	protected NetworkInterfaceModel(NetworkInterfaceData ifaceData, NetworkModel networkModel) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		super(ifaceData);
 
 		this.networkModel = networkModel;
@@ -120,7 +120,7 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	 * Don't invoke me directly.
 	 * @throws InvalidNetworkInterfaceException 
 	 */
-	protected NetworkInterfaceModel(NetworkInterfaceModel nic) throws InvalidNetworkInterfaceException {
+	protected NetworkInterfaceModel(NetworkInterfaceModel nic) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		this(nic.getData(), nic.getNetworkModel());
 
 		this.netDevSettings = nic.getNetDevSettings();

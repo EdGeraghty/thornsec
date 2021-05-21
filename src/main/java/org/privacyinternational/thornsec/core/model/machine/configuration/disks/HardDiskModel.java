@@ -12,7 +12,7 @@ import java.util.Optional;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Format;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.DiskModelException;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
@@ -33,7 +33,7 @@ public class HardDiskModel extends ADiskModel {
 		setComment(myData.getComment().orElseGet(() -> null));
 	}
 
-	public HardDiskModel(String label, File filename) {
+	public HardDiskModel(String label, File filename) throws ADataException {
 		super(new DiskData(label, null, Json.createObjectBuilder().build()), null);
 		
 		setFilename(filename);
