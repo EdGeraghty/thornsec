@@ -124,12 +124,6 @@ public class ADiskModel extends AModel {
 	}
 
 	@Override
-	public void init() throws AThornSecException {
-		getData().getFilename().ifPresent(this::setFilename);
-		getData().getFormat().ifPresent(this::setFormat);
-	}
-
-	@Override
 	public Collection<IUnit> getUnits() throws AThornSecException {
 		return new ArrayList<>();
 	}

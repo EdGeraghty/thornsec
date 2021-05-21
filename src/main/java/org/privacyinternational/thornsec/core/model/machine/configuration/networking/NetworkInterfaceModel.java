@@ -140,36 +140,6 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		return (NetworkInterfaceData) super.getData();
 	}
 
-	@Override
-	public void init() throws AThornSecException {
-		this.setDirection(getData().getDirection());
-		this.setIface(getData().getIface());
-		this.setInet(getData().getInet());
-		
-		if (getData().getAddresses().isPresent()) {
-			this.addAddress(getData().getAddresses().get().toArray(IPAddress[]::new));
-		}
-
-		getData().getBroadcast().ifPresent((broadcast) -> {
-			this.setBroadcast(broadcast);
-		});
-		getData().getComment().ifPresent((comment) -> {
-			this.setComment(comment);
-		});
-		getData().getGateway().ifPresent((gateway) -> {
-			this.setGateway(gateway);
-		});
-		getData().getMAC().ifPresent((mac) -> {
-			this.setMac(mac);
-		});
-		getData().getNetmask().ifPresent((netmask) -> {
-			this.setNetmask(netmask);
-		});
-		getData().getSubnet().ifPresent((subnet) -> {
-			this.setSubnet(subnet);
-		});
-	}
-
 	/**
 	 * Files in systemd drop-in directories are loaded in lexicographic order
 	 * by adding a double-digit weighting to the file, we can control the order

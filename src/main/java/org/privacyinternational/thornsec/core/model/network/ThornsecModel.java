@@ -48,9 +48,10 @@ public class ThornsecModel {
 	 * @param filePath
 	 * @throws ADataException 
 	 */
-	public void read(String filePath) throws ADataException {
-		String rawText = null;
+	public void read(String filePath) throws AThornSecException {
 		Path configFilePath = Paths.get(filePath);
+
+		String rawText;
 
 		// Start by stripping comments out of the JSON
 		try {
@@ -62,24 +63,13 @@ public class ThornsecModel {
 			throw new InvalidJSONException("Unable to read the file at " + filePath);
 		}
 
-		JsonReader jsonReader = null;
-		JsonObject networks = null;
-		jsonReader = Json.createReader(new StringReader(rawText));
-		networks = jsonReader.readObject();
+		JsonReader jsonReader = Json.createReader(new StringReader(rawText));
+		JsonObject networks = jsonReader.readObject();
 
 		for (final Entry<String, JsonValue> network : networks.entrySet()) {
-			final NetworkData networkData = new NetworkData(network.getKey());
-			networkData.read((JsonObject) network.getValue(), configFilePath);
+			final NetworkData networkData = new NetworkData(network.getKey(), Path.of(filePath), (JsonObject) network.getValue());
 
-			final NetworkModel networkModel = new NetworkModel(networkData);
-
-			this.networks.put(network.getKey(), networkModel);
-		}
-	}
-
-	public void init() throws AThornSecException {
-		for (final NetworkModel network : this.networks.values()) {
-			network.init();
+			this.networks.add(new NetworkModel(networkData));
 		}
 	}
 
