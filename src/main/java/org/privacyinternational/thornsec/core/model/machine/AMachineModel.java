@@ -66,6 +66,7 @@ public abstract class AMachineModel extends AModel {
 		super(myData);
 
 		this.networkModel = networkModel;
+		this.profiles = new LinkedHashMap<>();
 
 		setNICsFromData();
 		setDomainFromData();
@@ -73,7 +74,6 @@ public abstract class AMachineModel extends AModel {
 		setCNAMEsFromData();
 		setFirewallFromData();
 
-		this.profiles = new LinkedHashMap<>();
 		setTypeFromData();
 	}
 
