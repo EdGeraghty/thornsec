@@ -99,8 +99,13 @@ public abstract class AMachineModel extends AModel {
 					.getDeclaredConstructor(ServerModel.class)
 					.newInstance(this);
 		} catch (Exception e) {
-			throw new InvalidProfileException("Profile " + profile + " threw an"
-					+ " exception\n\n" + e.getLocalizedMessage());
+			throw new InvalidProfileException(
+				"Profile " + profile + " threw an exception..." +
+					"\nMachine: " + getLabel() +
+					"\nNetwork: " + getNetworkModel().getLabel() +
+					"\n" +
+					"\nException: " + e.getCause()
+			);
 		}
 	}
 
@@ -457,8 +462,13 @@ public abstract class AMachineModel extends AModel {
 
 			return (AMachineType) new Expression(typeClass, "new", new Object[]{this}).getValue();
 		} catch (Exception e) {
-			throw new InvalidProfileException("Type " + type + " threw an"
-					+ " exception\n\n" + e.getLocalizedMessage());
+			throw new InvalidProfileException(
+					"Type " + type + " threw an exception..." +
+							"\nMachine: " + getLabel() +
+							"\nNetwork: " + getNetworkModel().getLabel() +
+							"\n" +
+							"\nException: " + e.getMessage()
+			);
 		}
 	}
 
