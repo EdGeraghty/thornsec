@@ -101,7 +101,7 @@ public class ServerData extends AMachineData {
 			);
 		}
 		catch (NoSuchElementException e) {
-			return Optional.ofNullable(null);
+			return Optional.empty();
 		}
 	}
 
