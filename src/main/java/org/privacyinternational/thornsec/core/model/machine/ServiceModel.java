@@ -95,7 +95,7 @@ public class ServiceModel extends ServerModel {
 		}
 	}
 
-	public ServerModel getHypervisor() throws InvalidMachineModelException {
+	public ServerModel getHypervisor() {
 		return this.hypervisor;
 	}
 

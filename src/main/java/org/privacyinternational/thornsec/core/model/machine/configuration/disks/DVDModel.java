@@ -9,12 +9,10 @@ package org.privacyinternational.thornsec.core.model.machine.configuration.disks
 
 import java.io.File;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.DiskModelException;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskFilenameException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 
 public class DVDModel extends ADiskModel {
-	public DVDModel(DiskData myData, NetworkModel networkModel) throws DiskModelException {
+	public DVDModel(DiskData myData, NetworkModel networkModel) {
 		super(myData, networkModel);
 
 		setFilename(myData.getFilename().orElseGet(() -> null));
