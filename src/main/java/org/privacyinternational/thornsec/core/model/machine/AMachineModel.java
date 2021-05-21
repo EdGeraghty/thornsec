@@ -311,12 +311,18 @@ public abstract class AMachineModel extends AModel {
 	 * 			invalid
 	 */
 	public void addEgress(Encapsulation encapsulation, HostName destination) throws InvalidPortException {
+		Integer port = destination.getPort();
+
+		if (null == port) {
+			port = 443;
+		}
+
 		TrafficRule egressRule = new TrafficRule.Builder()
 									.withTable(Table.EGRESS)
 									.withDestination(destination)
 									.withEncapsulation(encapsulation)
 									.withSource(this.getHostName())
-									.withPorts(destination.getPort())
+									.withPorts(port)
 									.build();
 
 		this.addFirewallRule(egressRule);
