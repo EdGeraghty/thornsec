@@ -120,7 +120,15 @@ public abstract class AMachineModel extends AModel {
 
 	@Override
 	public Collection<IUnit> getUnits() throws AThornSecException {
-		return new ArrayList<>();
+		Collection<IUnit> units = new ArrayList<>();
+
+		units.addAll(getType().getUnits());
+
+		for (AProfile profile : this.getProfiles().values()) {
+			units.addAll(profile.getUnits());
+		}
+
+		return units;
 	}
 
 	public final NetworkModel getNetworkModel() {
