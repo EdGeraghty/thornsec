@@ -51,7 +51,7 @@ public class UserData extends AData {
 		this.homeDir = data.getString("home_dir", null);
 		this.defaultPassword = data.getString("defaultpw", null);
 
-		readWireguard(data);
+		readWireguard(data); //TODO: move this out to WireGuard. It doesn't belong here
 
 		return this;
 	}
