@@ -11,10 +11,10 @@ public class InvalidDiskSizeException extends ADiskDataException {
 	private static final long serialVersionUID = -8351165249687762249L;
 
 	public InvalidDiskSizeException(String message) {
-		super(message);
+		super(message + " is an invalid disk size. The minimum value is 512m, but we recommend much bigger than that.");
 	}
 
 	public InvalidDiskSizeException(Integer size) {
-		super(size + " is an invalid disk size. The minimum value is 512, but we recommend much bigger than that.");
+		super(size + " is an invalid disk size. The minimum value is 512m, but we recommend much bigger than that.");
 	}
 }
