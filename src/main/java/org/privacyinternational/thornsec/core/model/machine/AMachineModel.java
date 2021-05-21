@@ -166,9 +166,7 @@ public abstract class AMachineModel extends AModel {
 		}
 
 		for (NetworkInterfaceData nicData : getData().getNetworkInterfaces().get().values()) {
-			NetworkInterfaceModel nicModel = buildNICFromData(nicData);
-			nicModel.init();
-			this.addNetworkInterface(nicModel);
+			this.addNetworkInterface(buildNICFromData(nicData));
 		}
 	}
 
