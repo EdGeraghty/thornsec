@@ -25,7 +25,7 @@ public class DiskData extends AData {
 	 * As far as we're concerned, there are only three file formats.
 	 */
 	public enum Format {
-		VDI, VMDK, VHD, ISO;
+		VDI, VMDK, VHD, ISO
 	}
 
 	private Format format;
