@@ -28,10 +28,6 @@ public class DummyModel extends NetworkInterfaceModel {
 		super.setWeighting(10);
 	}
 
-	public DummyModel(NetworkModel networkModel) throws InvalidNetworkInterfaceException {
-		this(new NetworkInterfaceData("dummy"), networkModel);
-	}
-
 	@Override
 	public Optional<FileUnit> getNetworkFile() {
 		return Optional.empty(); // Don't need a Network for a dummy interface

@@ -19,10 +19,4 @@ public class DVDModel extends ADiskModel {
 
 		setFilename(myData.getFilename().orElseGet(() -> null));
 	}
-
-	public DVDModel(String label, File filename) throws InvalidDiskFilenameException {
-		super(new DiskData(label), null);
-		
-		setFilename(filename);
-	}
 }

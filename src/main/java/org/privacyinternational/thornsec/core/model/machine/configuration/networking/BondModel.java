@@ -28,10 +28,6 @@ public class BondModel extends NetworkInterfaceModel {
 		super.addToNetDev(Section.BOND, "Mode", "802.3ad");
 	}
 
-	public BondModel(NetworkModel networkModel) throws InvalidNetworkInterfaceException {
-		this(new NetworkInterfaceData("bond"), networkModel);
-	}
-
 	@Override
 	public Optional<FileUnit> getNetworkFile() {
 		return Optional.empty(); // Don't need a Network for a Bond

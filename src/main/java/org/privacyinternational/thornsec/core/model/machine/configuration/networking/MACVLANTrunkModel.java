@@ -37,10 +37,6 @@ public class MACVLANTrunkModel extends NetworkInterfaceModel {
 		vlans = new LinkedHashSet<>();
 	}
 
-	public MACVLANTrunkModel() throws InvalidNetworkInterfaceException {
-		this(new NetworkInterfaceData("MACVLANTrunk"), null);
-	}
-
 	@Override
 	public Optional<FileUnit> getNetworkFile() {
 		//TODO: fix this, it's a hack

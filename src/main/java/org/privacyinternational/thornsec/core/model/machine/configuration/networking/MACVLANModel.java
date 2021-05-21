@@ -30,8 +30,4 @@ public class MACVLANModel extends NetworkInterfaceModel {
 		super.addToNetDev(Section.MACVLAN, "Mode", "bridge");
 		super.setDirection(Direction.LAN);
 	}
-
-	public MACVLANModel() throws InvalidNetworkInterfaceException {
-		this(new NetworkInterfaceData("MACVLAN"), null);
-	}
 }

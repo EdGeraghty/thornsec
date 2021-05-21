@@ -27,15 +27,6 @@ public class ADiskModel extends AModel {
 	private File diffParent;
 	private String comment;
 
-	public ADiskModel(String label, Format format, File filename, Integer size, File diffParent, String comment, NetworkModel networkModel) throws InvalidDiskSizeException {
-		super(new DiskData(label));
-		setFormat(format);
-		setFilename(filename);
-		setSize(size);
-		setDiffParent(diffParent);
-		setComment(comment);
-	}
-	
 	public ADiskModel(DiskData myData, NetworkModel networkModel) {
 		super(myData);
 	}
