@@ -145,6 +145,10 @@ public abstract class AMachineModel extends AModel {
 	}
 
 	public void addFirewallRule(TrafficRule rule) {
+		if (null == this.firewallRules) {
+			this.firewallRules = new HashSet<>();
+		}
+
 		this.firewallRules.add(rule);
 	}
 
@@ -194,7 +198,7 @@ public abstract class AMachineModel extends AModel {
 	}
 
 	public final void addNetworkInterface(NetworkInterfaceModel ifaceModel) {
-		if (this.networkInterfaces == null) {
+		if (null == this.networkInterfaces) {
 			this.networkInterfaces = new ArrayList<>();
 		}
 
@@ -202,6 +206,9 @@ public abstract class AMachineModel extends AModel {
 	}
 
 	public final Collection<NetworkInterfaceModel> getNetworkInterfaces() {
+		if (null == this.networkInterfaces) {
+			this.networkInterfaces = new ArrayList<>();
+		}
 		return this.networkInterfaces;
 	}
 
