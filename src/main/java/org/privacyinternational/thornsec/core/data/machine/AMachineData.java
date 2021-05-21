@@ -157,7 +157,7 @@ public abstract class AMachineData extends AData {
 
 	/**
 	 * Set the email address for this Machine
-	 * 
+	 *
 	 * @param emailAddress The email address for this machine
 	 */
 	private void setEmailAddress(InternetAddress emailAddress) {
@@ -168,7 +168,7 @@ public abstract class AMachineData extends AData {
 	 * Read in listen rules for this machine. This punches holes in our Ingress
 	 * table, allowing traffic to come into this machine on the requested port(s)
 	 * in a given Encapsulation.
-	 * 
+	 *
 	 * @param encapsulation The packet encapsulation
 	 * @param ports The port(s) on which to listen
 	 * @throws InvalidPortException if a port is outside of the valid range
@@ -192,7 +192,7 @@ public abstract class AMachineData extends AData {
 
 	/**
 	 * Read in firewall-related data
-	 * 
+	 *
 	 * @param firewallData The data object "firewall" associated with this machine
 	 * @throws InvalidPortException
 	 * @throws InvalidIPAddressException
@@ -248,7 +248,7 @@ public abstract class AMachineData extends AData {
 
 			this.addTrafficRule(ingressRule);
 		}
-	}		
+	}
 
 	private void readDnats(JsonObject firewallData) throws InvalidPortException {
 		if (!firewallData.containsKey("dnat_to")) {
@@ -301,7 +301,7 @@ public abstract class AMachineData extends AData {
 			return;
 		}
 
-		this.throttled = firewallData.getBoolean("throttle");		
+		this.throttled = firewallData.getBoolean("throttle");
 	}
 
 	public final Optional<Set<String>> getCNAMEs() {
@@ -337,7 +337,7 @@ public abstract class AMachineData extends AData {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ifaces
 	 * @throws InvalidNetworkInterfaceException
 	 */
@@ -363,14 +363,14 @@ public abstract class AMachineData extends AData {
 		if (this.externalIPAddresses == null) {
 			this.externalIPAddresses = new LinkedHashSet<>();
 		}
-		
+
 		try {
 			this.externalIPAddresses.add(new IPAddressString(address).toAddress());
 		}
 		catch (final AddressStringException e) {
 			throw new InvalidIPAddressException(address + " on machine "
 					+ getLabel() + " is not a valid IP Address");
-		}		
+		}
 	}
 
 	private void setDomain(HostName domain) {

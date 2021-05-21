@@ -118,11 +118,14 @@ public class ServerData extends AMachineData {
 				putNetworkInterface(nicData);
 			}
 			else {
-				nicData.getAddresses().ifPresent(addresses -> {
-					getNetworkInterface(nicData.getIface())
-						.get()
-						.addAddress(addresses.toArray(IPAddress[]::new));
-				});
+				nicData.getAddresses()
+						.ifPresent(
+								addresses ->
+										getNetworkInterface(nicData.getIface())
+												.get()
+												.addAddress(addresses.toArray(IPAddress[]::new)
+						)
+				);
 			}
 		}
 	}

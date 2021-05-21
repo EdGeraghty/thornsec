@@ -62,7 +62,7 @@ public class TrafficRule {
 
 	/**
 	 * @param ports the ports to set
-	 * @throws InvalidPortException 
+	 * @throws InvalidPortException
 	 */
 	public void addPorts(Integer... ports) throws InvalidPortException {
 		if (null == ports) {
