@@ -34,7 +34,7 @@ public class HardDiskModel extends ADiskModel {
 	}
 
 	public HardDiskModel(String label, File filename) {
-		super(new DiskData(label), null);
+		super(new DiskData(label, null, Json.createObjectBuilder().build()), null);
 		
 		setFilename(filename);
 	}

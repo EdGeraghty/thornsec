@@ -29,6 +29,8 @@ public class ADiskModel extends AModel {
 
 	public ADiskModel(DiskData myData, NetworkModel networkModel) {
 		super(myData);
+		getData().getFilename().ifPresent(this::setFilename);
+		getData().getFormat().ifPresent(this::setFormat);
 	}
 
 	/**
