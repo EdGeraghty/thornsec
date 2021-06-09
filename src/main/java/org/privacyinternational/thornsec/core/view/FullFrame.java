@@ -7,40 +7,31 @@
  */
 package org.privacyinternational.thornsec.core.view;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.util.Collection;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeSelectionModel;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.model.network.ThornsecModel;
-import inet.ipaddr.IPAddress;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.*;
+import java.util.Collection;
 
 public class FullFrame {
 
 	public FullFrame(ThornsecModel model) {
 		final JTabbedPane jtp = new JTabbedPane();
-		for (final String network : model.getNetworkLabels()) {
-			jtp.add(network, getNetworkPane(model.getNetwork(network)));
-		}
+
+		model.getNetworks().stream()
+				.forEach(
+					networkModel -> {
+						jtp.add(networkModel.getLabel(), getNetworkPane(networkModel));
+					}
+				);
 
 		final JFrame frame = new JFrame("Thornsec");
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
