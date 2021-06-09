@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.core;
 
+import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.model.network.ThornsecModel;
 import org.privacyinternational.thornsec.core.view.FullFrame;
 
@@ -19,9 +20,8 @@ public class Main {
 	 * The main method.
 	 *
 	 * @param args [0] - Path to our JSON
-	 * @throws Exception Cannot read the JSON file
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws AThornSecException {
 		String jsonPath = null;
 
 		if (args.length == 0) {
@@ -38,16 +38,15 @@ public class Main {
 		}
 
 		final ThornsecModel model = new ThornsecModel();
-		model.read(jsonPath);
 
 		try {
-			model.init();
+			model.read(jsonPath);
+
+			new FullFrame(model);
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getLocalizedMessage());
+			JOptionPane.showMessageDialog(null, e);
 		}
-
-		new FullFrame(model);
 	}
 
 }
