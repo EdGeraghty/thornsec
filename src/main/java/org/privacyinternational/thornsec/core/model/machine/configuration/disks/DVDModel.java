@@ -7,7 +7,6 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.disks;
 
-import java.io.File;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 

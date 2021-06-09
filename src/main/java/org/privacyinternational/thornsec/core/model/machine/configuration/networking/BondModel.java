@@ -7,13 +7,14 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.networking;
 
-import java.util.Optional;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
+
+import java.util.Optional;
 
 /**
  * This model represents a Bond. You have to stack this on top of a Trunk for it

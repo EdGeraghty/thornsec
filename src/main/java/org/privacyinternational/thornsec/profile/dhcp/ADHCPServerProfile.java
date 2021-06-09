@@ -7,19 +7,15 @@
  */
 package org.privacyinternational.thornsec.profile.dhcp;
 
+import inet.ipaddr.IPAddress;
+import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
+import org.privacyinternational.thornsec.core.model.machine.ServerModel;
+import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-
-import inet.ipaddr.IPAddress;
-import org.privacyinternational.thornsec.core.exception.AThornSecException;
-
-import org.privacyinternational.thornsec.core.iface.IUnit;
-import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
-import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-
-import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
 
 /**
  * This is a DHCP server of some type.

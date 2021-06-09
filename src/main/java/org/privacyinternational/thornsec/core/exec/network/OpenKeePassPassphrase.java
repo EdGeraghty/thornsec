@@ -7,13 +7,12 @@
  */
 package org.privacyinternational.thornsec.core.exec.network;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.util.Collection;
+import de.slackspace.openkeepass.KeePassDatabase;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-import de.slackspace.openkeepass.KeePassDatabase;
+
+import java.util.Collection;
 
 public final class OpenKeePassPassphrase extends APassphrase {
 

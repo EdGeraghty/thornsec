@@ -7,10 +7,6 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.disks;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Format;
@@ -19,6 +15,11 @@ import org.privacyinternational.thornsec.core.exception.data.machine.configurati
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 
 public class ADiskModel extends AModel {
 	private Format format;

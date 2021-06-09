@@ -7,8 +7,6 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.disks;
 
-import java.io.File;
-import java.util.Optional;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData.Format;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
@@ -16,6 +14,10 @@ import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.InvalidDiskSizeException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+
+import javax.json.Json;
+import java.io.File;
+import java.util.Optional;
 
 public class HardDiskModel extends ADiskModel {
 	private Format format;
