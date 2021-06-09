@@ -421,11 +421,19 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 	}
 
 	private Map<String, String> getNetworkSection(Section section) {
-		return networkSettings.getOrDefault(section, new LinkedHashMap<>());
+		if (null == this.networkSettings) {
+			this.networkSettings = new LinkedHashMap<>();
+		}
+
+		return this.networkSettings.getOrDefault(section, new LinkedHashMap<>());
 	}
 
 	private Map<String, String> getNetDevSection(Section section) {
-		return netDevSettings.getOrDefault(section, new LinkedHashMap<>());
+		if (null == this.netDevSettings) {
+			this.netDevSettings = new LinkedHashMap<>();
+		}
+
+		return this.netDevSettings.getOrDefault(section, new LinkedHashMap<>());
 	}
 
 	private boolean setNetworkSection(Section section, Map<String, String> settings) {
