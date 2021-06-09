@@ -7,24 +7,19 @@
  */
 package org.privacyinternational.thornsec.core.model.machine.configuration.networking;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import inet.ipaddr.IPAddress;
+import inet.ipaddr.mac.MACAddress;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
-import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
-import inet.ipaddr.IPAddress;
-import inet.ipaddr.mac.MACAddress;
+
+import java.util.*;
 
 /**
  * This model represents a Network Interface Card (NIC) attached to our network.
@@ -63,7 +58,7 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 		}
 	}
 
-	private NetworkModel networkModel;
+	private final NetworkModel networkModel;
 
 	private String comment;
 	private String iface;
@@ -93,21 +88,22 @@ public abstract class NetworkInterfaceModel extends AModel implements ISystemdNe
 
 		this.networkModel = networkModel;
 
-		this.netDevSettings = new HashMap<>();
-		this.networkSettings = new HashMap<>();
-
 		this.setIface(getLabel());
 
-		this.addresses = null;
-		this.inet = null;
-		this.direction = null;
-		this.weighting = null;
-		this.subnet = null;
-		this.netmask = null;
-		this.broadcast = null;
-		this.gateway = null;
-		this.mac = null;
-		this.comment = null;
+		this.setDirection(ifaceData.getDirection());
+		this.setIface(ifaceData.getIface());
+		this.setInet(ifaceData.getInet());
+
+		if (ifaceData.getAddresses().isPresent()) {
+			this.addAddress(ifaceData.getAddresses().get().toArray(IPAddress[]::new));
+		}
+
+		ifaceData.getBroadcast().ifPresent(this::setBroadcast);
+		ifaceData.getComment().ifPresent(this::setComment);
+		ifaceData.getGateway().ifPresent(this::setGateway);
+		ifaceData.getMAC().ifPresent(this::setMac);
+		ifaceData.getNetmask().ifPresent(this::setNetmask);
+		ifaceData.getSubnet().ifPresent(this::setSubnet);
 	}
 
 	public NetworkModel getNetworkModel() {
