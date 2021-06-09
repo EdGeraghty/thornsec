@@ -7,7 +7,10 @@
  */
 package org.privacyinternational.thornsec.type;
 
+import inet.ipaddr.AddressStringException;
 import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
+import inet.ipaddr.IPAddressString;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
@@ -39,6 +42,19 @@ public class ExternalOnly extends Device {
 
 	@Override
 	public String getVLAN() {
-		return "ExternalOnly";
+		return "ExternalOnlys";
+	}
+
+	@Override
+	public IPAddress getVLANSubnet() {
+		IPAddress subnet = null;
+		try {
+			subnet = new IPAddressString("172.28.0.0/16").toAddress();
+		} catch (AddressStringException e) {
+			;; //Famous last words...
+			e.printStackTrace();
+		}
+
+		return subnet;
 	}
 }

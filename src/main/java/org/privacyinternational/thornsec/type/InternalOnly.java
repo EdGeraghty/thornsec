@@ -7,6 +7,9 @@
  */
 package org.privacyinternational.thornsec.type;
 
+import inet.ipaddr.AddressStringException;
+import inet.ipaddr.IPAddress;
+import inet.ipaddr.IPAddressString;
 import org.privacyinternational.thornsec.core.model.machine.DeviceModel;
 
 /**
@@ -20,6 +23,20 @@ public class InternalOnly extends Device {
 
 	@Override
 	public String getVLAN() {
-		return "InternalOnly";
+		return "InternalOnlys";
 	}
+
+	@Override
+	public IPAddress getVLANSubnet() {
+		IPAddress subnet = null;
+		try {
+			subnet = new IPAddressString("172.24.0.0/16").toAddress();
+		} catch (AddressStringException e) {
+			;; //Famous last words...
+			e.printStackTrace();
+		}
+
+		return subnet;
+	}
+
 }

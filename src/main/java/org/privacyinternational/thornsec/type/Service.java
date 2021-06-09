@@ -7,8 +7,6 @@
  */
 package org.privacyinternational.thornsec.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.ServiceModel;
@@ -16,6 +14,9 @@ import org.privacyinternational.thornsec.core.unit.SimpleUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirMountedUnit;
 import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileAppendUnit;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * This is a Service, which represents a VM on a HyperVisor

@@ -7,14 +7,32 @@
  */
 package org.privacyinternational.thornsec.type;
 
+import inet.ipaddr.AddressStringException;
+import inet.ipaddr.IPAddress;
+import inet.ipaddr.IPAddressString;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 
-/**
- * This is a Server, which represents a VM on a HyperVisor
- */
 public abstract class Server extends AMachineType {
-
 	public Server(ServerModel me) {
 		super(me);
+	}
+
+	@Override
+	public IPAddress getVLANSubnet() {
+		IPAddress subnet = null;
+			try {
+			subnet = new IPAddressString("10.0.0.0/16").toAddress();
+		} catch (
+		AddressStringException e) {
+			;; //Famous last words...
+			e.printStackTrace();
+		}
+
+		return subnet;
+	}
+
+	@Override
+	public String getVLAN() {
+		return "Servers";
 	}
 }

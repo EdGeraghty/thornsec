@@ -7,13 +7,14 @@
  */
 package org.privacyinternational.thornsec.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.privacyinternational.thornsec.core.exception.AThornSecException;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Any machine on a given network can only be of one Type, and that is represented here.
@@ -33,16 +34,10 @@ public abstract class AMachineType extends AStructuredProfile {
 	public abstract String getVLAN();
 
 	/**
-	 * Returns all Units for configuring this Type
-	 * @return All units pertaining to this Type
-	 * @throws AThornSecException if something goes wrong
+	 * What subnet should machines on this VLAN run on?
+	 * @return an IPAddress representing the VLAN subnet
 	 */
-	@Override
-	public Collection<IUnit> getUnits() throws AThornSecException {
-		Collection<IUnit> units = new ArrayList<>(getNetworkInterfaceUnits());
-		units.addAll(super.getUnits());
-		return units;
-	}
+	public abstract IPAddress getVLANSubnet();
 
 	/**
 	 * Do the magic to turn our Models' NIC information into whatever is required by their Type

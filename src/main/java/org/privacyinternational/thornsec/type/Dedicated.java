@@ -7,6 +7,7 @@
  */
 package org.privacyinternational.thornsec.type;
 
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
 
 /**
@@ -22,5 +23,10 @@ public class Dedicated extends Server {
 	@Override
 	public String getVLAN() {
 		return "Dedicated";
+	}
+
+	@Override
+	public IPAddress getVLANSubnet() {
+		return null;
 	}
 }

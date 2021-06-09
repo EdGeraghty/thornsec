@@ -248,4 +248,10 @@ public class Router extends Server {
 	public String getVLAN() {
 		return "";
 	}
+
+	@Override
+	public IPAddress getVLANSubnet() {
+		return null;
+	}
+
 }
