@@ -7,21 +7,7 @@
  */
 package org.privacyinternational.thornsec.core.model.network;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.privacyinternational.thornsec.core.data.machine.*;
+import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.data.network.NetworkData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.NoValidUsersException;
@@ -32,6 +18,12 @@ import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.machine.*;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * Below the ThornsecModel comes the getNetworkModel().
  *
@@ -39,36 +31,16 @@ import org.privacyinternational.thornsec.core.model.machine.*;
  * holds information representing which machines are around.
  */
 public class NetworkModel extends AModel {
-	private Set<UserModel> users;
-	private Set<AMachineModel> machines;
+	private final Set<UserModel> users = new HashSet<>();
+	private final Set<AMachineModel> machines = new HashSet<>();
 
-	private Map<String, Collection<IUnit>> networkUnits;
+	private final Map<String, Collection<IUnit>> networkUnits = new LinkedHashMap<>();
 
-	NetworkModel(NetworkData data) {
+	NetworkModel(NetworkData data) throws AThornSecException {
 		super(data);
 
-		this.users = new HashSet<>();
-
-		this.machines = null;
-		this.networkUnits = null;
-	}
-
-	/**
-	 * Initialises the various models across our network, building and initialising
-	 * all of our machines
-	 *
-	 * @throws AThornSecException
-	 */
-	@Override
-	public void init() throws AThornSecException {
-
-		buildMachines();
 		buildUsers();
-
-		// We want to initialise the whole network first before we start getting units
-		for (AMachineModel machine : getMachines()) {
-			machine.init();
-		}
+		buildMachines();
 
 		// Now get the units, working our way up the stack...
 		for (final AMachineModel device : getMachines(DeviceModel.class)) {
