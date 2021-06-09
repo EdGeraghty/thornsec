@@ -41,9 +41,4 @@ public class Hypervisor extends Server {
 
 		return units;
 	}
-
-	@Override
-	public String getVLAN() {
-		return "Hypervisor";
-	}
 }
