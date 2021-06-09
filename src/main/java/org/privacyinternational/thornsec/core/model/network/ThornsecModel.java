@@ -7,26 +7,24 @@
  */
 package org.privacyinternational.thornsec.core.model.network;
 
+import org.privacyinternational.thornsec.core.data.network.NetworkData;
+import org.privacyinternational.thornsec.core.exception.AThornSecException;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
+import org.privacyinternational.thornsec.core.exception.data.InvalidJSONException;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
-import org.privacyinternational.thornsec.core.data.network.NetworkData;
-
-import org.privacyinternational.thornsec.core.exception.AThornSecException;
-import org.privacyinternational.thornsec.core.exception.data.ADataException;
-import org.privacyinternational.thornsec.core.exception.data.InvalidJSONException;
 
 /**
  * This is the model at the very heart of ThornSec.
@@ -35,11 +33,11 @@ import org.privacyinternational.thornsec.core.exception.data.InvalidJSONExceptio
  */
 public class ThornsecModel {
 
-	private final Map<String, NetworkModel> networks;
+	private final Collection<NetworkModel> networks;
 	private final Path configPath;
 
 	public ThornsecModel() {
-		this.networks = new LinkedHashMap<>();
+		this.networks = new ArrayList<>();
 		this.configPath = null;
 	}
 
@@ -74,28 +72,24 @@ public class ThornsecModel {
 	}
 
 	/**
-	 * Returns the labels of our various networks
-	 * @return
+	 * Returns our various networks
+	 * @return a collection of all networks in our ThornSec model
 	 */
-	public Collection<String> getNetworkLabels() {
-		return this.networks.keySet();
+	public Collection<NetworkModel> getNetworks() {
+		return this.networks;
 	}
 
 	/**
 	 * Get a specific network by its label
-	 * @param label
-	 * @return
+	 * @param label The network's label, as given in the JSON
+	 * @return the corresponding NetworkModel
 	 */
 	public NetworkModel getNetwork(String label) {
-		return this.networks.get(label);
-	}
-
-	/**
-	 * Get the path to config file this network was configured against, useful
-	 * for 
-	 * @return absolute Path
-	 */
-	public Path getConfigFilePath() {
-		return this.configPath;
+		return getNetworks().stream()
+				.filter(
+					network -> network.getLabel().equals(label)
+				)
+				.findFirst()
+				.get();
 	}
 }
