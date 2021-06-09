@@ -53,15 +53,6 @@ public class NetworkModel extends AModel {
 		this.networkUnits = null;
 	}
 
-	@Override
-	public NetworkData getData() {
-		return (NetworkData) super.getData();
-	}
-
-	final public Set<UserModel> getUsers() {
-		return this.users;
-	}
-
 	/**
 	 * Initialises the various models across our network, building and initialising
 	 * all of our machines
@@ -91,6 +82,15 @@ public class NetworkModel extends AModel {
 		for (final AMachineModel service : getMachines(ServiceModel.class)) {
 			putUnits(service);
 		}
+	}
+
+	@Override
+	public NetworkData getData() {
+		return (NetworkData) super.getData();
+	}
+
+	final public Set<UserModel> getUsers() {
+		return this.users;
 	}
 
 	@Override
