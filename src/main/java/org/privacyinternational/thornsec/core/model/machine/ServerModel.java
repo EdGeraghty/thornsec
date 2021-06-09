@@ -94,7 +94,7 @@ public class ServerModel extends AMachineModel {
 				"readonly TMOUT\n" + "export TMOUT", "/etc/profile",
 				"Couldn't set the serial timeout. This means users who forget to log out won't be auto logged out after two hours."));
 
-		units.addAll(this.os.getUnits());
+		units.addAll(getOS().getUnits());
 
 		for (final AProfile profile : getProfiles().values()) {
 			units.addAll(profile.getUnits());
