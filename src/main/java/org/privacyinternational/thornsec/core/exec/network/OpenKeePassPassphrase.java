@@ -26,18 +26,18 @@ public final class OpenKeePassPassphrase extends APassphrase {
 
 	@Override
 	public Boolean init() {
-		try {
-			final File keypassDB = new File(getNetworkModel().getKeePassDBPath(getMachineModel().getLabel()));
-			if (keypassDB.isFile()) {
-				this.db = KeePassDatabase.getInstance(keypassDB);
-				this.db.openDatabase("IAmAString");
-
-				return true;
-			}
-		} catch (final URISyntaxException | IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//try {
+			//final File keypassDB = new File(getNetworkModel().getKeePassDBPath(getMachineModel().getLabel()));
+		//	if (keypassDB.isFile()) {
+//				this.db = KeePassDatabase.getInstance(keypassDB);
+//				this.db.openDatabase("IAmAString");
+//
+//				return true;
+//			}
+//		} catch (final URISyntaxException | IllegalArgumentException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		return false;
 	}
