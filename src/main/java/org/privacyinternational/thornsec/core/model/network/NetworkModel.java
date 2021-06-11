@@ -80,10 +80,6 @@ public class NetworkModel extends AModel {
 	 * @throws AThornSecException if something is broken
 	 */
 	private void buildMachines() throws AThornSecException {
-		if (null == this.machines) {
-			this.machines = new HashSet<>();
-		}
-
 		for (AMachineData machineData : getData().getMachines()) {
 			machines.add(ModelFactory.modelFromData(machineData, this));
 		}
@@ -104,10 +100,6 @@ public class NetworkModel extends AModel {
 	}
 
 	private void putUnits(AMachineModel machine) throws AThornSecException {
-		if (this.networkUnits == null) {
-			this.networkUnits = new LinkedHashMap<>();
-		}
-
 		this.networkUnits.put(machine.getLabel(), machine.getUnits());
 	}
 
