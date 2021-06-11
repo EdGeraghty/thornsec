@@ -34,11 +34,9 @@ import java.util.Map.Entry;
 public class ThornsecModel {
 
 	private final Collection<NetworkModel> networks;
-	private final Path configPath;
 
 	public ThornsecModel() {
 		this.networks = new ArrayList<>();
-		this.configPath = null;
 	}
 
 	/**
