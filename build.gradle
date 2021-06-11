@@ -49,6 +49,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-}
-
 mainClassName = $/org.privacyinternational.thornsec.core.Main/$
