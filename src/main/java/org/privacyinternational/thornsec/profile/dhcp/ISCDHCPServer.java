@@ -94,64 +94,6 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 				.anyMatch(machine -> machine.getIPs().contains(ip));
 	}
 	
-	/**
-	 * Check whether a given machine has a MAC address set for each of its
-	 * interfaces.
-	 *
-	 * @param machine
-	 * @param isRequired true if you want it to throw an Exception
-	 * @return true if all interfaces have MAC adddresses, false otherwise.
-	 * @throws InvalidNetworkInterfaceException
-	 */
-	private Boolean checkMACs(AMachineModel machine, Boolean isRequired) throws InvalidNetworkInterfaceException {
-		for (final NetworkInterfaceModel nic : machine.getNetworkInterfaces()) {
-			if (nic.getMac().isEmpty()) {
-				if (isRequired) {
-					throw new InvalidNetworkInterfaceException("Network interface " + nic.getIface() + " on "
-							+ machine.getLabel() + " requires a MAC address to be set.");
-				}
-				else {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	protected void distributeMACs() throws AThornSecException {
-//		final Boolean isRouterHV = getMachineModel().isType(MachineType.HYPERVISOR);
-//
-//		// Start by checking all of the devices have a MAC address provided, as these
-//		// are physical devices!
-//		for (final ADeviceModel device : getNetworkModel().getMachines(ADeviceModel.class)) {
-//			checkMACs(device, !isRouterHV);
-//		}
-//
-//		// Iterate through our dedi machines, these are also physical machines
-//		for (final AMachineModel server : getNetworkModel().getMachines(MachineType.DEDICATED)) {
-//			checkMACs(server, !isRouterHV);
-//		}
-//
-//		// Iterate through our HyperVisor machines, these are also physical machines
-//		for (final AMachineModel server : getNetworkModel().getMachines(MachineType.HYPERVISOR)) {
-//			checkMACs(server, !isRouterHV);
-//		}
-//
-//		// Finally, iterate through our services, filling in any gaps.
-//		// TODO: tidy up this loopy mess?
-//		for (final AMachineModel server : getNetworkModel().getMachines(MachineType.SERVICE)) {
-//			if (!checkMACs(server, false)) {
-//				server.getNetworkInterfaces().forEach(nic -> {
-//					if (nic.getMac().isEmpty()) {
-//						nic.setMac(server.generateMAC(nic.getIface()));
-//					}
-//				});
-//			}
-//		}
-	}
-
 	@Override
 	public Collection<IUnit> getInstalled() {
 		final Collection<IUnit> units = new ArrayList<>();
