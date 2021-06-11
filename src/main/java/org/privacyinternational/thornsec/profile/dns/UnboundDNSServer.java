@@ -107,11 +107,10 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * Initialise an Unbound DNS Server on this machine
 	 * @param me Our ServerModel
 	 */
-	public UnboundDNSServer(ServerModel me) {
+	public UnboundDNSServer(ServerModel me) throws ADataException {
 		super(me);
 
-		this.data = new UnboundConfig();
-		this.data.setData(me.getData().getData().getJsonObject("unbound"));
+		this.data = new UnboundConfig(me.getData().getData());
 
 		this.zones = new Hashtable<>();
 		this.unboundConf = null;
