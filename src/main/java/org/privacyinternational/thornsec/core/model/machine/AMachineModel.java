@@ -8,8 +8,8 @@
 package org.privacyinternational.thornsec.core.model.machine;
 
 import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
-import inet.ipaddr.*;
-import inet.ipaddr.mac.MACAddress;
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.StringUtils;
 import org.privacyinternational.thornsec.core.data.machine.AMachineData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
@@ -33,8 +33,6 @@ import org.privacyinternational.thornsec.type.AMachineType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.beans.Expression;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -255,40 +253,6 @@ public abstract class AMachineModel extends AModel {
 		});
 
 		return ips;
-	}
-
-	public MACAddress generateMAC(String iface) {
-		final String name = getLabel() + iface;
-
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("SHA-512");
-		} catch (final NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		md.update(name.getBytes());
-
-		final byte[] byteData = md.digest();
-		final StringBuilder hashCodeBuffer = new StringBuilder();
-		for (final byte element : byteData) {
-			hashCodeBuffer.append(Integer.toString((element & 0xff) + 0x100, 16).substring(1));
-
-			if (hashCodeBuffer.length() == 6) {
-				break;
-			}
-		}
-
-		final String address = "080027" + hashCodeBuffer.toString();
-
-		try {
-			return new MACAddressString(address).toAddress();
-		} catch (final AddressStringException | IncompatibleAddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return null;
 	}
 
 	public Set<TrafficRule> getFirewallRules() {
