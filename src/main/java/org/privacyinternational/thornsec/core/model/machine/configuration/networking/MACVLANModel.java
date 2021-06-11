@@ -13,12 +13,14 @@ import org.privacyinternational.thornsec.core.data.machine.configuration.Network
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
+import org.privacyinternational.thornsec.type.AMachineType;
 
 /**
  * This model represents a MACVLAN. You have to stack this on top of a Trunk for
  * it to work, of course.
  */
 public class MACVLANModel extends NetworkInterfaceModel {
+	AMachineType type;
 
 	public MACVLANModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		super(myData, networkModel);
@@ -30,5 +32,13 @@ public class MACVLANModel extends NetworkInterfaceModel {
 		super.setGatewayOnLink(true);
 		super.addToNetDev(Section.MACVLAN, "Mode", "bridge");
 		super.setDirection(Direction.LAN);
+	}
+
+	public AMachineType getType() {
+		return type;
+	}
+
+	public void setType(AMachineType type) {
+		this.type = type;
 	}
 }
