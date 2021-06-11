@@ -7,23 +7,16 @@
  */
 package org.privacyinternational.thornsec.profile.firewall.router;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.StringUtils;
-import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Inet;
+import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.machine.InvalidServerException;
-import org.privacyinternational.thornsec.core.exception.runtime.ARuntimeException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidFirewallRuleException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidMachineModelException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidProfileException;
-import org.privacyinternational.thornsec.core.exception.runtime.InvalidServerModelException;
+import org.privacyinternational.thornsec.core.exception.runtime.*;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
@@ -33,10 +26,15 @@ import org.privacyinternational.thornsec.core.model.machine.configuration.networ
 import org.privacyinternational.thornsec.core.unit.fs.FileEditUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
+import org.privacyinternational.thornsec.type.AMachineType;
 import org.privacyinternational.thornsec.type.Router;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * For more information on this Firewall, please see
@@ -116,16 +114,16 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setDestinationZone(
 				rule.getDestinations()
 					.stream()
-					.<String>map(destination -> cleanZone(destination.getHost()))
+					.map(destination -> cleanZone(destination.getHost()))
 					.collect(Collectors.joining(","))
 			);
 			this.setDestinationSubZone(
 				rule.getDestinations()
 					.stream()
-					.<String>map(destination -> destination.getHost())
-					.<Collection<IPAddress>>map(label -> getNetworkModel().getMachineModel(label).get().getIPs())
+					.map(destination -> destination.getHost())
+					.map(label -> getNetworkModel().getMachineModel(label).get().getIPs())
 					.flatMap(Collection::stream)
-					.<String>map(ip -> ip.withoutPrefixLength().toCompressedString())
+					.map(ip -> ip.withoutPrefixLength().toCompressedString())
 					.collect(Collectors.joining(","))
 			);
 		}
@@ -142,39 +140,40 @@ public class ShorewallFirewall extends AFirewallProfile {
 			//boolean destIsExternallyAccessible = rule.getDestinations()
 			//		.stream()
 			//		.map(HostName::getHost)
-			//		.anyMatch(label -> !this.getMachineModel(label).getExternalIPs().isEmpty());
+			//		.anyMatch(label -> !getNetworkModel().getMachineModel(label).getIPs().isEmpty());
 
-			//this.setAction(Action.ACCEPT);
+			this.setAction(Action.ACCEPT);
+			//TODO
 			//if (destIsExternallyAccessible) {
-			//	this.setSourceZone("any");
+				this.setSourceZone("any");
 			//}
 			//else {
-//				this.setSourceZone(
-//					getNetworkModel().getSubnets().keySet()
-//					 .stream()
-//					 .filter(type -> !getNetworkModel().getMachines(type).isEmpty())
-//					 .map(ShorewallFirewall.this::cleanZone)
-//					 .collect(Collectors.joining(","))
-//				);
+			//	this.setSourceZone(
+			//		getNetworkModel().getSubnets().keySet()
+			//		 .stream()
+			//		 .filter(type -> !getNetworkModel().getMachines(type).isEmpty())
+			//		 .map(ShorewallFirewall.this::cleanZone)
+			//		 .collect(Collectors.joining(","))
+			//	);
 //			}
-//			this.setProto(rule.getEncapsulation());
-//			this.setDPorts(rule.getPorts());
-//			this.setDestinationZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(destination -> cleanZone(destination.getHost()))
-//					.collect(Collectors.joining(","))
-//			);
-//			this.setDestinationSubZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(HostName::getHost)
-//					.map(label -> this.getMachineModel(label).getIPs())
-//					.flatMap(Collection::stream)
-//					.filter(IPAddress::isLocal)
-//					.map(ip -> ip.withoutPrefixLength().toCompressedString())
-//					.collect(Collectors.joining(","))
-//			);
+			this.setProto(rule.getEncapsulation());
+			this.setDPorts(rule.getPorts());
+			this.setDestinationZone(
+				rule.getDestinations()
+					.stream()
+					.map(destination -> cleanZone(destination.getHost()))
+					.collect(Collectors.joining(","))
+			);
+			this.setDestinationSubZone(
+				rule.getDestinations()
+					.stream()
+					.map(HostName::getHost)
+					.map(label -> getNetworkModel().getMachineModel(label).orElseThrow().getIPs())
+					.flatMap(Collection::stream)
+					.filter(IPAddress::isLocal)
+					.map(ip -> ip.withoutPrefixLength().toCompressedString())
+					.collect(Collectors.joining(","))
+			);
 		}
 
 		/**
@@ -206,45 +205,46 @@ public class ShorewallFirewall extends AFirewallProfile {
 			this.setAction(Action.DNAT);
 
 			//don't DNAT to us if we're the source!
-//			this.setInvertSource(true);
-//			this.setSourceZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(destination -> cleanZone(destination.getHost()))
-//					.collect(Collectors.joining(","))
-//			);
-//			this.setSourceSubZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(HostName::getHost)
-//					.map(label -> getNetworkModel().getMachineModel(label).orElseThrow(InvalidMachineModelException::new).getIPs())
-//					.flatMap(Collection::stream)
-//					.map(ip -> ip.withoutPrefixLength().toCompressedString())
-//					.collect(Collectors.joining(","))
-//			);
-//
-//			//Traffic's now coming to us
-//			this.setDestinationZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(destination -> cleanZone(destination.getHost()))
-//					.collect(Collectors.joining(","))
-//			);
-//			this.setDestinationSubZone(
-//				rule.getDestinations()
-//					.stream()
-//					.map(HostName::getHost)
-//					.map(label -> getNetworkModel().getMachineModel(label).getIPs())
-//					.flatMap(Collection::stream)
-//					.map(ip -> ip.withoutPrefixLength().toCompressedString())
-//					.collect(Collectors.joining(","))
-//			);
-//			this.setDPorts(rule.getPorts());
-//			this.setProto(rule.getEncapsulation());
-//			this.setOrigDest(
-//				this.getMachineModel(rule.getSource())
-//					.getIPs(true)
-//			);
+			this.setInvertSource(true);
+			this.setSourceZone(
+				rule.getDestinations()
+					.stream()
+					.map(destination -> cleanZone(destination.getHost()))
+					.collect(Collectors.joining(","))
+			);
+			this.setSourceSubZone(
+				rule.getDestinations()
+					.stream()
+					.map(HostName::getHost)
+					.map(label -> getNetworkModel().getMachineModel(label).orElseThrow().getIPs())
+					.flatMap(Collection::stream)
+					.map(ip -> ip.withoutPrefixLength().toCompressedString())
+					.collect(Collectors.joining(","))
+			);
+
+			//Traffic's now coming to us
+			this.setDestinationZone(
+				rule.getDestinations()
+					.stream()
+					.map(destination -> cleanZone(destination.getHost()))
+					.collect(Collectors.joining(","))
+			);
+			this.setDestinationSubZone(
+				rule.getDestinations()
+					.stream()
+					.map(HostName::getHost)
+					.map(label -> getNetworkModel().getMachineModel(label).orElseThrow().getIPs())
+					.flatMap(Collection::stream)
+					.map(ip -> ip.withoutPrefixLength().toCompressedString())
+					.collect(Collectors.joining(","))
+			);
+			this.setDPorts(rule.getPorts());
+			this.setProto(rule.getEncapsulation());
+			this.setOrigDest(
+				getNetworkModel().getMachineModel(rule.getSource())
+					.orElseThrow()
+					.getIPs()
+			);
 		}
 
 		private void setMacro(String macro) {
@@ -309,7 +309,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 					&& !(this.destinationSubZone.startsWith("&"))
 					&& !(this.destinationSubZone.matches(".*\\.[0-9]+$"))) {
 				_egress += ".";
-			}		
+			}
 			if (dPorts != null) {
 				_dPorts = dPorts.stream().map(Object::toString).collect(Collectors.joining(","));
 			}
@@ -423,49 +423,21 @@ public class ShorewallFirewall extends AFirewallProfile {
 	 * This maclist file reflects the whole network
 	 * 
 	 * @return the contents of the maclist file
-	 * @throws InvalidProfileException if you don't have exactly 1 router on your network
 	 */
-	private Collection<String> getMaclistFile() throws InvalidProfileException {
+	private Collection<String> getMaclistFile() {
 		final Collection<String> maclist = new ArrayList<>();
 
-		assert (null != getRouter().getNetworkInterfaces());
-		getRouter().getNetworkInterfaces()
+		getServerModel().getNetworkInterfaces()
 		.stream()
 		.filter(nic -> nic instanceof MACVLANTrunkModel)
 		.map(MACVLANTrunkModel.class::cast)
 		.forEach(nic -> {
 			nic.getVLANs().forEach(vlan -> {
-//				Set<AMachineModel> machines = getNetworkModel().getMachines(vlan.getType());
-//				maclist.addAll(machines2Maclist(vlan.getType(), machines));
+				maclist.addAll(machines2Maclist(vlan.getType()));
 			});
 		});
 
 		return maclist;
-	}
-
-	/**
-	 * Get this network's Router
-	 * @return the Router
-	 * @throws InvalidProfileException if the network contains <>1 router
-	 */
-	private ServerModel getRouter() throws InvalidProfileException {
-//		if (getServerModel().isType(MachineType.ROUTER)) {
-//			return getServerModel();
-//		}
-//		else {
-//			Set<AMachineModel> routers = getNetworkModel().getMachines(MachineType.ROUTER);
-//
-//			if (routers.isEmpty()) {
-//				throw new InvalidProfileException("You must have at least one router on your network!");
-//			}
-//			else if (routers.size() > 1) {
-//				throw new InvalidProfileException("You must only have one router on your network!");
-//			}
-//
-//			return (ServerModel) routers.iterator().next();
-//		}
-		//TODO
-		return null;
 	}
 
 	private Collection<String> getHostsFile() {
@@ -481,9 +453,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		.map(MACVLANTrunkModel.class::cast)
 		.forEach(nic -> {
 			nic.getVLANs().forEach(vlan -> {
-				//Set<AMachineModel> machines = getNetworkModel().getMachines(vlan.getType());
-				//TODO
-				//hosts.addAll(machines2Host(vlan.getType(), machines));
+				hosts.addAll(machines2Host(vlan.getType()));
 			});
 		});
 
@@ -493,29 +463,24 @@ public class ShorewallFirewall extends AFirewallProfile {
 	private Collection<ShorewallRule> getRulesFile() throws InvalidServerException, InvalidMachineModelException {
 		Collection<ShorewallRule> rules = new ArrayList<>();
 
-//		if (getMachineModel().isType(MachineType.ROUTER)) {
-//			// Iterate over every machine to build all of its rules
-//			getNetworkModel().getMachines().values().forEach((machine) -> {
-//				if (machine.getFirewallRules().isEmpty()) {
-//					return;
-//				}
-//
-//				Comment machineComment = new Comment(machine.getLabel());
-//				rules.add(machineComment);
-//
-//				machine.getFirewallRules().forEach(rule -> {
-//					try {
-//						rules.add(new ShorewallRule(rule));
-//					} catch (InvalidMachineModelException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				});
-//			});
-//		}
-//		else {
-//			;; //TODO
-//		}
+		// Iterate over every machine to build all of its rules
+		getNetworkModel().getMachines().forEach((machine) -> {
+			if (null == machine.getFirewallRules() || machine.getFirewallRules().isEmpty()) {
+				return;
+			}
+
+			Comment machineComment = new Comment(machine.getLabel());
+			rules.add(machineComment);
+
+			machine.getFirewallRules().forEach(rule -> {
+				try {
+					rules.add(new ShorewallRule(rule));
+				} catch (InvalidMachineModelException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+		});
 
 		return rules;
 	}
@@ -545,21 +510,21 @@ public class ShorewallFirewall extends AFirewallProfile {
 				zones.appendLine("#" + vlan.getIface());
 				zones.appendLine(cleanZone(vlan.getIface()) + "\tipv4");
 
-				//getNetworkModel().getMachines(vlan.getType()).forEach(machine -> {
-					//zones.appendText(cleanZone(machine.getLabel()));
-					//zones.appendText(machine.(MachineType.ROUTER)
-					//					? ""
-					//					: ":" + cleanZone(vlan.getIface())
-					//);
-					//zones.appendText(machine.isType(MachineType.ROUTER)
-					//					? "\tfirewall"
-					//					: "\tipv4"
-					//);
-					//zones.appendText("\t#" + machine.getLabel());
-					//zones.appendCarriageReturn();
-				//});
+				getNetworkModel().getMachines(vlan.getType()).forEach(machine -> {
+					zones.appendText(cleanZone(machine.getLabel()));
+					zones.appendText(machine.getType().equals(Router.class)
+										? ""
+										: ":" + cleanZone(vlan.getIface())
+					);
+					zones.appendText(machine.getType().equals(Router.class)
+										? "\tfirewall"
+										: "\tipv4"
+					);
+					zones.appendText("\t#" + machine.getLabel());
+					zones.appendCarriageReturn();
+				});
 
-				//zones.appendCarriageReturn();
+				zones.appendCarriageReturn();
 			});
 		});
 
@@ -708,14 +673,16 @@ public class ShorewallFirewall extends AFirewallProfile {
 	public Collection<IUnit> getPersistentConfig() throws ARuntimeException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-		if (this.myRouter == null) {
-			return units;
-		}
-
-		final FileEditUnit shorewallConf = new FileEditUnit("shorewall_implicit_continue_on", "shorewall_installed",
-				"IMPLICIT_CONTINUE=No", "IMPLICIT_CONTINUE=Yes", "/etc/shorewall/shorewall.conf",
-				"I couldn't enable implicit continue on your firewall - this means many of our firewall configurations will fail.");
-		units.add(shorewallConf);
+		units.add(
+			new FileEditUnit(
+				"shorewall_implicit_continue_on",
+				"shorewall_installed",
+				"IMPLICIT_CONTINUE=No",
+				"IMPLICIT_CONTINUE=Yes",
+				"/etc/shorewall/shorewall.conf",
+				"I couldn't enable implicit continue on your firewall - this means many of our firewall configurations will fail."
+			)
+		);
 		units.add(getPoliciesFile());
 		units.add(getInterfacesFile());
 		units.add(getMasqFile());
@@ -753,20 +720,18 @@ public class ShorewallFirewall extends AFirewallProfile {
 	 * Turns a zone and an array of AMachineModels into the Shorewall hosts file format
 	 *
 	 * @param type the zone
-	 * @param machines the machines
 	 * @return the hosts file contents
 	 */
-	private Collection<String> machines2Host(AMachineModel type, Collection<AMachineModel> machines) {
+	private Collection<String> machines2Host(AMachineType type) {
 		final Collection<String> hosts = new ArrayList<>();
 
 		hosts.add("");
 		hosts.add("#" + type.toString());
 
-		machines.stream()
-			//.filter(machine -> !machine.isType(MachineType.ROUTER))
+		getNetworkModel().getMachines(type)
 			.forEach(machine -> {
 				hosts.add(cleanZone(machine.getLabel())
-					+ "\t" + type.toString()
+					+ "\t" + type.getVLAN()
 					+ ":" + getAddresses(machine)
 					+ "\tmaclist");
 			});
@@ -777,33 +742,33 @@ public class ShorewallFirewall extends AFirewallProfile {
 	/**
 	 * Parses machines into shorewall maclist lines
 	 *
-	 * @param type the machine type, only used for labelling
-	 * @param machines the machines to list in the maclist file
+	 * @param type the machine type
 	 * @return a Collection of Strings containing the maclist file lines
 	 */
-	private Collection<String> machines2Maclist(AMachineModel type, Collection<AMachineModel> machines) {
+	private Collection<String> machines2Maclist(AMachineType type) {
 		final Collection<String> maclist = new ArrayList<>();
 
-		maclist.add("#" + type.toString());
+		maclist.add("#" + type.getVLAN());
 
-		machines.forEach(machine -> {
-			machine.getNetworkInterfaces().stream()
-				.filter(nic -> nic.getMac().isPresent())
-				.filter(nic -> nic.getAddresses().isPresent())
-				.forEach(nic -> {
-					String mac = nic.getMac().get().toNormalizedString();
-					String addresses = nic.getAddresses().get().stream()
+		getNetworkModel().getMachines(type)
+			.forEach(machine ->
+				machine.getNetworkInterfaces().stream()
+					.filter(nic -> nic.getMac().isPresent())
+					.filter(nic -> nic.getAddresses().isPresent())
+					.forEach(nic -> {
+						String mac = nic.getMac().get().toNormalizedString();
+						String addresses = nic.getAddresses().get().stream()
 											.map(IPAddress::withoutPrefixLength)
 											.map(Object::toString)
 											.collect(Collectors.joining(","));
 
-					maclist.add("ACCEPT"
-								+ "\t" + type.toString()
-								+ "\t" + mac
-								+ "\t" + addresses
-								+ "\t#" + machine.getLabel());
-				});
-		});
+						maclist.add("ACCEPT"
+									+ "\t" + type.getVLAN()
+									+ "\t" + mac
+									+ "\t" + addresses
+									+ "\t#" + machine.getLabel());
+				})
+			);
 
 		return maclist;
 	}
