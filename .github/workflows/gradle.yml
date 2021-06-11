@@ -5,9 +5,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master, unstable ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ master, unstable ]
+    branches: [ master, develop ]
 
 jobs:
   build:
@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 15
+    - name: Set up JDK 16
       uses: actions/setup-java@v1
       with:
-        java-version: 15
+        java-version: 16
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
