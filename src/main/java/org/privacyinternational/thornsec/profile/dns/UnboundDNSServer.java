@@ -116,10 +116,15 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		units.addAll(getRootHints());
 		units.addAll(populateInternalZones());
 
-		this.unboundConf = new FileUnit("unbound_conf", "dns_installed",
-				UNBOUND_CONFIG_FILE,
-				"root", "root", 644,
-				"I was unable to create Unbound's config file. Your DNS server will fail to boot.");
+		this.unboundConf = new FileUnit(
+			"unbound_conf",
+			"dns_installed",
+			UNBOUND_CONFIG_FILE,
+			"root",
+			"root",
+			644,
+			"I was unable to create Unbound's config file. Your DNS server will fail to boot."
+		);
 		units.add(unboundConf);
 
 		unboundConf.appendLine("server:");
