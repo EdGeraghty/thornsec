@@ -106,17 +106,17 @@ public class Webproxy extends AStructuredProfile {
 		sslConf.appendLine("\tssl_stapling on;");
 		sslConf.appendLine("\tssl_stapling_verify on;");
 
-		sslConf.appendText("\tresolver ");
-		getNetworkModel().getData()
-						 .getUpstreamDNSServers()
-						 .ifPresent(upstreams ->
-						 	upstreams.forEach(resolver -> {
-						 		sslConf.appendText(resolver.asInetAddress() + " ");
-						 	}
-						 ));
-		sslConf.appendLine("valid=300s;");
-
-		sslConf.appendLine("\tresolver_timeout 5s;");
+//		sslConf.appendText("\tresolver ");
+//		getNetworkModel().getData()
+//						 .getUpstreamDNSServers()
+//						 .ifPresent(upstreams ->
+//						 	upstreams.forEach(resolver -> {
+//						 		sslConf.appendText(resolver.asInetAddress() + " ");
+//						 	}
+//						 ));
+//		sslConf.appendLine("valid=300s;");
+//
+//		sslConf.appendLine("\tresolver_timeout 5s;");
 
 		// Now build our headers file
 		final FileUnit headersConf = new FileUnit("nginx_headers", "proceed", "/etc/nginx/includes/header_params");
