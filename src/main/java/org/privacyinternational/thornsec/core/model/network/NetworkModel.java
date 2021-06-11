@@ -147,14 +147,6 @@ public class NetworkModel extends AModel {
 				.findFirst();
 	}
 
-	public String getKeePassDBPassphrase() {
-		return null;
-	}
-
-	public String getKeePassDBPath(String server) throws URISyntaxException {
-		return null;//getData().getKeePassDB(server);
-	}
-
 	public String getDomain() {
 		return getData().getDomain().orElse("lan");
 	}
