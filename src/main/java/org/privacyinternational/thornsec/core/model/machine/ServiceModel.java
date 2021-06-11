@@ -7,10 +7,15 @@
  */
 package org.privacyinternational.thornsec.core.model.machine;
 
+import inet.ipaddr.AddressStringException;
+import inet.ipaddr.IncompatibleAddressException;
+import inet.ipaddr.MACAddressString;
+import inet.ipaddr.mac.MACAddress;
 import org.privacyinternational.thornsec.core.data.machine.ServerData;
 import org.privacyinternational.thornsec.core.data.machine.ServiceData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.DiskData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.HardDiskData;
+import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.disks.ADiskDataException;
@@ -18,11 +23,15 @@ import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.ADiskModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.DVDModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.disks.HardDiskModel;
+import org.privacyinternational.thornsec.core.model.machine.configuration.networking.StaticInterfaceModel;
 import org.privacyinternational.thornsec.core.model.network.NetworkModel;
 import org.privacyinternational.thornsec.profile.guest.AOS;
 import org.privacyinternational.thornsec.profile.guest.Alpine;
 
+import javax.json.Json;
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -33,7 +42,7 @@ import java.util.*;
 public class ServiceModel extends ServerModel {
 
 	private Map<String, ADiskModel> disks;
-	private ServerModel hypervisor;
+	private final ServerModel hypervisor;
 
 	private static final Integer DEFAULT_BOOT_DISK_SIZE = (8 * 1024); //8GB
 	private static final Integer DEFAULT_DATA_DISK_SIZE = (20 * 1024); //20GB
@@ -48,6 +57,22 @@ public class ServiceModel extends ServerModel {
 								.getLabel()
 				)
 				.orElseThrow();
+
+		if (getNetworkInterfaces().isEmpty()) {
+			StaticInterfaceModel nic = new StaticInterfaceModel(
+					new NetworkInterfaceData(
+							"eth0",
+							null,
+							Json.createObjectBuilder().build()
+					),
+					null
+			);
+
+			nic.setMac(generateMAC("eth0"));
+			nic.setDirection(NetworkInterfaceData.Direction.LAN);
+
+			addNetworkInterface(nic);
+		}
 
 		initDisks();
 	}
@@ -142,5 +167,40 @@ public class ServiceModel extends ServerModel {
 	public Collection<IUnit> getUserPasswordUnits() {
 		// TODO Auto-generated method stub
 		return new ArrayList<>();
+	}
+
+	public MACAddress generateMAC(String iface) {
+		final String name = getLabel() + iface;
+
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-512");
+		} catch (final NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assert md != null;
+		md.update(name.getBytes());
+
+		final byte[] byteData = md.digest();
+		final StringBuilder hashCodeBuffer = new StringBuilder();
+		for (final byte element : byteData) {
+			hashCodeBuffer.append(Integer.toString((element & 0xff) + 0x100, 16).substring(1));
+
+			if (hashCodeBuffer.length() == 6) {
+				break;
+			}
+		}
+
+		final String address = "080027" + hashCodeBuffer;
+
+		try {
+			return new MACAddressString(address).toAddress();
+		} catch (final AddressStringException | IncompatibleAddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }
