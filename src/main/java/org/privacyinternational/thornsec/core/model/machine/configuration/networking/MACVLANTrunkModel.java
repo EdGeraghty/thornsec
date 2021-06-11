@@ -29,12 +29,12 @@ public class MACVLANTrunkModel extends NetworkInterfaceModel {
 	public MACVLANTrunkModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		super(myData, networkModel);
 
-		super.setInet(Inet.MACVLAN);
-		super.setWeighting(10);
-		super.setARP(false);
-		super.setIsIPForwarding(true);
-		super.setIsIPMasquerading(false);
-		super.setReqdForOnline(true);
+		setInet(Inet.MACVLAN);
+		setWeighting(10);
+		setARP(false);
+		setIsIPForwarding(true);
+		setIsIPMasquerading(false);
+		setReqdForOnline(true);
 
 		vlans = new LinkedHashSet<>();
 	}

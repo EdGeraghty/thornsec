@@ -25,13 +25,13 @@ public class MACVLANModel extends NetworkInterfaceModel {
 	public MACVLANModel(NetworkInterfaceData myData, NetworkModel networkModel) throws InvalidNetworkInterfaceException, InvalidIPAddressException {
 		super(myData, networkModel);
 
-		super.setInet(Inet.MACVLAN);
-		super.setWeighting(20);
-		super.setReqdForOnline(true);
-		super.setConfigureWithoutCarrier(true);
-		super.setGatewayOnLink(true);
-		super.addToNetDev(Section.MACVLAN, "Mode", "bridge");
-		super.setDirection(Direction.LAN);
+		setInet(Inet.MACVLAN);
+		setWeighting(20);
+		setReqdForOnline(true);
+		setConfigureWithoutCarrier(true);
+		setGatewayOnLink(true);
+		addToNetDev(Section.MACVLAN, "Mode", "bridge");
+		setDirection(Direction.LAN);
 	}
 
 	public AMachineType getType() {
