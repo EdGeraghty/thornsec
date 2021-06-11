@@ -49,16 +49,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-application {
-    mainClassName = 'org.privacyinternational.thornsec.core.Main'
 }
 
-jar {
-    manifest {
-        attributes "Main-Class": "org.privacyinternational.thornsec.core.Main"
-    }
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+mainClassName = $/org.privacyinternational.thornsec.core.Main/$
