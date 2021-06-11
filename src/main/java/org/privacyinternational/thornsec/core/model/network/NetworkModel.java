@@ -17,6 +17,7 @@ import org.privacyinternational.thornsec.core.exec.ManageExec;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.AModel;
 import org.privacyinternational.thornsec.core.model.machine.*;
+import org.privacyinternational.thornsec.type.AMachineType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -118,12 +119,22 @@ public class NetworkModel extends AModel {
 
 	/**
 	 * @param type
-	 * @return A map of all machines of a given type, or an empty Set
+	 * @return A map of all machines of a given AMachineModel type, or an empty Set
 	 */
 	public Set<AMachineModel> getMachines(Class<? extends AMachineModel> type) {
 		return getMachines().stream()
 				.filter(type::isInstance)
 				.map(type::cast)
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * @param type
+	 * @return A map of all machines of a given type, or an empty Set
+	 */
+	public Set<AMachineModel> getMachines(AMachineType type) {
+		return getMachines().stream()
+				.filter(machine -> type.equals(machine.getType()))
 				.collect(Collectors.toSet());
 	}
 
