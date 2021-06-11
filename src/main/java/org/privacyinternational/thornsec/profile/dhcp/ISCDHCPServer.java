@@ -7,15 +7,12 @@
  */
 package org.privacyinternational.thornsec.profile.dhcp;
 
-import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
 import inet.ipaddr.IncompatibleAddressException;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
-import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
@@ -25,9 +22,11 @@ import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.EnabledServiceUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.RunningUnit;
+import org.privacyinternational.thornsec.type.AMachineType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Configure and set up our various different networks, and offer IP addresses
@@ -49,36 +48,34 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	}
 
 	/**
-	 * Builds a given subnet
-	 * @param type The Machine type you're building the subnet for
+	 * Builds our subnets
 	 * @throws InvalidIPAddressException if an invalid IP address is assigned
 	 */
-	private void buildNet(Class<AMachineModel> type) throws InvalidIPAddressException {
-		// First IP belongs to this net's router, so start from there (as it's assigned)
-//		IPAddress ip = getNetworkModel().getSubnet(type).getLowerNonZeroHost();
-//
-//		addSubnet(type, getSubnet(type));
-//		addToSubnet(type, getNetworkModel().getMachines(type));
-//
-//		for (final AMachineModel machine : getNetworkModel().getMachines(type)) {
-//
-//			if (machine.isType(MachineType.ROUTER) ||
-//				machine.getNetworkInterfaces() == null) {
-//				continue;
-//			}
-//
-//			for (final NetworkInterfaceModel nic : machine.getNetworkInterfaces()) {
-//				// DHCP servers distribute IP addresses, correct? :)
-//				if (nic.getAddresses().isEmpty()) {
-//					do {
-//						ip = ip.increment(1);
-//					}
-//					while (isAssigned(ip));
-//
-//					nic.addAddress(ip);
-//				}
-//			}
-//		}
+	private void buildNets() {
+
+		getNetworkModel().getSubnets().forEach( (subnet, machines) -> {
+			IPAddress ip = subnet.getVLANSubnet().getLower();
+
+			for (final AMachineModel machine : machines) {
+
+				for (final NetworkInterfaceModel nic : machine.getNetworkInterfaces()) {
+					// DHCP servers distribute IP addresses, correct? :)
+					if (nic.getAddresses().isEmpty()) {
+						do {
+							ip = ip.increment(1);
+						}
+						while (isAssigned(ip));
+
+						try {
+							nic.addAddress(ip);
+						} catch (InvalidIPAddressException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+
+		});
 	}
 
 	/**
@@ -104,20 +101,6 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	}
 
 	/**
-	 * Build our subnets where they have machines in them
-	 * @throws InvalidIPAddressException if attempting to assign an invalid IP
-	 */
-	private void buildPersistentNets() throws InvalidIPAddressException {
-//		for (MachineType type : getNetworkModel().getSubnets().keySet()) {
-//			if (getNetworkModel().getMachines(type).isEmpty()) {
-//				continue;
-//			}
-//
-//			buildNet(type);
-//		}
-	}
-
-	/**
 	 * Build our /etc/dhcp/dhcpd.conf file, including all subnet files
 	 * 
 	 * @return FileUnit for DHCPd.conf
@@ -138,14 +121,10 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 		dhcpdConf.appendLine("log-facility local7;");
 		dhcpdConf.appendCarriageReturn();
 
-//		for (final MachineType subnet : getNetworkModel().getSubnets().keySet()) {
-//			if (getNetworkModel().getMachines(subnet).isEmpty()) {
-//				continue;
-//			}
-//
-//			dhcpdConf.appendLine("include \\\"/etc/dhcp/dhcpd.conf.d/" + subnet.toString() + ".conf\\\";");
-//		}
-//
+		for (final AMachineType subnet : getNetworkModel().getSubnets().keySet()) {
+			dhcpdConf.appendLine("include \\\"/etc/dhcp/dhcpd.conf.d/" + subnet.getVLAN() + ".conf\\\";");
+		}
+//TODO
 //		if (getNetworkModel().buildAutoGuest()) {
 //			dhcpdConf.appendLine("include \\\"/etc/dhcp/dhcpd.conf.d/Guests.conf\\\";");
 //		}
@@ -156,12 +135,12 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	private FileUnit getDHCPListenInterfaces() {
 		final FileUnit dhcpdListen = new FileUnit("dhcpd_defiface", "dhcp_installed", "/etc/default/isc-dhcp-server");
 
-//		dhcpdListen.appendText("INTERFACESv4=\\\"");
-//		dhcpdListen.appendText(getNetworkModel().getSubnets().keySet().stream()
-//				.filter((type) -> !getNetworkModel().getMachines(type).isEmpty())
-//				.map(Object::toString)
-//				.collect(Collectors.joining(" ")));
-//		dhcpdListen.appendText("\\\"");
+		dhcpdListen.appendText("INTERFACESv4=\\\"");
+		dhcpdListen.appendText(getNetworkModel().getSubnets().keySet().stream()
+				.filter((type) -> !getNetworkModel().getMachines(type).isEmpty())
+				.map(Object::toString)
+				.collect(Collectors.joining(" ")));
+		dhcpdListen.appendText("\\\"");
 
 		return dhcpdListen;
 	}
@@ -173,8 +152,7 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 		// Create config drop-in dir
 		units.add(new DirUnit("dhcpd_confd_dir", "dhcp_installed", "/etc/dhcp/dhcpd.conf.d"));
 
-		buildPersistentNets();
-		distributeMACs();
+		buildNets();
 
 		units.add(getDHCPConf());
 		units.add(getDHCPListenInterfaces());
@@ -188,16 +166,11 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	 * @return
 	 * @throws InvalidIPAddressException
 	 */
-	private FileUnit buildSubNet(Class<AMachineModel> type) throws InvalidIPAddressException {
+	private FileUnit buildSubNet(AMachineType type) throws InvalidIPAddressException {
 		final FileUnit subnetConfig = new FileUnit(type + "_dhcpd_live_config", "dhcp_installed",
-				"/etc/dhcp/dhcpd.conf.d/" + type + ".conf");
+				"/etc/dhcp/dhcpd.conf.d/" + type.getVLAN() + ".conf");
 
-		IPAddress subnet = null;//getNetworkModel().getSubnet(type);
-		try {
-			subnet = new IPAddressString("0.0.0.0").toAddress();
-		} catch (AddressStringException e) {
-			e.printStackTrace();
-		}
+		IPAddress subnet = type.getVLANSubnet();
 
 		final Integer prefix = subnet.getNetworkPrefixLength();
 		final IPAddress netmask = subnet.getNetwork().getNetworkMask(prefix, false);
@@ -209,8 +182,8 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 
 		// Now let's create our subnet/groups!
 		subnetConfig.appendCarriageReturn();
-		subnetConfig.appendLine("group " + type.toString().toLowerCase() + " {");
-		subnetConfig.appendLine("\tserver-name \\\"" + type.toString().toLowerCase() + "." + getMachineModel().getHostName() + "." + getNetworkModel().getDomain() + "\\\";");
+		subnetConfig.appendLine("group " + type.getVLAN().toLowerCase() + " {");
+		subnetConfig.appendLine("\tserver-name \\\"" + type.getVLAN().toLowerCase() + "." + getMachineModel().getHostName() + "." + getNetworkModel().getDomain() + "\\\";");
 		subnetConfig.appendLine("\toption routers " + gateway + ";");
 		subnetConfig.appendLine("\toption domain-name-servers " + gateway + ";");
 		subnetConfig.appendCarriageReturn();
@@ -249,14 +222,6 @@ public class ISCDHCPServer extends ADHCPServerProfile {
 	public Collection<IUnit> getLiveConfig() throws InvalidIPAddressException {
 		final Collection<IUnit> units = new ArrayList<>();
 
-//		for (final MachineType subnet : getNetworkModel().getSubnets().keySet()) {
-//			if (getNetworkModel().getMachines(subnet).isEmpty()) {
-//				continue;
-//			}
-//
-//			units.add(buildSubNet(subnet));
-//		}
-//
 //		// @TODO: guest networking
 //		if (getNetworkModel().buildAutoGuest()) {
 //			final FileUnit guestConfig = new FileUnit("guest_dhcpd_live_config", "dhcp_installed",
