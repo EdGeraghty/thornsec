@@ -501,7 +501,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void doNotQueryLocalhost(String value) throws InvalidProfileException {
-		addSettingToConfig("do-not-query-localhost", "no");
+		addSettingToConfig("do-not-query-localhost", value);
 	}
 
 	/**
