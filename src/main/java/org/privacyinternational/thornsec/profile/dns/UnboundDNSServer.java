@@ -7,10 +7,11 @@
  */
 package org.privacyinternational.thornsec.profile.dns;
 
-import java.util.*;
-
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.data.AData;
 import org.privacyinternational.thornsec.core.data.machine.configuration.TrafficRule.Encapsulation;
+import org.privacyinternational.thornsec.core.exception.data.ADataException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidHostException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidPortException;
 import org.privacyinternational.thornsec.core.exception.runtime.ARuntimeException;
@@ -25,8 +26,11 @@ import org.privacyinternational.thornsec.core.unit.fs.DirUnit;
 import org.privacyinternational.thornsec.core.unit.fs.FileUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.InstalledUnit;
 import org.privacyinternational.thornsec.core.unit.pkg.RunningUnit;
-import inet.ipaddr.HostName;
-import inet.ipaddr.IPAddress;
+
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import java.util.*;
 
 /**
  * Creates and configures an internal, recursive DNS server for your network.
@@ -35,15 +39,15 @@ import inet.ipaddr.IPAddress;
  */
 public class UnboundDNSServer extends ADNSServerProfile {
 
-	private class UnboundConfig extends AData {
-		public UnboundConfig() {
-			super("unbound_config");
+	private static class UnboundConfig extends AData {
+		public UnboundConfig(JsonObject unboundData) throws ADataException {
+			super("unbound_config", null, unboundData);
 		}
 
 		public Set<HostName> getUpstreamDNSServers() throws InvalidHostException {
 			String key = "upstream_dns";
 
-			if (!keyIsPresent(key)) {
+			if (!getData().containsKey(key)) {
 				return new HashSet<>(
 					Arrays.asList(
 						new HostName("1.1.1.1:853"),
@@ -52,7 +56,20 @@ public class UnboundDNSServer extends ADNSServerProfile {
 				);
 			}
 
-			return super.getHostNameArray(key);
+			Set<HostName> hosts = new HashSet<>();
+
+			for (final JsonValue jsonHost : getData().getJsonArray(key)) {
+				HostName host = new HostName(((JsonString) jsonHost).getString());
+
+				if (!host.isValid()) {
+					throw new InvalidHostException(((JsonString) jsonHost).getString()
+							+ " is an invalid host");
+				}
+
+				hosts.add(host);
+			}
+
+			return hosts;
 		}
 
 		/**
@@ -61,13 +78,17 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		public boolean doAdBlocking() {
 			String key = "adblocking";
 
-			if (!keyIsPresent(key)) {
+			if (!getData().containsKey(key)) {
 				return false;
 			}
 
 			return getData().getBoolean(key);
 		}
 
+		@Override
+		public AData read(JsonObject data) throws ADataException {
+			return null;
+		}
 	}
 
 	private static final String UNBOUND_CONFIG_DIR = "/etc/unbound/";
