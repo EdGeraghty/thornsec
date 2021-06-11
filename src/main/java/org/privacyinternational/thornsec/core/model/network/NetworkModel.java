@@ -23,6 +23,9 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -136,6 +139,36 @@ public class NetworkModel extends AModel {
 		return getMachines().stream()
 				.filter(machine -> type.equals(machine.getType()))
 				.collect(Collectors.toSet());
+	}
+
+	public final Map<AMachineType, Collection<AMachineModel>> getSubnets() {
+		LinkedHashMap<AMachineType, Collection<AMachineModel>> subnets = new LinkedHashMap<>();
+
+		getMachines()
+			.stream()
+			.map(AMachineModel::getType)
+			.filter(distinctByKey(AMachineType::getVLAN))
+			.filter(type -> null != type.getVLANSubnet())
+			.forEach(type -> {
+				subnets.put(
+					type,
+					getMachines()
+						.stream()
+						.filter(machine ->
+							machine.getType()
+								.getVLAN()
+								.equals(type.getVLAN())
+						)
+						.collect(Collectors.toList())
+				);
+			});
+
+		return subnets;
+	}
+
+	static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+		Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+		return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
 	}
 
 	/**
