@@ -7,20 +7,15 @@
  */
 package org.privacyinternational.thornsec.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.json.stream.JsonParsingException;
+import inet.ipaddr.IPAddress;
 import org.privacyinternational.thornsec.core.data.machine.configuration.NetworkInterfaceData.Direction;
 import org.privacyinternational.thornsec.core.exception.AThornSecException;
 import org.privacyinternational.thornsec.core.exception.data.InvalidIPAddressException;
 import org.privacyinternational.thornsec.core.exception.data.machine.configuration.InvalidNetworkInterfaceException;
 import org.privacyinternational.thornsec.core.iface.IUnit;
+import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.networking.BondInterfaceModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.networking.BondModel;
-import org.privacyinternational.thornsec.core.model.machine.configuration.networking.DummyModel;
+import org.privacyinternational.thornsec.core.model.machine.configuration.networking.MACVLANModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.MACVLANTrunkModel;
 import org.privacyinternational.thornsec.core.model.machine.configuration.networking.NetworkInterfaceModel;
 import org.privacyinternational.thornsec.core.unit.SimpleUnit;
@@ -32,6 +27,14 @@ import org.privacyinternational.thornsec.profile.dhcp.ISCDHCPServer;
 import org.privacyinternational.thornsec.profile.dns.ADNSServerProfile;
 import org.privacyinternational.thornsec.profile.dns.UnboundDNSServer;
 import org.privacyinternational.thornsec.profile.firewall.AFirewallProfile;
+import org.privacyinternational.thornsec.profile.firewall.router.ShorewallFirewall;
+
+import javax.json.stream.JsonParsingException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * This is a Router.
@@ -46,7 +49,7 @@ public class Router extends Server {
 	private final ADHCPServerProfile dhcpServer;
 	private final AFirewallProfile firewall;
 
-	private NetworkInterfaceModel vlanTrunk;
+	private MACVLANTrunkModel vlanTrunk;
 
 	public Router(ServerModel me) throws AThornSecException, JsonParsingException {
 		super(me);
@@ -56,8 +59,9 @@ public class Router extends Server {
 		masqueradeWANIfaces();
 		buildLANIfaces();
 		buildTrunk();
-		//TODO: build the VLANS themselves
-		this.firewall = me.getFirewall();
+
+		//TODO: shouldn't be hardcoded
+		this.firewall = new ShorewallFirewall(me);
 		this.dhcpServer = new ISCDHCPServer(me);
 		this.dnsServer = new UnboundDNSServer(me);
 	}
@@ -75,37 +79,18 @@ public class Router extends Server {
 	}
 
 	private void buildLANIfaces() throws InvalidNetworkInterfaceException {
-		NetworkInterfaceModel lanTrunk = null;
-
 		Set<NetworkInterfaceModel> nics = getMachineModel().getNetworkInterfaces()
 			.stream()
 			.filter(nic -> Direction.LAN.equals(nic.getDirection()))
 			.collect(Collectors.toSet());
 
 		if (nics.isEmpty()) {
-			lanTrunk = new DummyModel(getNetworkModel());
-			lanTrunk.setIface("LAN");
-			getMachineModel().addNetworkInterface(lanTrunk);
+			throw new InvalidNetworkInterfaceException(getMachineModel().getLabel() + " needs a LAN-facing NIC");
 		}
-		else if (nics.size() == 1) {
-			lanTrunk = nics.iterator().next();
-		}
-		else {
+		else if (nics.size() > 1) {
 			//TODO: Bonding ifaces is broken.
-			lanTrunk = new BondModel(getNetworkModel());
-			lanTrunk.setIface("LAN");
-
-			for (NetworkInterfaceModel lanNic : nics) {
-				BondInterfaceModel bondNic = new BondInterfaceModel(lanNic.getData(), getNetworkModel());
-				bondNic.setIface(lanNic.getIface());
-				bondNic.setBond((BondModel) lanTrunk);
-				getMachineModel().addNetworkInterface(bondNic);
-			}
-
-			getMachineModel().addNetworkInterface(lanTrunk);
+			throw new InvalidNetworkInterfaceException("We currently only support one LAN-facing NIC per Router");
 		}
-
-		this.vlanTrunk = lanTrunk;
 	}
 
 	/**
@@ -114,12 +99,40 @@ public class Router extends Server {
 	 * @throws InvalidIPAddressException if an IP address is invalid
 	 * @throws InvalidNetworkInterfaceException
 	 */
-	private final MACVLANTrunkModel buildTrunk() throws InvalidNetworkInterfaceException {
-		final MACVLANTrunkModel trunk = new MACVLANTrunkModel();
-		trunk.setIface(this.vlanTrunk.getIface());
+	private final MACVLANTrunkModel buildTrunk() throws InvalidNetworkInterfaceException, InvalidIPAddressException {
+		NetworkInterfaceModel lanNIC = getMachineModel().getNetworkInterfaces()
+				.stream()
+				.filter(nic -> Direction.LAN.equals(nic.getDirection()))
+				.collect(Collectors.toSet())
+				.iterator()
+				.next();
+
+		final MACVLANTrunkModel trunk = new MACVLANTrunkModel(lanNIC.getData(), getNetworkModel());
 		getMachineModel().addNetworkInterface(trunk);
 
+		this.vlanTrunk = trunk;
+
 		return trunk;
+	}
+
+	private final void buildVLANs() throws InvalidNetworkInterfaceException, InvalidIPAddressException {
+		List<AMachineType> toBuild = getNetworkModel().getMachines()
+				.stream()
+				.map(AMachineModel::getType)
+				.filter(distinctByKey(t -> t.getVLAN()))
+				.filter(t -> null != t.getVLANSubnet())
+				.collect(Collectors.toList());
+
+		for (AMachineType type : toBuild) {
+			MACVLANModel vlan = new MACVLANModel(vlanTrunk.getData(), getNetworkModel());
+			vlan.setIface(type.getVLAN());
+			vlan.setSubnet(type.getVLANSubnet());
+			vlan.addAddress(type.getVLANSubnet().getLowerNonZeroHost());
+			vlan.setType(type);
+			this.vlanTrunk.addVLAN(vlan);
+
+			getMachineModel().addNetworkInterface(vlan);
+		}
 	}
 
 	public ADHCPServerProfile getDHCPServer() {
@@ -128,6 +141,10 @@ public class Router extends Server {
 
 	public ADNSServerProfile getDNSServer() {
 		return this.dnsServer;
+	}
+
+	public AFirewallProfile getFirewall() {
+		return firewall;
 	}
 
 	@Override
@@ -140,6 +157,7 @@ public class Router extends Server {
 
 		units.addAll(getDHCPServer().getInstalled());
 		units.addAll(getDNSServer().getInstalled());
+		units.addAll(getFirewall().getInstalled());
 
 		return units;
 	}
@@ -150,6 +168,7 @@ public class Router extends Server {
 
 		units.addAll(getDHCPServer().getLiveConfig());
 		units.addAll(getDNSServer().getLiveConfig());
+		units.addAll(getFirewall().getLiveConfig());
 
 		return units;
 	}
@@ -160,6 +179,7 @@ public class Router extends Server {
 
 		units.addAll(getDHCPServer().getLiveFirewall());
 		units.addAll(getDNSServer().getLiveFirewall());
+		units.addAll(getFirewall().getLiveFirewall());
 
 		return units;
 	}
@@ -167,6 +187,10 @@ public class Router extends Server {
 	@Override
 	public Collection<IUnit> getPersistentConfig() throws AThornSecException {
 		final Collection<IUnit> units = new ArrayList<>();
+
+		buildVLANs();
+
+		units.addAll(super.getNetworkInterfaceUnits());
 
 		final FileUnit resolvConf = new FileUnit("leave_my_resolv_conf_alone", "proceed",
 				"/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone", 
@@ -226,6 +250,7 @@ public class Router extends Server {
 
 		units.addAll(getDHCPServer().getPersistentConfig());
 		units.addAll(getDNSServer().getPersistentConfig());
+		units.addAll(getFirewall().getPersistentConfig());
 
 		units.addAll(super.getPersistentConfig());
 
@@ -238,6 +263,7 @@ public class Router extends Server {
 
 		units.addAll(getDHCPServer().getPersistentFirewall());
 		units.addAll(getDNSServer().getPersistentFirewall());
+		units.addAll(getFirewall().getPersistentFirewall());
 
 		units.addAll(super.getPersistentFirewall());
 
@@ -254,4 +280,8 @@ public class Router extends Server {
 		return null;
 	}
 
+	static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+		Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+		return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+	}
 }
