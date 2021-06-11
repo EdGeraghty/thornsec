@@ -356,6 +356,10 @@ public abstract class AMachineData extends AData {
 	}
 
 	private void addTrafficRule(TrafficRule rule) {
+		if (null == this.trafficRules) {
+			this.trafficRules = new HashSet<>();
+		}
+
 		this.trafficRules.add(rule);
 	}
 
