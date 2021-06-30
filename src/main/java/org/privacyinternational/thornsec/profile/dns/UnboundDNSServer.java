@@ -195,6 +195,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		adBlocking(getMyConfig().doAdBlocking());
 		rootHints(UNBOUND_CONFIG_DIR + "root.hints");
 
+		buildZones();
 		setInternalZones();
 		rDNS("nodefault");
 
@@ -973,8 +974,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		}
 	}
 
-	@Override
-	public void addRecord(AMachineModel... machines) {
+	public void buildZones(AMachineModel... machines) {
 		Map<HostName, Set<AMachineModel>> zones = this.zones;
 		if (zones == null) {
 			zones = new Hashtable<>();
