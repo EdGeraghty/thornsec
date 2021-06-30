@@ -97,7 +97,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	private static final String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
 
-	private UnboundConfig data;
+	private final UnboundConfig data;
 
 	private final Map<HostName, Set<AMachineModel>> zones;
 
