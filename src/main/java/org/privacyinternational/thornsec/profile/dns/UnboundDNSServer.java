@@ -797,18 +797,6 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	/**
-	 * Build our internal DNS zones from the whole network
-	 * @return
-	 */
-	private Collection<IUnit> populateInternalZones() {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		addRecord(getNetworkModel().getMachines());
-
-		return units;
-	}
-
-	/**
 	 * Downloads a root hints file from InterNIC. This is used as authoritative
 	 * records for the "." zone.
 	 *
@@ -896,26 +884,11 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	/**
-	 * Creates the DNS records for given machines
-	 * @param machines machines to build DNS for
-	 * @return a Collection of Strings representing the DNS records
-	 */
-	private Collection<String> createRecords(Collection<AMachineModel> machines) {
-		Collection<String> records = new ArrayList<>();
-
-		machines.forEach((machine) -> {
-			records.addAll(createRecords(machine));
-		});
-
-		return records;
-	}
-
-	/**
 	 * Creates the DNS records for a given machine
 	 * @param machine machine to build DNS for
 	 * @return a Collection of Strings representing the DNS records
 	 */
-	private Collection<String> createRecords(AMachineModel machine) {
+	Collection<String> createRecords(AMachineModel machine) {
 		Collection<String> records = new ArrayList<>();
 
 		machine.getIPs().forEach((ip) -> {

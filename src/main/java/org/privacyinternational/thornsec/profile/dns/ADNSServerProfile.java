@@ -7,12 +7,12 @@
  */
 package org.privacyinternational.thornsec.profile.dns;
 
-import java.util.Collection;
-
 import org.privacyinternational.thornsec.core.model.machine.AMachineModel;
 import org.privacyinternational.thornsec.core.model.machine.ServerModel;
-
 import org.privacyinternational.thornsec.core.profile.AStructuredProfile;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * This is a DNS Server of some type.
@@ -28,15 +28,18 @@ public abstract class ADNSServerProfile extends AStructuredProfile {
 	}
 
 	/**
-	 * add a machine(s) to a given domain
+	 * Build DNS records for a given machine
 	 */
-	public abstract void addRecord(AMachineModel... machine);
+	abstract Collection<String> createRecords(AMachineModel machine);
 
 	/**
-	 * Add the required DNS records for a Collection of Machines
-	 * @param machines The machines to build DNS records for
+	 * Build DNS records for the whole network
 	 */
-	public final void addRecord(Collection<AMachineModel> machines) {
-		machines.forEach(this::addRecord);
+	final Collection<String> createRecords(Collection<AMachineModel> machines) {
+		Collection<String> records = new ArrayList<>();
+
+		machines.forEach(machine -> records.addAll(createRecords(machine)));
+
+		return records;
 	}
 }
