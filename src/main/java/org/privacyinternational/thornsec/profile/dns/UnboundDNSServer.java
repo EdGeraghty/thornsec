@@ -97,7 +97,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	private static final String UNBOUND_PIDFILE = "/var/run/unbound/unbound.pid";
 
-	private UnboundConfig data;
+	private final UnboundConfig data;
 
 	private final Map<HostName, Set<AMachineModel>> zones;
 
@@ -122,19 +122,18 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 
 	/**
-	 * Builds our unbound config file, see 
+	 * Builds our unbound config file, see
 	 * https://linux.die.net/man/5/unbound.conf for full config file
-	 * 
+	 *
 	 * Config originally based on https://calomel.org/unbound_dns.html
 	 * @return Units for unbound.conf and the drop-in directory
-	 * @throws InvalidProfileException 
+	 * @throws InvalidProfileException
 	 */
 	@Override
 	public Collection<IUnit> getPersistentConfig() throws InvalidProfileException {
 		final Collection<IUnit> units = new ArrayList<>();
 
 		units.addAll(getRootHints());
-		units.addAll(populateInternalZones());
 
 		this.unboundConf = new FileUnit(
 			"unbound_conf",
@@ -152,7 +151,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		dropUserPostInvocation("unbound");
 		setLogVerbosity(1);
 		setWorkingDirectory(UNBOUND_CONFIG_DIR);
-		setChroot(""); // TODO: implement  
+		setChroot(""); // TODO: implement
 		setPIDFile(UNBOUND_PIDFILE);
 
 		buildListeningIfaces();
@@ -196,6 +195,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		adBlocking(getMyConfig().doAdBlocking());
 		rootHints(UNBOUND_CONFIG_DIR + "root.hints");
 
+		buildZones();
 		setInternalZones();
 		rDNS("nodefault");
 
@@ -225,14 +225,14 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Configure our reverse DNS for our subnets.
-	 * 
+	 *
 	 * Answers for local zones are authoritative DNS answers. By default the
 	 * zones are class IN.
-	 * 
+	 *
 	 * This is achieved through building a stub zone for each subnet.
 	 * @param type The type determines the answer to give if there is no match
 	 * 				from local-data.
-	 * 
+	 *
 	 * 				The types are deny, refuse, static, transparent, redirect,
 	 * 				nodefault, and typetransparent.
 	 *
@@ -291,9 +291,9 @@ public class UnboundDNSServer extends ADNSServerProfile {
 					addComment(vlan.getIface());
 
 					unboundConf.appendLine("\tlocal-zone: \\\"" + subnet.getLower().toReverseDNSLookupString() + ".\\\" " + type);
-					//unboundConf.appendLine("\tstub-zone:");
-					//unboundConf.appendLine("\t\tname: \\\"" + subnet.toReverseDNSLookupString() + ".\\\"");
-					//unboundConf.appendLine("\t\tstub-addr: " + subnet.toCompressedString());
+					unboundConf.appendLine("\tstub-zone:");
+					unboundConf.appendLine("\t\tname: \\\"" + subnet.toReverseDNSLookupString() + ".\\\"");
+					unboundConf.appendLine("\t\tstub-addr: " + subnet.toCompressedString());
 				});
 			});
 	}
@@ -319,7 +319,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * @param comment text
 	 */
 	private void addComment(String comment) {
-		unboundConf.appendLine("\t# " + comment);	
+		unboundConf.appendLine("\t# " + comment);
 	}
 
 	/**
@@ -353,7 +353,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	/**
 	 * If not 0, then set the SO_RCVBUF socket option to get more buffer space
 	 * on UDP port incoming queries so that short spikes on busy servers do
-	 * not drop packets (see counter in netstat -su). 
+	 * not drop packets (see counter in netstat -su).
 	 * @param size 0 (use system value). Otherwise, the number of bytes to ask
 	 * 				for. The OS caps it at a maximum, on linux unbound needs
 	 * 				root permission to bypass the limit, or the admin can set
@@ -461,9 +461,9 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	/**
 	 * Whether cache elements are prefetched before they expire to keep the
 	 * cache up to date.
-	 * 
+	 *
 	 * Switching on generates about 10% more traffic and load on the machine,
-	 * but popular items do not expire from the cache. 
+	 * but popular items do not expire from the cache.
 	 * @param value "yes" or "no"
 	 * @throws InvalidProfileException if invalid value passed
 	 */
@@ -473,14 +473,14 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Time to live maximum for RRsets and messages in the cache.
-	 * 
+	 *
 	 * If this maximum is hit, responses to clients still get decrementing TTLs
 	 * based on the upstream (larger) values.
-	 * 
+	 *
 	 * When the internal TTL expires, the cache item has expired.
-	 * 
+	 *
 	 * Can be set low to force the resolver to query for data more often, and
-	 * not trust (very large) TTL values. 
+	 * not trust (very large) TTL values.
 	 * @param seconds maximum TTL in seconds
 	 * @throws InvalidProfileException if invalid TTL
 	 */
@@ -490,15 +490,15 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Time to live minimum for RRsets and messages in the cache.
-	 * 
+	 *
 	 * Depending on the value, the data may end up cached for longer than the
 	 * domain owner intended, but fewer queries are made to upstream.
-	 * 
+	 *
 	 * High values, especially more than an hour or so, can lead to trouble as
 	 * the data in the cache may not match up with the live data any more.
-	 * 
+	 *
 	 * Setting to 0 makes sure the data in the cache is as the domain owner
-	 * intended. 
+	 * intended.
 	 * @throws InvalidProfileException if given an invalid TTL
 	 */
 	private void cacheMiniumumTTL(int seconds) throws InvalidProfileException {
@@ -543,12 +543,12 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 	/**
 	 * Use 0x20-encoded random bits in the query to foil spoof attempts.
-	 * 
+	 *
 	 * This perturbs the lowercase and uppercase of query names sent to
 	 * authority servers and checks if the reply still has the correct casing.
-	 * 
+	 *
 	 * This feature is an experimental implementation of draft dns-0x20.
-	 * 
+	 *
 	 * @param value "yes" or "no"
 	 * @throws InvalidProfileException if value is invalid
 	 */
@@ -561,15 +561,15 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * If such data is absent, the zone becomes bogus. If turned off, and no
 	 * DNSSEC data is received (or the DNSKEY data fails to validate), then
 	 * the zone is made insecure, this behaves like there is no trust anchor.
-	 * 
+	 *
 	 * You could turn this off if you are sometimes behind an intrusive firewall
 	 * (of some sort) that removes DNSSEC data from packets, or a zone changes
 	 * from signed to unsigned to badly signed often.
-	 * 
+	 *
 	 * If turned off you run the risk of a downgrade attack that disables
 	 * security for a zone.
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException is value is invalid  
+	 * @throws InvalidProfileException is value is invalid
 	 */
 	private void hardenDNSSECStripped(String value) throws InvalidProfileException {
 		addSettingToConfig("harden-dnssec-stripped", value);
@@ -579,7 +579,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * Add a setting to unbound's conf
 	 * @param setting The name of the setting, as per man(5)
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void addSettingToConfig(String setting, String value) throws InvalidProfileException {
 		if (!"yes".equals(value) && !"no".equals(value)) {
@@ -592,7 +592,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * Add a setting to unbound's conf
 	 * @param setting The name of the setting, as per man(5)
 	 * @param value >=0
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void addSettingToConfig(String setting, Integer value) throws InvalidProfileException {
 		if (value == null || value < 0) {
@@ -611,60 +611,60 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	/**
-	 * If enabled version.server and version.bind queries are refused. 
+	 * If enabled version.server and version.bind queries are refused.
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void hideVersion(String value) throws InvalidProfileException {
 		addSettingToConfig("hide-version", value);
 	}
 
 	/**
-	 * If enabled id.server and hostname.bind queries are refused. 
+	 * If enabled id.server and hostname.bind queries are refused.
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void hideIdentity(String value) throws InvalidProfileException {
-		addSettingToConfig("hide-identity", value);		
+		addSettingToConfig("hide-identity", value);
 	}
 
 	/**
 	 * Enable or disable whether ip6 queries are answered or issued.
-	 * 
+	 *
 	 * If disabled, queries are not answered on IPv6, and queries are not sent
-	 * on IPv6 to the upstream nameservers. 
+	 * on IPv6 to the upstream nameservers.
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void setListenIPv6(String value) throws InvalidProfileException {
-		addSettingToConfig("do-ip6", value);		
+		addSettingToConfig("do-ip6", value);
 	}
 
 	/**
 	 * Enable or disable whether ip4 queries are answered or issued
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void setListenIPv4(String value) throws InvalidProfileException {
-		addSettingToConfig("do-ip4", value);		
+		addSettingToConfig("do-ip4", value);
 	}
 
 	/**
 	 * Enable or disable whether UDP queries are answered or issued
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException if value is invalid 
+	 * @throws InvalidProfileException if value is invalid
 	 */
 	private void setListenUDP(String value) throws InvalidProfileException {
-		addSettingToConfig("do-udp", value);		
+		addSettingToConfig("do-udp", value);
 	}
 
 	/**
 	 * Enable or disable whether TCP queries are answered or issued
 	 * @param value "yes" or "no"
-	 * @throws InvalidProfileException 
+	 * @throws InvalidProfileException
 	 */
 	private void setListenTCP(String value) throws InvalidProfileException {
-		addSettingToConfig("do-tcp", value);		
+		addSettingToConfig("do-tcp", value);
 	}
 
 	/**
@@ -705,7 +705,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		 * involve the unbound server recursive lookup algorithm, and static
 		 * data is served in the reply. This supports normal operations where
 		 * nonrecursive queries are made for the authoritative data. For
-		 * nonrecursive queries any replies from the dynamic cache are refused. 
+		 * nonrecursive queries any replies from the dynamic cache are refused.
 		 */
 		unboundConf.appendLine("\taccess-control: 127.0.0.1/32 allow");
 
@@ -718,10 +718,10 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 		/*
 		 * Refuse stops queries, but sends a DNS rcode REFUSED error message back
-		 * 
+		 *
 		 * We use refused not drop, because it's protocol-friendly. The DNS
 		 * protocol is not designed to handle dropped packets due to policy,
-		 * and dropping may result in (possibly excessive) retried queries. 
+		 * and dropping may result in (possibly excessive) retried queries.
 		 */
 		unboundConf.appendLine("\taccess-control: 0.0.0.0/0 refuse");
 	}
@@ -775,7 +775,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	 * 					2 for detailed operational information.
 	 * 					3 for query level information, output per query.
 	 * 					4 for algorithm level information.
-	 * 					5 logs client identification for cache misses 
+	 * 					5 logs client identification for cache misses
 	 * @throws InvalidProfileException if verbosity is invalid
 	 */
 	private void setLogVerbosity(int verbosity) throws InvalidProfileException {
@@ -797,21 +797,9 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	/**
-	 * Build our internal DNS zones from the whole network
-	 * @return
-	 */
-	private Collection<IUnit> populateInternalZones() {
-		final Collection<IUnit> units = new ArrayList<>();
-
-		addRecord(getNetworkModel().getMachines());
-
-		return units;
-	}
-
-	/**
 	 * Downloads a root hints file from InterNIC. This is used as authoritative
 	 * records for the "." zone.
-	 * 
+	 *
 	 * See https://kb.isc.org/docs/aa-01309 for a little more info
 	 * @return a unit which downloads InterNIC's root hints file to /etc/unbound
 	 */
@@ -856,7 +844,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 				"[ ! -f /etc/unbound/rawhosts ] && echo fail || wget -O - -o /dev/null https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | cmp /etc/unbound/rawhosts 2>&1",
 				"", "pass");
 	}
-	
+
 	@Override
 	public Collection<IUnit> getLiveConfig() throws InvalidMachineModelException {
 		final Collection<IUnit> units = new ArrayList<>();
@@ -876,9 +864,11 @@ public class UnboundDNSServer extends ADNSServerProfile {
 
 		return units;
 	}
-	
+
 	private Collection<IUnit> buildDropinZones() {
 		final Collection<IUnit> units = new ArrayList<>();
+
+		buildZones(getNetworkModel().getMachines().toArray(AMachineModel[]::new));
 
 		this.zones.forEach((zone, machines) -> {
 			final FileUnit zoneFile = new FileUnit(zone.getHost() + "_dns_internal_zone",
@@ -894,26 +884,11 @@ public class UnboundDNSServer extends ADNSServerProfile {
 	}
 
 	/**
-	 * Creates the DNS records for given machines
-	 * @param machines machines to build DNS for
-	 * @return a Collection of Strings representing the DNS records
-	 */
-	private Collection<String> createRecords(Collection<AMachineModel> machines) {
-		Collection<String> records = new ArrayList<>();
-
-		machines.forEach((machine) -> {
-			records.addAll(createRecords(machine));
-		});
-
-		return records;
-	}
-
-	/**
 	 * Creates the DNS records for a given machine
 	 * @param machine machine to build DNS for
 	 * @return a Collection of Strings representing the DNS records
 	 */
-	private Collection<String> createRecords(AMachineModel machine) {
+	Collection<String> createRecords(AMachineModel machine) {
 		Collection<String> records = new ArrayList<>();
 
 		machine.getIPs().forEach((ip) -> {
@@ -923,7 +898,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 			// Add our reverse-DNS records for this machine, with and without domain
 			records.add("\tlocal-data-ptr: \\\"" + ip.withoutPrefixLength() + " " + machine.getHostName() + "\\\"");
 			records.add("\tlocal-data-ptr: \\\"" + ip.withoutPrefixLength() + " " + machine.getHostName() + "." + machine.getDomain() + "\\\"");
-	
+
 			// Add any CNAMEs configured against this machine
 			machine.getCNAMEs().ifPresent((cnames) -> {
 				cnames.forEach((cname) -> {
@@ -938,7 +913,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 				});
 			});
 		});
-		
+
 		return records;
 	}
 
@@ -972,8 +947,7 @@ public class UnboundDNSServer extends ADNSServerProfile {
 		}
 	}
 
-	@Override
-	public void addRecord(AMachineModel... machines) {
+	public void buildZones(AMachineModel... machines) {
 		Map<HostName, Set<AMachineModel>> zones = this.zones;
 		if (zones == null) {
 			zones = new Hashtable<>();
@@ -984,10 +958,9 @@ public class UnboundDNSServer extends ADNSServerProfile {
 			if (_machines == null) {
 				_machines = new HashSet<>();
 			}
-	
+
 			_machines.add(machine);
 			this.zones.put(machine.getDomain(), _machines);
 		}
 	}
-
 }
