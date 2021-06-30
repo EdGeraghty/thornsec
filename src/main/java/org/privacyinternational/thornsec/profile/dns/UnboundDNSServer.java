@@ -291,9 +291,9 @@ public class UnboundDNSServer extends ADNSServerProfile {
 					addComment(vlan.getIface());
 
 					unboundConf.appendLine("\tlocal-zone: \\\"" + subnet.getLower().toReverseDNSLookupString() + ".\\\" " + type);
-					//unboundConf.appendLine("\tstub-zone:");
-					//unboundConf.appendLine("\t\tname: \\\"" + subnet.toReverseDNSLookupString() + ".\\\"");
-					//unboundConf.appendLine("\t\tstub-addr: " + subnet.toCompressedString());
+					unboundConf.appendLine("\tstub-zone:");
+					unboundConf.appendLine("\t\tname: \\\"" + subnet.toReverseDNSLookupString() + ".\\\"");
+					unboundConf.appendLine("\t\tstub-addr: " + subnet.toCompressedString());
 				});
 			});
 	}
