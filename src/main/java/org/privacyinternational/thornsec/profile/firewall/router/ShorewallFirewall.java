@@ -634,10 +634,10 @@ public class ShorewallFirewall extends AFirewallProfile {
 	private String buildInterfaceLine(NetworkInterfaceModel nic) {
 		String line = "";
 		if (nic instanceof MACVLANModel) {
-			//line += cleanZone(((MACVLANModel) nic).getType().toString());
+			line += cleanZone(((MACVLANModel) nic).getType().getVLAN());
 		}
 		else if (Direction.WAN.equals(nic.getDirection())) {
-			//line += ParentZone.INTERNET.toString();
+			line += "Internet";
 		}
 		line += "\t" + nic.getIface();
 		line += "\t-\t";
