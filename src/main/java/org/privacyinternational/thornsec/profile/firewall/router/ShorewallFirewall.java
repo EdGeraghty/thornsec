@@ -355,11 +355,8 @@ public class ShorewallFirewall extends AFirewallProfile {
 		}
 	}
 
-	private final Router myRouter;
-
 	public ShorewallFirewall(ServerModel me) {
 		super(me);
-		this.myRouter = (Router) me.getProfiles().get(Router.class);
 	}
 	
 	/**
