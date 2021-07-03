@@ -136,7 +136,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		 * 
 		 * @param rule Forward TrafficRule
 		 */
-		private void buildForward(TrafficRule rule) throws InvalidFirewallRuleException {
+		private void buildForward(TrafficRule rule) {
 			//boolean destIsExternallyAccessible = rule.getDestinations()
 			//		.stream()
 			//		.map(HostName::getHost)
@@ -180,7 +180,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		 * Ingests an Egress TrafficRule, turning it into the Shorewall equivalent.
 		 * @param rule Egress TrafficRule
 		 */
-		private void buildEgress(TrafficRule rule) throws InvalidFirewallRuleException {
+		private void buildEgress(TrafficRule rule) {
 			this.setAction(Action.ACCEPT);
 			this.setSourceZone(cleanZone(rule.getSource()));
 			this.setProto(rule.getEncapsulation());
@@ -201,7 +201,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		 * 
 		 * @param rule Ingress TrafficRule
 		 */
-		private void buildDNAT(TrafficRule rule) throws InvalidFirewallRuleException {
+		private void buildDNAT(TrafficRule rule) {
 			this.setAction(Action.DNAT);
 
 			//don't DNAT to us if we're the source!
@@ -465,7 +465,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 		return hosts;
 	}
 
-	private Collection<ShorewallRule> getRulesFile() throws InvalidServerException, InvalidMachineModelException {
+	private Collection<ShorewallRule> getRulesFile() throws InvalidServerException {
 		Collection<ShorewallRule> rules = new ArrayList<>();
 
 		// Iterate over every machine to build all of its rules
@@ -569,7 +569,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 				rules.appendLine(rule.getRule());
 			});
 		}
-		catch (InvalidServerException | InvalidServerModelException e) {
+		catch (InvalidServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -580,7 +580,7 @@ public class ShorewallFirewall extends AFirewallProfile {
 	}
 
 	@Override
-	public Collection<IUnit> getLiveFirewall() throws ARuntimeException {
+	public Collection<IUnit> getLiveFirewall() {
 		return new ArrayList<>();
 	}
 
