@@ -305,11 +305,16 @@ public class ShorewallFirewall extends AFirewallProfile {
 
 			String _egress = this.destinationSubZone;
 			if ((this.destinationSubZone != null)
+					&& !(this.destinationSubZone.equals("*"))
 					&& !(new HostName(this.destinationSubZone).isAddress())
 					&& !(this.destinationSubZone.startsWith("&"))
 					&& !(this.destinationSubZone.matches(".*\\.[0-9]+$"))) {
 				_egress += ".";
 			}
+			if (_egress.equals("*")) {
+				_egress = null;
+			}
+
 			if (dPorts != null) {
 				_dPorts = dPorts.stream().map(Object::toString).collect(Collectors.joining(","));
 			}
